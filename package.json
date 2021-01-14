@@ -1,0 +1,59 @@
+{
+  "name": "mgr-typescript-module-template",
+  "version": "0.0.1",
+  "description": "Sample typescript module template for node and native browser",
+  "main": "dist/mgr.umd.js",
+  "types": "dist/mgr.d.ts",
+  "module": "dist/mgr.esm.min.js",
+  "keywords": [
+    "sample",
+    "template"
+  ],
+  "exports": {
+    ".": {
+      "require": "./dist/mgr.umd.min.js",
+      "import": "./dist/mgr.esm.min.js"
+    }
+  },
+  "scripts": {
+    "docs": "typedoc && touch docs/.nojekyll",
+    "build:types": "tsc -t esnext --moduleResolution node -d --emitDeclarationOnly --outFile dist/mgr.d.ts src/mgr.ts",
+    "build:js": "rollup -c rollup.config.js",
+    "build:minjs:umd": "terser dist/mgr.umd.js --compress --mangle > dist/mgr.umd.min.js",
+    "build:minjs:esm": "terser dist/mgr.esm.js --compress --mangle > dist/mgr.esm.min.js",
+    "build:minjs": "npm run build:minjs:esm -s && npm run build:minjs:umd -s",
+    "build": "npm run build:js -s && npm run build:minjs -s && npm run build:types -s",
+    "test": "env TS_NODE_PROJECT=\"tsconfig-test.json\" mocha -r ts-node/register **/test/**/*.test.ts",
+    "coverage": "nyc --reporter html --reporter text npm test"
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "author": "Maciej Grula",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^6.1.0",
+    "prettier": "^2.1.2",
+    "pretty-quick": "^3.1.0",
+    "rollup": "^2.32.1",
+    "terser": "^5.3.8",
+    "tslib": "^2.0.3",
+    "typedoc": "^0.19.2",
+    "typescript": "^4.0.5",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "mocha": "8.2.1",
+    "nyc": "14.1.x",
+    "sinon": "^9.0.0",
+    "ts-node": "9.0.0",
+    "eslint": "7.12.1",
+    "@typescript-eslint/parser": "4.6.1",
+    "@typescript-eslint/eslint-plugin": "4.6.1",
+    "@types/mocha": "8.0.3",
+    "@types/chai": "4.2.14",
+    "@types/chai-as-promised": "7.1.3",
+    "@types/sinon": "9.0.8"
+  }
+}
