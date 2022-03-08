@@ -1,16 +1,16 @@
 import typescript from '@rollup/plugin-typescript';
 
 export default {
-  input: 'src/mgr.ts',
+  input: 'src/gamengine.ts',
   output: [
     {
-      file: 'dist/mgr.esm.js',
+      file: 'dist/gamengine.esm.js',
       format: 'es',
     },
     {
-      file: 'dist/mgr.umd.js',
+      file: 'dist/gamengine.umd.js',
       format: 'umd',
-      name: 'Mgr',
+      name: 'Mgr22',
     },
   ],
   plugins: [typescript()],

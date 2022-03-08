@@ -1,26 +1,26 @@
 {
-  "name": "mgr-typescript-module-template",
+  "name": "gamengine",
   "version": "0.0.1",
-  "description": "Sample typescript module template for node and native browser",
-  "main": "dist/mgr.umd.js",
-  "types": "dist/mgr.d.ts",
-  "module": "dist/mgr.esm.min.js",
+  "description": "Typescript game engine",
+  "main": "dist/gamengine.umd.js",
+  "types": "dist/gamengine.d.ts",
+  "module": "dist/gamengine.esm.min.js",
   "keywords": [
     "sample",
     "template"
   ],
   "exports": {
     ".": {
-      "require": "./dist/mgr.umd.min.js",
-      "import": "./dist/mgr.esm.min.js"
+      "require": "./dist/gamengine.umd.min.js",
+      "import": "./dist/gamengine.esm.min.js"
     }
   },
   "scripts": {
     "docs": "typedoc && touch docs/.nojekyll",
-    "build:types": "tsc -t esnext --moduleResolution node -d --emitDeclarationOnly --outFile dist/mgr.d.ts src/mgr.ts",
+    "build:types": "tsc -t esnext --moduleResolution node -d --emitDeclarationOnly --outFile dist/gamengine.d.ts src/gamengine.ts",
     "build:js": "rollup -c rollup.config.js",
-    "build:minjs:umd": "terser dist/mgr.umd.js --compress --mangle > dist/mgr.umd.min.js",
-    "build:minjs:esm": "terser dist/mgr.esm.js --compress --mangle > dist/mgr.esm.min.js",
+    "build:minjs:umd": "terser dist/gamengine.umd.js --compress --mangle > dist/gamengine.umd.min.js",
+    "build:minjs:esm": "terser dist/gamengine.esm.js --compress --mangle > dist/gamengine.esm.min.js",
     "build:minjs": "npm run build:minjs:esm -s && npm run build:minjs:umd -s",
     "build": "npm run build:js -s && npm run build:minjs -s && npm run build:types -s",
     "test": "env TS_NODE_PROJECT=\"tsconfig-test.json\" mocha -r ts-node/register **/test/**/*.test.ts",
@@ -55,5 +55,25 @@
     "@types/chai": "4.2.14",
     "@types/chai-as-promised": "7.1.3",
     "@types/sinon": "9.0.8"
-  }
+  },
+  "nyc": {
+    "check-coverage": true,
+    "branches": 100,
+    "lines": 100,
+    "functions": 100,
+    "statements": 100,
+    "exclude-after-remap": false,
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "**/*.js",
+      "**/*.notest.ts",
+      "**/*.mock.ts",
+      "**/*.test.ts"
+    ],
+    "all": true      
+  }  
 }
