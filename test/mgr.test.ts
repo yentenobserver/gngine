@@ -605,44 +605,47 @@ describe('Lib', () => {
             });
 
             it('upper left', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});
-                console.log(neighbours);
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});                
                 return expect(neighbours).length(2);                
             }) 
-            // it('upper left #1', () => {    
-            //     const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});
-            //     const E = neighbours.find((item:Neighbour)=>{
-            //         return item.direction == "E"
-            //     })
-            //     const S = neighbours.find((item:Neighbour)=>{
-            //         return item.direction == "S"
-            //     })
-            //     const SE = neighbours.find((item:Neighbour)=>{
-            //         return item.direction == "SE"
-            //     })
-            //     return expect(E?.direction+S?.direction+SE?.direction).eq("ESSE")
-            // }) 
-            // it('upper right', () => {    
-            //     const neighbours: Neighbour[] = mappy.neighbours({id: "0,4", x: 4, y:0, t:"PLAIN"});
-            //     return expect(neighbours).length(3);                
-            // }) 
-            // it('upper right #1', () => {    
-            //     const neighbours: Neighbour[] = mappy.neighbours({id: "0,4", x: 4, y:0, t:"PLAIN"});
-            //     const nW = neighbours.find((item:Neighbour)=>{
-            //         return item.direction == "W"
-            //     })
-            //     const nSW = neighbours.find((item:Neighbour)=>{
-            //         return item.direction == "SW"
-            //     })
-            //     const nS = neighbours.find((item:Neighbour)=>{
-            //         return item.direction == "S"
-            //     })                
-            //     return expect(nW?.direction+nSW?.direction+nS?.direction).eq("WSWS")
-            // })
-            // it('middle', () => {    
-            //     const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t:"PLAIN"});
-            //     return expect(neighbours).length(8);                
-            // })
+            it('upper left #1', () => {    
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});
+                const S = neighbours.find((item:Neighbour)=>{
+                    return item.direction == "S"
+                })
+                const SE = neighbours.find((item:Neighbour)=>{
+                    return item.direction == "SE"
+                })
+                return expect(S?.direction+SE?.direction).eq("SSE")
+            }) 
+            it('upper right', () => {    
+                const neighbours: Neighbour[] = mappy.neighbours({id: "5,0", x: 0, y:5, t:"PLAIN"});                
+                return expect(neighbours).length(3);                
+            }) 
+            it('upper right #1', () => {    
+                const neighbours: Neighbour[] = mappy.neighbours({id: "5,0", x: 0, y:5, t:"PLAIN"});
+                const nNW = neighbours.find((item:Neighbour)=>{
+                    return item.direction == "NW"
+                })
+                const nSW = neighbours.find((item:Neighbour)=>{
+                    return item.direction == "SW"
+                })
+                const nS = neighbours.find((item:Neighbour)=>{
+                    return item.direction == "S"
+                })                
+                return expect(nNW?.direction+nSW?.direction+nS?.direction).eq("NWSWS")
+            })
+            it('middle even', () => {    
+                const neighbours: Neighbour[] = mappy.neighbours({id: "2,2", x: 2, y:2, t:"PLAIN"});
+                console.log(neighbours);
+                return expect(neighbours).length(6);                
+            })
+
+            it('middle odd', () => {    
+                const neighbours: Neighbour[] = mappy.neighbours({id: "3,2", x: 2, y:3, t:"PLAIN"});
+                console.log(neighbours);
+                return expect(neighbours).length(6);                
+            })
             // it('middle #1', () => {    
             //     const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t:"PLAIN"});
             //     const N = neighbours.find((item:Neighbour)=>{

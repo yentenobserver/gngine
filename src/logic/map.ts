@@ -334,9 +334,7 @@ export class MapHexOddQ extends MapBase {
             const tile:TileSquare = <TileSquare> item;
             //distance on each x,y <=1
             const dx = originTile.x-tile.x;
-            const dy = originTile.y-tile.y;            
-            
-            console.log(tile, dy, dx);
+            const dy = originTile.y-tile.y;                                    
 
             let neighbour;
             switch(origin.y%2==0){
