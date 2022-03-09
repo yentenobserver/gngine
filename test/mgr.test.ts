@@ -14,10 +14,10 @@ const expect = chai.expect;
 
 // import SomeClass from '../src/mgr'
 
-import {TileBase} from '../src/logic/common.notest'
-import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map'
+import {TileBase} from '../src/logic/map/common.notest'
+import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'
 import {MapsMocks, TerrainMocks} from './data.mock'
-import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/costs"
+import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 
 describe('Lib', () => {
     describe('MapSquare', () => {   

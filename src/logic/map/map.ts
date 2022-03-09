@@ -5,9 +5,7 @@ import { Node } from "./queue.notest"
 
 
 
-interface TileSquare extends TileBase {
-    id: string
-}
+
 
 
 
@@ -242,9 +240,9 @@ export class MapSquare extends MapBase {
      */
     neighbours(origin: TileBase): Neighbour[] {
         const neighbours:Neighbour[] = [];
-        const originTile: TileSquare = <TileSquare>origin;        
+        const originTile: TileBase = <TileBase>origin;        
         this.theMap.forEach((item:TileBase)=>{
-            const tile:TileSquare = <TileSquare> item;
+            const tile:TileBase = <TileBase> item;
             //distance on each x,y <=1
             const dx = tile.x-originTile.x;
             const dy = tile.y-originTile.y;            
@@ -329,9 +327,9 @@ export class MapHexOddQ extends MapBase {
      */
     neighbours(origin: TileBase): Neighbour[] {
         const neighbours:Neighbour[] = [];
-        const originTile: TileSquare = <TileSquare>origin;        
+        const originTile: TileBase = <TileBase>origin;        
         this.theMap.forEach((item:TileBase)=>{
-            const tile:TileSquare = <TileSquare> item;
+            const tile:TileBase = <TileBase> item;
             //distance on each x,y <=1
             const dx = originTile.x-tile.x;
             const dy = originTile.y-tile.y;                                    
