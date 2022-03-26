@@ -1,0 +1,43 @@
+@startuml
+
+abstract class ActionBase {
+    {abstract} {method} rangeAndCosts() // tiles that may be affected by this action with costs
+    
+}
+
+class ActionGlobal{
+}
+
+class ActionUnit{
+}
+
+class ActionTile{
+}
+
+class ActionRunning {
+    {field} ActionBase action
+    {field} Turn started    // on which turn the action was started
+    {field} Turn eta // when action is planned to finish
+}
+
+class Turn {}
+
+
+interface Actionable {
+  {field} ActionBase[] actionsAllowed 
+  {field} ActionBase[] actionsAll
+  {field} ActionBase[] actionsQueue // planned actions for entity
+  {field} ActionRunning actionRunning // currently processing long lasting action  
+}
+
+Actionable o-- ActionRunning : actionRunning
+ActionRunning o-- Turn : started
+ActionRunning o-- Turn : eta
+ActionRunning o-- ActionBase : action
+
+ActionBase <|-- ActionGlobal
+ActionBase <|-- ActionTile
+ActionBase <|-- ActionUnit
+
+
+@enduml

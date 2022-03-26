@@ -31,7 +31,7 @@ export class CostCalculatorTerrain extends CostCalculator{
     
     terrainCost:TerrainCost;
 
-    constructor(_unit:any, terrainCost:TerrainCost){
+    constructor(terrainCost:TerrainCost){
         super();
         this.terrainCost = terrainCost
     }
