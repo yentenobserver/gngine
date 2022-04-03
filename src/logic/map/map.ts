@@ -101,6 +101,7 @@ export abstract class MapBase {
         
         while(!frontier.isEmpty()){
 			iterationCounter++;
+            /* istanbul ignore next */
 			if(iterationCounter>SAFETYMAXITERATIONS){
 				console.log("[_algorithmDijikstra] ERROR - max iterations found. Stopping algorithm.");
 				break;

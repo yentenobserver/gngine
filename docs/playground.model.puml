@@ -1,0 +1,70 @@
+@startuml
+
+
+abstract class GameContainer <<external>> {    
+}
+
+
+abstract class Playground {    
+  {field} any container
+  {field} EventEmitter emitter
+  {method} attach(view:PlaygroundView)
+  {method} run()
+  {method} #_attachInteractionListeners()
+  {method} #_onInteraction(...event:any[])
+}
+
+abstract class PlaygroundView {  
+  {field} string name
+  {field} EventEmitter emitter
+  {method} #preAttach(parentPlayground: Playground)
+  {method} #_onInteraction(...event:any[]):any
+}
+
+interface PlaygroundViewMain {   
+  {field} isViewMain boolean
+}
+
+interface PlaygroundViewHud {   
+   {field} isViewHud boolean
+}
+
+abstract class PlaygroundViewThreeJs {
+  {field} camera THREE.Camera
+  {field} scene THREE.Scene
+  {field} container HTMLCanvas 
+  {field} canvas HTMLCanvas
+  {method} pickObjectOfNames():PickResultThreeJs
+}
+
+interface PlaygroundInteractionEvent{
+  {field} string viewName
+  {field} any originalEvent
+  {field} any interactingObject
+  {field} any data
+}
+
+class PlaygroundThreeJs {
+  {field} THREE.WebGLRenderer _renderer
+}
+
+abstract class PlaygroundViewHudThreeJs {}
+abstract class PlaygroundViewMainThreeJs {}
+
+
+abstract class PlaygroundInteractions {    
+}
+GameContainer .. "many" Playground : displays/embeds
+Playground .. "1..2" PlaygroundView : Map and Hud
+PlaygroundInteractions .. "many" PlaygroundViewInteractionHandler
+PlaygroundView .. PlaygroundViewInteractionHandler
+Playground .. PlaygroundInteractions : coordinates ui interactions between views and container
+PlaygroundView <|-- PlaygroundViewThreeJs
+PlaygroundViewMain <|.. PlaygroundViewMainThreeJs
+PlaygroundViewThreeJs <|-- PlaygroundViewMainThreeJs
+PlaygroundViewHud <|.. PlaygroundViewHudThreeJs
+PlaygroundViewThreeJs <|-- PlaygroundViewHudThreeJs
+Playground <|-- PlaygroundThreeJs
+Playground .. EventEmitter
+PlaygroundView .. PlaygroundInteractionEvent : emits on interaction
+@enduml

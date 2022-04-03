@@ -14,18 +14,20 @@ const expect = chai.expect;
 import sinon, { SinonStub } from 'sinon';
 
 // import SomeClass from '../src/mgr'
-
+import * as THREE from 'three'
 import {TileBase} from '../src/logic/map/common.notest'
 import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'
 import {MapsMocks, TerrainMocks} from './data.mock'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
+import {MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 
-describe('Lib', () => {
+
+describe('Gamengine', () => {
     describe('MapSquare', () => {   
         describe('_direction', () => {   
             let mappy:MapSquare;
@@ -1336,5 +1338,662 @@ describe('Lib', () => {
         })
         
     })
-    
 })
+describe('Playground', () => {
+    let messageBusMocked = new EventEmitter();
+    describe('PlaygroundThreeJs', () => {
+        describe('attach', () => {
+            let s1: SinonStub;
+            // let s2: SinonStub;
+            let view1: PlaygroundViewDefault;
+            let view2: PlaygroundViewDefault;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+            let playground: PlaygroundThreeJs;
+            beforeEach(() => {
+                view1 = new PlaygroundViewDefault("name1",messageBusMocked);
+                view1.isViewHud = true;
+                view2 = new PlaygroundViewDefault("name2",messageBusMocked);
+                view2.isViewMain = true;
+                s1 = sinon.stub(view1,"_preAttach").resolves();                
+
+                playground = new PlaygroundThreeJs(container,messageBusMocked);                
+                // s2 = sinon.stub(playground,"_attachInteractionListeners").returns();
+                playground.views = []
+                playground.views.push(view2);
+            });
+            afterEach(() => {    
+                s1.restore();   
+                // s2.restore();                         
+            });
+
+            it('calls preAttach for view', () => {
+                
+                
+
+                return playground.attach(view1).then(()=>{
+                    return expect(s1.callCount).eq(1);
+                })
+            })
+            it('adds view', () => {                                
+                return playground.attach(view1).then(()=>{
+                    return expect(playground.views[1]).eq(view1);
+                })
+            })
+            it('replaces view', () => {  
+                playground.views.unshift(view1);                              
+                return playground.attach(view1).then(()=>{
+                    return expect(playground.views[1]).eq(view1);
+                })
+            })
+            it('unsets autoclear for hud view', () => {  
+                playground._renderer = {
+                    autoClear: true
+                }                              
+                return playground.attach(view1).then(()=>{
+                    return expect(playground._renderer.autoClear).eq(false);
+                })
+            })
+        })
+        describe("_attachInteractionListeners",()=>{
+            const container = {                
+                nodeName: "CANVAS",
+                addEventListener(){}
+            }
+            let s1: SinonStub;
+            let playground: PlaygroundThreeJs;
+
+
+            beforeEach(() => {
+                s1 = sinon.stub(container,"addEventListener");
+                playground = new PlaygroundThreeJs(container,messageBusMocked);
+            })
+            afterEach(() => {    
+                s1.restore();
+            })
+            it("listens for pointermove events",()=>{
+                playground._attachInteractionListeners();
+                return expect(s1.getCall(0).args[0]).eq("pointermove");
+            })
+            it("listens for pointerdown events",()=>{
+                playground._attachInteractionListeners();
+                return expect(s1.getCall(1).args[0]).eq("pointerdown");
+            })
+
+        })
+        describe("initialize",()=>{
+            let playground: PlaygroundThreeJs;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+            let s1: SinonStub;
+            let s2: SinonStub;
+
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container,messageBusMocked);
+                s1 = sinon.stub(playground,"_attachInteractionListeners");
+                s2 = sinon.stub(playground, "_setupRenderer");
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("calls super initialize",()=>{
+                playground.initialize();
+                return expect(s1.callCount).eq(1);
+            })
+            it("sets up renderer",()=>{
+                playground.initialize();
+                return expect(s2.callCount).eq(1);
+            })
+            it("sets up renderer using container",()=>{
+                playground.initialize();
+                return expect(s2.getCall(0).args[0]).eq(playground.container);
+            })
+        })
+        describe("_resizeRendererToDisplaySize",()=>{
+            let playground: PlaygroundThreeJs;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+            let s1: SinonStub;
+            let s2: SinonStub;
+            let renderer1: any;
+            let renderer2: any;
+
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container,messageBusMocked);  
+                playground._renderer = undefined;
+
+                renderer1 = {
+                    autoClear: true,
+                    domElement: {
+                        clientWidth: 200,
+                        clientHeight: 100,
+                        width: 50,
+                        height: 25
+                    },
+                    setSize(){}
+                }
+                renderer2 = {
+                    autoClear: true,
+                    domElement: {
+                        clientWidth: 200,
+                        clientHeight: 100,
+                        width: 200,
+                        height: 100
+                    },
+                    setSize(){}
+                }
+
+                s1 = sinon.stub(renderer1,"setSize")
+                s2 = sinon.stub(renderer2,"setSize")
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+
+            it("resizes renderer when needed",()=>{
+                playground._renderer = renderer1;
+                playground._resizeRendererToDisplaySize();
+                return expect(s1.callCount).eq(1)
+            })
+            it("resizes renderer only when needed",()=>{
+                playground._renderer = renderer2;
+                playground._resizeRendererToDisplaySize();
+                return expect(s2.callCount).eq(0)
+            })
+        })
+        describe("_onInteraction",()=>{
+            let view1: PlaygroundViewDefault;
+            let view2: PlaygroundViewDefault;
+            let view3: PlaygroundViewDefault;
+            let s1: SinonStub;
+            let s2: SinonStub;
+            let s3: SinonStub;
+            let playground: PlaygroundThreeJs;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container,messageBusMocked);  
+                view1 = new PlaygroundViewDefault("name1",messageBusMocked);
+                view1.isViewHud = true;
+                view2 = new PlaygroundViewDefault("name2",messageBusMocked);
+                view2.isViewMain = true;
+                view3 = new PlaygroundViewDefault("name3",messageBusMocked);
+                view3.isViewMain = true;
+
+                s1 = sinon.stub(view1,"_onInteraction").returns(undefined);
+                s2 = sinon.stub(view2,"_onInteraction").returns({});
+                s3 = sinon.stub(view3,"_onInteraction").returns({});
+
+                playground.views = []
+                playground.views.push(view1);
+                playground.views.push(view2);
+                playground.views.push(view3);
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+            })
+            it("tries all views for interaction unless first interaction is found",()=>{
+                playground._onInteraction("john", "doe");
+                return expect(s3.callCount).eq(0);
+            })
+            it("tries all views for interaction unless first interaction is found",()=>{
+                playground._onInteraction("john", "doe");
+                return expect(s1.callCount).eq(1);
+            })
+            it("tries all views for interaction unless first interaction is found",()=>{
+                playground._onInteraction("john", "doe");
+                return expect(s2.callCount).eq(1);
+            })
+        })
+        describe('run', () => {
+            let s1: SinonStub;
+            let s2: SinonStub;
+            let s3: SinonStub;
+            let s4: SinonStub;
+            let s5: SinonStub;
+            let s6: SinonStub;
+            let s7: SinonStub;
+            
+            let view1: PlaygroundViewDefault;
+            let view2: PlaygroundViewDefault;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+            let playground: PlaygroundThreeJs;
+            beforeEach(() => {
+                
+                view1 = new PlaygroundViewDefault("name1",messageBusMocked);
+                view1.isViewHud = true;
+                view1.camera = {
+                    aspect: 1,
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    updateProjectionMatrix(){}
+                }
+                view2 = new PlaygroundViewDefault("name2",messageBusMocked);
+                view2.isViewMain = true;
+                view2.camera = {
+                    aspect: 1,
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    updateProjectionMatrix(){}
+                }
+                
+                
+                // console.log(global);
+                playground = new PlaygroundThreeJs(container,messageBusMocked);  
+                global.requestAnimationFrame = (_callback: FrameRequestCallback) => {
+                    return 1
+                }             
+                s2 = sinon.stub(global,"requestAnimationFrame").returns(1);
+
+                playground.views = []
+                playground.views.push(view1);
+                playground.views.push(view2);
+                
+
+                s1 = sinon.stub(playground,"_resizeRendererToDisplaySize").returns(true);                
+
+                playground._renderer = {
+                    autoClear: true,
+                    domElement: {
+                        clientWidth: 200,
+                        clientHeight: 100
+                    },
+                    clear(){},
+                    clearDepth(){},
+                    render(){}
+                }
+
+                s3 = sinon.stub(view1.camera,"updateProjectionMatrix");
+                s4 = sinon.stub(view2.camera,"updateProjectionMatrix");
+                s5 = sinon.stub(playground._renderer,"clear");
+                s6 = sinon.stub(playground._renderer,"clearDepth");
+                s7 = sinon.stub(playground._renderer,"render");
+
+            });
+            afterEach(() => {    
+                s1.restore();   
+                s2.restore();
+                s3.restore();   
+                s4.restore();
+                s5.restore();   
+                s6.restore();
+                s7.restore();                          
+            });
+
+            it('plugs into browser animation engine', () => {                                
+                playground.run();
+                return expect(s2.callCount).eq(1);                
+            })
+            it('sets main view camera correctly', () => {                                
+                playground.run();
+                return expect(view2.camera.aspect).eq(2);                
+            })
+            it('sets main view camera matrix correctly', () => {                                
+                playground.run();
+                return expect(s4.callCount).eq(1);                
+            })
+            it('sets hud view camera correctly', () => {                                
+                playground.run();
+                return expect(view1.camera.left).eq(-100);                
+            })
+            it('sets hud view camera correctly', () => {                                
+                playground.run();
+                return expect(view1.camera.right).eq(100);                
+            })
+            it('sets hud view camera correctly', () => {                                
+                playground.run();
+                return expect(view1.camera.top).eq(50);                
+            })
+            it('sets hud view camera correctly', () => {                                
+                playground.run();
+                return expect(view1.camera.bottom).eq(-50);                
+            })
+
+            it('sets hud view camera matrix correctly', () => {                                
+                playground.run();
+                return expect(s3.callCount).eq(1);                
+            })
+
+            it('clears renderer when hud view is present', () => {                                
+                playground.run();
+                return expect(s5.callCount).eq(1);                
+            })
+
+            it('renders main view', () => {                                
+                playground.run();                
+                return expect(s7.getCall(0).args[1]).eq(view2.camera);                
+            })
+            it('renders hud view', () => {                                
+                playground.run();                
+                return expect(s7.getCall(1).args[1]).eq(view1.camera);                
+            })
+
+            it('clears depth when hud view is present', () => {                                
+                playground.run();                
+                return expect(s6.callCount).eq(1);                
+            })
+            
+        })
+    })
+    describe("PlaygroundViewThreeJS",()=>{
+        let playgroundView1: PlaygroundViewMainThreeJsDefault;
+        let playground: PlaygroundThreeJs;
+        const container = {                
+            nodeName: "CANVAS",
+            width: 300,
+            height: 300,
+            getBoundingClientRect(){}
+        }
+        let pointerEvent = {
+            clientX: 10,
+            clientY: 10,
+            preventDefault(){}
+        }
+        describe("_pickScenePosition",()=>{
+            let s1: SinonStub;
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container,messageBusMocked);
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                s1 = sinon.stub(playgroundView1, "_getCanvasRelativePosition");
+                s1.returns({
+                    x: 100,
+                    y:100
+                })
+                playgroundView1._preAttach(playground)
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("recalculates scene position",()=>{
+                const pos = playgroundView1._pickScenePosition(pointerEvent);
+                return expect(pos.x).eq(2/3-1)
+            })
+            it("recalculates scene position",()=>{
+                const pos = playgroundView1._pickScenePosition(pointerEvent);
+                return expect(pos.y).eq(-2/3+1)
+            })
+            it("uses canvas proportions",()=>{
+                playgroundView1._pickScenePosition(pointerEvent);
+                return expect(s1.callCount).eq(1);
+            })
+        })
+        describe("_getCanvasRelativePosition",()=>{
+            let s1: SinonStub;
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container,messageBusMocked);
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                s1 = sinon.stub(container, "getBoundingClientRect");
+                s1.returns({
+                    left: 0,
+                    top:0,
+                    width: 200,
+                    height: 50
+                })
+                playgroundView1._preAttach(playground)
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("calculates position",()=>{
+                const pos = playgroundView1._getCanvasRelativePosition(pointerEvent);
+                return expect(pos.x).eq(15);
+            })
+            it("calculates position",()=>{
+                const pos = playgroundView1._getCanvasRelativePosition(pointerEvent);
+                return expect(pos.y).eq(60);
+            })
+        })
+        describe("pickObjectOfNames",()=>{
+            let s1:SinonStub;
+            let s2: SinonStub;
+            let s3: SinonStub;
+            let s4: SinonStub;
+            let s5: SinonStub;
+            let s6: SinonStub;
+            const filter1:string[] = []
+            const filter2:string[] = ["some"]
+
+            beforeEach(()=>{
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                playgroundView1._raycaster = {
+                    setFromCamera(){},
+                    intersectObjects(){}
+                }
+                s1 = sinon.stub(pointerEvent,"preventDefault");
+                s2 = sinon.stub(playgroundView1,"_pickScenePosition");
+                s3 = sinon.stub(playgroundView1._raycaster,"setFromCamera");
+                s4 = sinon.stub(playgroundView1._raycaster,"intersectObjects");
+                s5 = sinon.stub(playgroundView1,"_findClosestObjectMatching");
+                s5.withArgs(sinon.match.any,filter1);
+                const matchingResult: MatchingThreeJs = {
+                    distance: 0,
+                    face: {},
+                    faceIndex:1,
+                    point: {},
+                    object: new THREE.Object3D()
+
+                }
+                s5.withArgs(sinon.match.any,filter2).returns(matchingResult);
+                s6 = sinon.stub(playgroundView1, "_getHierarchyObjects");
+                
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+                s4.restore();
+                s5.restore();
+                s6.restore();
+            })
+            it("translates to scene position",()=>{
+                playgroundView1.pickObjectOfNames(pointerEvent,filter1);
+                return expect(s2.callCount).eq(1)
+            })
+            it("gets closest object that is hit",()=>{
+                playgroundView1.pickObjectOfNames(pointerEvent,filter1);
+                return expect(s5.callCount).eq(1)
+            })
+            it("captures ancestors for the hit object",()=>{
+                playgroundView1.pickObjectOfNames(pointerEvent,filter2);
+                return expect(s6.callCount).eq(1)
+            })
+            it("prevents further event processing",()=>{
+                playgroundView1.pickObjectOfNames(pointerEvent,filter1);
+                return expect(s1.callCount).eq(1)
+            })
+        })
+        describe("_getHierarchyObjects",()=>{
+            beforeEach(()=>{
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+            })
+            it("returns all ancestors with the main ancestor first",()=>{
+                const grandchild = new THREE.Object3D();
+                const child = new THREE.Object3D();
+                child.add(grandchild);
+                const me = new THREE.Object3D();
+                me.add(child)
+                const parent = new THREE.Object3D();
+                parent.add(me);
+                const grandparent = new THREE.Object3D();
+                grandparent.add(parent);
+
+                const ancestors = playgroundView1._getHierarchyObjects(grandchild);
+                return expect(ancestors[0]).eq(grandparent);
+            })
+            it("returns all ancestors with the queried object last",()=>{
+                const grandchild = new THREE.Object3D();
+                const child = new THREE.Object3D();
+                child.add(grandchild);
+                const me = new THREE.Object3D();
+                me.add(child)
+                const parent = new THREE.Object3D();
+                parent.add(me);
+                const grandparent = new THREE.Object3D();
+                grandparent.add(parent);
+
+                const ancestors = playgroundView1._getHierarchyObjects(grandchild);
+                return expect(ancestors[ancestors.length-1]).eq(grandchild);
+            })
+        })
+        describe("_findClosestObjectMatching",()=>{
+            it("returns closest match - the first one",()=>{
+                const intersections =  [ 
+                    { object: {name: "the_name"}, distance: 3 },
+                    { object: {name: "other"}, distance: 5 },
+                    { object: {name: "name_another"}, distance: 12 }
+                ]
+                const filters = ["name","nonmatching"]
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                const matching = playgroundView1._findClosestObjectMatching(intersections,filters);
+                
+                return expect(matching).eq(intersections[0])
+            })
+            it("uses cases insensitive filtering",()=>{
+                const intersections =  [ 
+                    { object: {name: "the_name"}, distance: 3 },
+                    { object: {name: "OTHER"}, distance: 5 },
+                    { object: {name: "name_another"}, distance: 12 }
+                ]
+                const filters = ["nonmatching","other"]
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                const matching = playgroundView1._findClosestObjectMatching(intersections,filters);
+                
+                return expect(matching).eq(intersections[1])
+            })
+            it("returns first when no filter is provided",()=>{
+                const intersections =  [ 
+                    { object: {name: "the_name"}, distance: 3 },
+                    { object: {name: "other"}, distance: 5 },
+                    { object: {name: "name_another"}, distance: 12 }
+                ]
+                const filters:any[] = []
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                const matching = playgroundView1._findClosestObjectMatching(intersections,filters);
+                
+                return expect(matching).eq(intersections[0])
+            })
+        })
+    })
+    describe("PlaygroundViewMainThreeJsDefault",()=>{
+        describe("_onInteraction",()=>{
+            let playgroundView1: PlaygroundViewMainThreeJsDefault;
+            let playgroundView2: PlaygroundViewMainThreeJsDefault;
+            let s1: SinonStub;
+            let s2: SinonStub;
+            let s3: SinonStub;        
+            let playground: PlaygroundThreeJs;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+            let pointerEvent = {
+
+            }
+            
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container, messageBusMocked);
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                playgroundView1._preAttach(playground);
+                playgroundView2 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                playgroundView2._preAttach(playground);
+                s1 = sinon.stub(playgroundView1,"pickObjectOfNames");
+                s1.onCall(0).returns({
+                    object: {a:1}
+                })
+                s1.onCall(1).returns(undefined);
+
+                s2 = sinon.stub(playgroundView2,"pickObjectOfNames");
+                s2.onCall(1).returns({
+                    object: {a:1}
+                })
+                s2.onCall(0).returns(undefined);
+
+                s3 = sinon.stub(messageBusMocked,"emit");
+
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+            })
+            it("triggers unit event when unit was picked",()=>{
+                playgroundView2._onInteraction(pointerEvent);
+                return expect(s3.getCall(0).args[0]).eq(Events.INTERACTIONS.UNIT);
+            })
+            it("triggers tile event when tile was picked",()=>{
+                playgroundView1._onInteraction(pointerEvent);
+                return expect(s3.getCall(0).args[0]).eq(Events.INTERACTIONS.TILE);
+            })
+        })
+        describe("_setupScene",()=>{
+            let playgroundView: PlaygroundViewMainThreeJsDefault;
+            let playground: PlaygroundThreeJs;
+            const container = {                
+                nodeName: "CANVAS"
+            }
+            beforeEach(()=>{
+                playground = new PlaygroundThreeJs(container, messageBusMocked);
+                playgroundView = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                playgroundView._preAttach(playground);
+            })
+            it("sets proper camera position",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.position.x).eq(0)
+            })
+            it("sets proper camera position",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.position.y).eq(-50)
+            })
+            it("sets proper camera position",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.position.z).eq(20)
+            })
+            it("sets proper camera name",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.name).eq(PlaygroundViewMainThreeJsDefault.CAMERA_NAME)
+            })
+            it("sets proper camera up vector",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.up.x).eq(0);
+            })
+            it("sets proper camera up vector",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.up.y).eq(0);
+            })
+            it("sets proper camera up vector",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.camera!.up.z).eq(1);
+            })
+
+            it("sets proper scene name",()=>{
+                playgroundView._setupScene();
+                return expect(playgroundView.scene!.name).eq(PlaygroundViewMainThreeJsDefault.SCENE_NAME);
+            })
+
+            it("has at least one light",()=>{
+                playgroundView._setupScene();
+                let lightsCount = 0;
+                playgroundView.scene.traverse((item:THREE.Light)=>{
+                    if(item.isLight) lightsCount++;
+                })
+                return expect(lightsCount).gt(0);
+            })
+
+        })
+    })
+})
+
+

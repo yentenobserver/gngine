@@ -10,6 +10,10 @@ export const Events = {
     },
     ENGINE: {
         BATTLE_OUTCOME: "battle:outcome", // (result: BattleOutcome)
+    },
+    INTERACTIONS: {
+        UNIT: "interaction:unit", // (event: PlaygroundInteractionEvent)
+        TILE: "interaction:tile" // (event: PlaygroundInteractionEvent)
     }
     
 }

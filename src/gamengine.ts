@@ -1,7 +1,7 @@
 import { TileBase } from "./logic/map/common.notest";
 import { ActionBase } from "./logic/units/actions/action";
 import { UnitPosition, UnitPositions } from "./logic/units/positions";
-import { Actionable, SpecsBase, UnitBase } from "./logic/units/unit";
+import { SpecsBase, UnitBase } from "./logic/units/unit";
 import { Events } from "./util/eventDictionary.notest";
 import { EventEmitter } from "./util/events.notest";
 
@@ -24,7 +24,7 @@ export interface BattleOutcome {
 
 }
 
-class Gamengine {
+export class Gamengine {
   emitter: EventEmitter;
   positions: UnitPositions;
 
@@ -196,6 +196,3 @@ class Gamengine {
   // 3. when actiom is performed - consume action points and/or according to path cost
   //  4. eventual change position according to path
 }
-
-
-export const gamengine = new Gamengine();
