@@ -115,7 +115,13 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
     }
 
 
-
+    /**
+     * Filters intersected objects using name filter and returns the closes one. When empty name filter array
+     * is used then the closest intersected object is returned.
+     * @param intersectArray array of objects intersected, ordered by distance
+     * @param filterNames when provided only objects that match name will be taken into consideration
+     * @returns closest intersected object matching name criteria
+     */
     _findClosestObjectMatching(intersectArray:any[], filterNames: string[]):MatchingThreeJs{        
         // [ { distance, point, face, faceIndex, object }, ... ]   
         let matching:MatchingThreeJs;
@@ -150,6 +156,12 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
         return ancestors;
     }
 
+    /**
+     * Finds closest object, filtered by name, that is pointed by the event.      
+     * @param pointerEvent ui pointer event
+     * @param filterNames optional array of names that should be used to filter candidates
+     * @returns closest object pointed by the event and matching name criteria
+     */
     pickObjectOfNames(pointerEvent: any,  filterNames: string[]):PickResultThreeJs|undefined{
         pointerEvent.preventDefault();         
                 
@@ -157,7 +169,7 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
         // console.log('PTR',pointer, this._ndcToScreen2D(new THREE.Vector3( pointer.x, pointer.y, 0 )), event);
         this._raycaster.setFromCamera( sceneXY, this.camera! );
         // See if the ray from the camera into the world hits one of our meshes
-        const intersects = this._raycaster.intersectObjects( this.scene?.children!, true );
+        const intersects = this._raycaster.intersectObjects( this.scene!.children!, true );
 
         // first try to find 
         const matching = this._findClosestObjectMatching(intersects, filterNames);
@@ -210,11 +222,38 @@ export abstract class PlaygroundViewHudThreeJs extends PlaygroundViewThreeJS imp
     camera: THREE.OrthographicCamera|undefined;
     isViewHud: boolean;
     static VIEW_NAME: string = "HUD_VIEW";
+    components: HudComponentThreeJs[];
     /* istanbul ignore next */
     constructor(emitter: EventEmitter){
         super(PlaygroundViewHudThreeJs.VIEW_NAME, emitter);
         this.isViewHud = true;
-    }   
+        this.components = [];
+    }  
+
+    /**
+     * Adds hud component at the end of the hud components list
+     * @param component hud component to be added
+     */
+    addComponent(component:HudComponentThreeJs){
+        component.setContainer(this.container);
+        this.scene.add(component.object);
+        this.components.push(component);
+        this.repositionComponents();
+    }
+    /**
+     * Recalculates components' positions using current cointainer dimensions.
+     */
+    repositionComponents(){
+        let x = -this.container.clientWidth/2;
+        const y = -this.container.clientHeight/2;
+        
+        this.components.forEach((item:HudComponentThreeJs)=>{
+        
+            item.object!.position.set(x,y,0);
+            x += item.getSize().x!;
+        })
+    }
+     
     
       
 
@@ -370,6 +409,232 @@ export interface PlaygroundInteractionEvent{
     data: any // additional interaction data
 }
 
+
+
+export abstract class SpriteFactory {
+    abstract initialize():Promise<void>;
+    abstract getInstance(which:number):THREE.Sprite;
+}
+/**
+ * Texture in a form of a line stripe
+ * Each sprite is of 1x1x0 size
+ */
+export class SpriteFactoryx128x128x4xL extends SpriteFactory{
+    url:string;
+    texture: THREE.Texture|any;
+    size: number = 128;
+    itemCnt: number = 4;
+
+    constructor(textureUrl: string){
+        super();
+        this.url = textureUrl;
+    }
+
+    initialize(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            new THREE.TextureLoader().load(this.url, (texture:THREE.Texture) => {
+                resolve(texture);
+            }, undefined, (error) => {
+                reject(error);
+            });
+        }).then((textureResult:any) => {
+            this.texture = textureResult as THREE.Texture;
+            if(this.texture.width!=this.size*this.itemCnt)
+                throw new Error(`Invalid texture width ${this.url}`)
+            if(this.texture.height!=this.size) 
+                throw new Error(`Invalid texture height ${this.url}`)            
+        })
+    }
+
+    getInstance(idx: number): THREE.Sprite {
+        if(idx>this.size-1)
+            throw new Error(`Invalid sprite idx ${idx} for ${this.url}`);
+        
+        const materialMap = this.texture.clone()
+        materialMap.repeat.x = 1 / this.itemCnt
+        materialMap.offset.x = idx * this.size / (this.size*this.itemCnt)
+        materialMap.needsUpdate = true;
+
+        const material = new THREE.SpriteMaterial({ map: materialMap });
+
+        const sprite = new THREE.Sprite(material);
+        return sprite;
+    }
+
+
+}
+/**
+ * xxxvvvxxx
+ * xxx0.0xxx
+ * xxxvvvxxx
+ * 
+ * Origin is located at the lower left corner of the component
+ * 
+ * xxxvvvxxx
+ * xxxvvvxxx
+ * 0.0vvvxxx
+ */
+export abstract class HudComponentThreeJs{
+    container: any;
+    sizePercentage: number|undefined;
+    width: number|undefined;
+    height: number|undefined;
+    object: THREE.Object3D|undefined;
+
+    constructor(){        
+    }
+
+    setContainer(container:any){
+        this.container = container;
+    }
+
+    resize(){
+        const newWidth = this.container.clientWidth;
+        const newHeight = this.container.clientHeight;
+        // const targetSize = new THREE.Vector3(1,1,1);
+        const targetSize = new THREE.Vector3(newWidth*this.sizePercentage!, newHeight*this.sizePercentage!,0);
+        const box = new THREE.Box3().setFromObject(this.object!);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const scaleVec = targetSize.divide(size);
+        const scale = Math.min(scaleVec.x, Math.min(scaleVec.y, scaleVec.z));
+        this.object?.scale.setScalar(scale);
+    }
+
+    getSize(){
+        return {
+            x: this.width,
+            y: this.height
+        }
+    }
+    abstract build():Promise<HudComponentThreeJs>;
+}
+
+export abstract class HudComponentLargeThreeJs extends HudComponentThreeJs{
+    constructor(){
+        super(); 
+        this.sizePercentage = 0.25;       
+    }
+    abstract build():Promise<HudComponentThreeJs>;
+}
+export class HudComponentDefaultThreeJs extends HudComponentThreeJs{
+    constructor(){
+        super();
+        this.object = new THREE.Object3D();
+        this.width = 40;
+        this.height = 40;
+    }
+    build(): Promise<HudComponentThreeJs> {
+        throw new Error('Method not implemented.');
+    }
+}
+export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
+    buttonsFactory: SpriteFactory;
+    constructor(buttonsSpriteUrl: string){
+        super();
+        this.buttonsFactory = new SpriteFactoryx128x128x4xL(buttonsSpriteUrl);
+    }
+
+    /**
+     * Generates 3x3 button square with 4 buttons for map navigation
+     * ?^?
+     * <?>
+     * ?v?
+     * @returns 
+     */
+     build(): Promise<HudComponentThreeJs> {
+        const that = this;
+        const hud = new Object3D();
+        hud.name = "HUD"
+        return this.buttonsFactory.initialize().then(()=>{
+            const up = this.buttonsFactory.getInstance(0);
+            hud.add(up);
+            up.position.set(0, 1, 0);
+            // up.scale.set(this._sizing.items, this._sizing.items, 1);            
+            up.name = 'UP'
+
+            const left = this.buttonsFactory.getInstance(1);
+            hud.add(left);
+            left.position.set(-1, 0, 0);
+            // left.scale.set(this._sizing.items, this._sizing.items, 1);
+            // rotLeft.position.set( 0, 0, this._size );
+            left.name = 'LEFT'
+
+            const right = this.buttonsFactory.getInstance(2);
+            hud.add(right);
+            right.position.set(1, 0, 0);
+            // right.scale.set(this._sizing.items, this._sizing.items, 1);
+            right.name = 'RIGHT'
+
+            const down = this.buttonsFactory.getInstance(3);
+            hud.add(down);
+            down.position.set(0, -1, 0);
+            // down.scale.set(this._sizing.items, this._sizing.items, 1);
+            // backward.position.set( this._size-this._size/2, 0, 0 );
+            down.name = 'DOWN'
+
+            // now normalize hud origin
+            hud.position.set(1.5, 1.5,0);
+            const holder = new Object3D();
+            holder.add(hud);
+            
+            that.object = holder;
+            that.width = 3;
+            that.height = 3;
+            // return holder;
+            return that;
+        })
+    }
+}
+
+export interface SizingHudThreeJs {
+    camera: number
+}
+export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
+    static CAMERA_NAME:string = "PLAYGROUND_HUD_CAM"
+    static SCENE_NAME:string = "PLAYGROUND_HUD_SCENE"
+    _sizing: SizingHudThreeJs;
+
+    constructor(emitter:EventEmitter, _sizing?: SizingHudThreeJs){
+        super(emitter)
+        this._sizing = _sizing || {
+            camera: 20,            
+        }
+        this._setupScene();
+    }
+    
+
+    _setupScene(){
+        // this._camera = new THREE.OrthographicCamera( - this._width / 2, this._width / 2, this._height / 2, - this._height / 2, 10, 100 );
+        this.camera = new THREE.OrthographicCamera(- this._sizing.camera, this._sizing.camera, this._sizing.camera, - this._sizing.camera, .1, 1000);
+        // this._camera.position.z = this._cameraSettings.z;
+        this.camera.position.set(0, 0, 1);
+        // this._camera.up.set( 0, 0, 1 );
+        // this._camera.lookAt(0,0,0);
+        this.camera.name = PlaygroundViewHudThreeJsDefault.CAMERA_NAME
+
+        this.scene = new THREE.Scene();
+        this.scene.name = PlaygroundViewHudThreeJsDefault.SCENE_NAME
+    }
+    _onInteraction(...event: any[]) {
+        const pointerEvent:any =  event as any;
+        // const eventType:string = pointerEvent.type;
+        
+        // check if any hud element is hit
+        const hudPickResult = this.pickObjectOfNames(pointerEvent,[])
+        if(hudPickResult?.object){
+            const interactionEvent: PlaygroundInteractionEvent = {
+                viewName: this.name,
+                interactingObject: hudPickResult.object,
+                originalEvent: pointerEvent,
+                data: hudPickResult
+            }
+            this.emitter.emit(Events.INTERACTIONS.HUD,interactionEvent)
+        }
+    }
+    
+}
+
 export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
     static CAMERA_NAME:string = "PLAYGROUND_MAIN_CAM"
     static SCENE_NAME:string = "PLAYGROUND_MAIN_SCENE"
@@ -377,7 +642,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         super(emitter)
     }
 
-    _setupScene(){
+    initialize(){
         
         let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
         camera.position.set(0, -50, 20);

@@ -21,7 +21,7 @@ import {MapsMocks, TerrainMocks} from './data.mock'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
-import {MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
+import {HudComponentDefaultThreeJs, MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
@@ -1773,6 +1773,7 @@ describe('Playground', () => {
                     setFromCamera(){},
                     intersectObjects(){}
                 }
+                playgroundView1.scene = new THREE.Scene();
                 s1 = sinon.stub(pointerEvent,"preventDefault");
                 s2 = sinon.stub(playgroundView1,"_pickScenePosition");
                 s3 = sinon.stub(playgroundView1._raycaster,"setFromCamera");
@@ -1938,7 +1939,7 @@ describe('Playground', () => {
                 return expect(s3.getCall(0).args[0]).eq(Events.INTERACTIONS.TILE);
             })
         })
-        describe("_setupScene",()=>{
+        describe("initialize",()=>{
             let playgroundView: PlaygroundViewMainThreeJsDefault;
             let playground: PlaygroundThreeJs;
             const container = {                
@@ -1950,41 +1951,41 @@ describe('Playground', () => {
                 playgroundView._preAttach(playground);
             })
             it("sets proper camera position",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.position.x).eq(0)
             })
             it("sets proper camera position",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.position.y).eq(-50)
             })
             it("sets proper camera position",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.position.z).eq(20)
             })
             it("sets proper camera name",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.name).eq(PlaygroundViewMainThreeJsDefault.CAMERA_NAME)
             })
             it("sets proper camera up vector",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.up.x).eq(0);
             })
             it("sets proper camera up vector",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.up.y).eq(0);
             })
             it("sets proper camera up vector",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.camera!.up.z).eq(1);
             })
 
             it("sets proper scene name",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 return expect(playgroundView.scene!.name).eq(PlaygroundViewMainThreeJsDefault.SCENE_NAME);
             })
 
             it("has at least one light",()=>{
-                playgroundView._setupScene();
+                playgroundView.initialize();
                 let lightsCount = 0;
                 playgroundView.scene.traverse((item:THREE.Light)=>{
                     if(item.isLight) lightsCount++;
@@ -1992,6 +1993,142 @@ describe('Playground', () => {
                 return expect(lightsCount).gt(0);
             })
 
+        })
+    })
+    describe("PlaygroundViewHudThreeJs", ()=>{
+        let s1:SinonStub;
+        let s2:SinonStub;
+        let view:PlaygroundViewHudThreeJsDefault;
+        let c: HudComponentDefaultThreeJs;
+        let c2: HudComponentDefaultThreeJs;
+        describe("addComponent",()=>{
+            
+            beforeEach(()=>{
+                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
+                view.container = {
+                    clientWidth: 100
+                }               
+                s1 = sinon.stub(view,"repositionComponents");
+                c = new HudComponentDefaultThreeJs();
+                s2 = sinon.stub(view.scene,"add");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("adds component to scene",()=>{
+                view.addComponent(c);
+                return expect(s2.callCount).eq(1);
+
+            });
+            it("adds component to components list",()=>{
+                view.addComponent(c);
+                return expect(view.components[0]).eq(c);
+            });
+
+            it("repositions components",()=>{
+                view.addComponent(c);
+                return expect(s1.callCount).eq(1);
+            });
+            it("shares view cointainer with component",()=>{
+                view.addComponent(c);
+                return expect(c.container).eq(view.container);
+            });
+        })
+
+        describe("repositionComponents",()=>{
+            beforeEach(()=>{
+                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
+                view.container = {
+                    clientWidth: 200,
+                    clientHeight: 100
+                }               
+                
+                c = new HudComponentDefaultThreeJs();
+                s1 = sinon.stub(c,"getSize").returns({
+                    x: 40,
+                    y:40
+                })
+                c2 = new HudComponentDefaultThreeJs();
+                s2 = sinon.stub(c2,"getSize").returns({
+                    x: 40,
+                    y:40
+                })
+            })
+            afterEach(()=>{
+                // s1.restore();
+                // s2.restore();
+            })
+            it("sets position of all components",()=>{
+                view.components = [c,c2];                
+                view.repositionComponents();
+                
+                return expect(view.components[0].object!.position.x).eq(-view.container.clientWidth/2)
+
+            })
+            it("sets position of all components",()=>{
+                view.components = [c,c2];                
+                view.repositionComponents();
+                
+                return expect(view.components[1].object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
+
+            })
+            it("moves components along x axis according to the component position on the list",()=>{
+                view.components = [c,c2];                
+                view.repositionComponents();
+                
+                return expect(view.components[1].object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
+            })
+            it("starts placing components in the lower, left corner of the view",()=>{
+                view.components = [c,c2];                
+                view.repositionComponents();
+                
+                return expect(view.components[0].object!.position.x).eq(-view.container.clientWidth/2)
+            })
+            it("starts placing components in the lower, left corner of the view",()=>{
+                view.components = [c,c2];                
+                view.repositionComponents();
+                
+                return expect(view.components[0].object!.position.y).eq(-view.container.clientHeight/2)
+            })
+        })
+        
+    })
+    describe("PlaygroundViewHudThreeJsDefault",()=>{
+        describe("_onInteraction",()=>{
+            let p1:PlaygroundViewHudThreeJsDefault;
+            let s1: SinonStub;
+            let p2:PlaygroundViewHudThreeJsDefault;
+            let s2: SinonStub;
+            let s3: SinonStub; 
+            beforeEach(()=>{
+                p1 = new PlaygroundViewHudThreeJsDefault(messageBusMocked);
+                p2 = new PlaygroundViewHudThreeJsDefault(messageBusMocked);
+
+                s1 = sinon.stub(p1,"pickObjectOfNames").returns({
+                    object: new THREE.Object3D(),
+                    hierarchy: []
+                });
+                s2 = sinon.stub(p2,"pickObjectOfNames");
+                s3 = sinon.stub(messageBusMocked,"emit");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+            })
+            it("sends interaction event when something is selected",()=>{
+                p1._onInteraction("john", "doe");
+                return expect(s3.callCount).eq(1);
+            })
+            it("sends interaction HUD event when something is selected",()=>{
+                p1._onInteraction("john", "doe");
+                return expect(s3.getCall(0).args[0]).eq(Events.INTERACTIONS.HUD);
+            })
+            it("do nothing when none is selected",()=>{
+                p2._onInteraction("john", "doe");
+                return expect(s3.callCount).eq(0);
+            })
         })
     })
 })
