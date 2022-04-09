@@ -509,7 +509,7 @@ export abstract class HudComponentThreeJs{
     }
     abstract build():Promise<HudComponentThreeJs>;
 }
-
+/* istanbul ignore next */
 export abstract class HudComponentLargeThreeJs extends HudComponentThreeJs{
     constructor(){
         super(); 
@@ -517,6 +517,7 @@ export abstract class HudComponentLargeThreeJs extends HudComponentThreeJs{
     }
     abstract build():Promise<HudComponentThreeJs>;
 }
+/* istanbul ignore next */
 export class HudComponentDefaultThreeJs extends HudComponentThreeJs{
     constructor(){
         super();
