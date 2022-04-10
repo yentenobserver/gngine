@@ -25,6 +25,7 @@ import {HudComponentDefaultThreeJs, MatchingThreeJs, PlaygroundThreeJs, Playgrou
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
+import { Vector3 } from 'three';
 
 
 describe('Gamengine', () => {
@@ -2131,6 +2132,69 @@ describe('Playground', () => {
             })
         })
     })
+
+    describe("HudComponentThreeJs",()=>{
+        let c1: HudComponentDefaultThreeJs;
+        let c2: HudComponentDefaultThreeJs;
+        let ct1: any;
+        let o1: THREE.Object3D;
+        let o2: THREE.Object3D;
+        let perc: number;
+
+        describe("resize",()=>{            
+            beforeEach(()=>{                
+                const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                const geometry2 = new THREE.BoxGeometry( 10000, 10000, 10000 );
+                const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+                const cube = new THREE.Mesh( geometry, material );
+                const cube2 = new THREE.Mesh( geometry2, material );
+                o1 = cube;
+                o2 = cube2;
+                c1 = new HudComponentDefaultThreeJs();
+                c2 = new HudComponentDefaultThreeJs();
+                ct1 = {
+                    clientWidth: 1000,
+                    clientHeight: 500
+                }
+                c1.container = ct1;
+                c2.container = ct1;
+                c1.object = o1;
+                c2.object = o2;
+                perc = 0.1;
+                c1.sizePercentage = perc;
+                c2.sizePercentage = perc;
+            })
+            it("resizes object accordingly to size percentage - making larger",()=>{
+                c1.resize();                
+                const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
+                const size = new THREE.Vector3();
+                updatedBBox.getSize(size);
+                return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+            })
+            it("resizes object accordingly to size percentage - size is updated",()=>{
+                c1.resize();                
+                const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
+                const size = new THREE.Vector3();
+                updatedBBox.getSize(size);
+                return expect(c1.getSize().x).eq(50);
+            })
+            it("resizes object accordingly to size percentage - size is updated",()=>{
+                c1.resize();                
+                const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
+                const size = new THREE.Vector3();
+                updatedBBox.getSize(size);
+                return expect(c1.getSize().y).eq(50);
+            })
+            it("resizes object accordingly to size percentage - making smaller",()=>{
+                c2.resize();                
+                const updatedBBox = new THREE.Box3().setFromObject(c2.object!);
+                const size = new THREE.Vector3();
+                updatedBBox.getSize(size);
+                return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+            })
+        })
+    })
+    
 })
 
 

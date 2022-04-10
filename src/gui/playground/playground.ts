@@ -415,6 +415,8 @@ export abstract class SpriteFactory {
     abstract initialize():Promise<void>;
     abstract getInstance(which:number):THREE.Sprite;
 }
+
+/* istanbul ignore next */
 /**
  * Texture in a form of a line stripe
  * Each sprite is of 1x1x0 size
@@ -431,8 +433,12 @@ export class SpriteFactoryx128x128x4xL extends SpriteFactory{
     }
 
     initialize(): Promise<void> {
+        
         return new Promise((resolve, reject) => {
-            new THREE.TextureLoader().load(this.url, (texture:THREE.Texture) => {
+            
+            const loader = new THREE.TextureLoader();
+            console.log(this.url)
+            loader.load(this.url, (texture:THREE.Texture) => {
                 resolve(texture);
             }, undefined, (error) => {
                 reject(error);
@@ -492,13 +498,25 @@ export abstract class HudComponentThreeJs{
         const newWidth = this.container.clientWidth;
         const newHeight = this.container.clientHeight;
         // const targetSize = new THREE.Vector3(1,1,1);
-        const targetSize = new THREE.Vector3(newWidth*this.sizePercentage!, newHeight*this.sizePercentage!,0);
+        const targetSize = new THREE.Vector3(newWidth*this.sizePercentage!, newHeight*this.sizePercentage!,Math.min(newWidth*this.sizePercentage!, newHeight*this.sizePercentage!));
+        
         const box = new THREE.Box3().setFromObject(this.object!);
         const size = new THREE.Vector3();
         box.getSize(size);
+        
+        
         const scaleVec = targetSize.divide(size);
+        
         const scale = Math.min(scaleVec.x, Math.min(scaleVec.y, scaleVec.z));
-        this.object?.scale.setScalar(scale);
+        
+        this.object!.scale.setScalar(scale);
+
+        // now update size property accordingly
+        const box2 = new THREE.Box3().setFromObject(this.object!);
+        const size2 = new THREE.Vector3();
+        box2.getSize(size2);
+        this.width = size2.x;
+        this.height = size2.y;
     }
 
     getSize(){
