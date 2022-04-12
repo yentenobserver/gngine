@@ -1940,7 +1940,7 @@ describe('Playground', () => {
                 return expect(s3.getCall(0).args[0]).eq(Events.INTERACTIONS.TILE);
             })
         })
-        describe("initialize",()=>{
+        describe("_setupScene",()=>{
             let playgroundView: PlaygroundViewMainThreeJsDefault;
             let playground: PlaygroundThreeJs;
             const container = {                
@@ -1952,41 +1952,41 @@ describe('Playground', () => {
                 playgroundView._preAttach(playground);
             })
             it("sets proper camera position",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.position.x).eq(0)
             })
             it("sets proper camera position",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.position.y).eq(-50)
             })
             it("sets proper camera position",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.position.z).eq(20)
             })
             it("sets proper camera name",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.name).eq(PlaygroundViewMainThreeJsDefault.CAMERA_NAME)
             })
             it("sets proper camera up vector",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.up.x).eq(0);
             })
             it("sets proper camera up vector",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.up.y).eq(0);
             })
             it("sets proper camera up vector",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.camera!.up.z).eq(1);
             })
 
             it("sets proper scene name",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 return expect(playgroundView.scene!.name).eq(PlaygroundViewMainThreeJsDefault.SCENE_NAME);
             })
 
             it("has at least one light",()=>{
-                playgroundView.initialize();
+                playgroundView._setupScene();
                 let lightsCount = 0;
                 playgroundView.scene.traverse((item:THREE.Light)=>{
                     if(item.isLight) lightsCount++;

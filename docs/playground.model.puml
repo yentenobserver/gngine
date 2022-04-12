@@ -29,12 +29,22 @@ interface PlaygroundViewHud {
    {field} isViewHud boolean
 }
 
+interface PlaygroundView3D {
+  {field} camera: THREE.Camera|any;
+  {field} scene: THREE.Scene|any;
+}
+
 abstract class PlaygroundViewThreeJs {
   {field} camera THREE.Camera
   {field} scene THREE.Scene
   {field} container HTMLCanvas 
   {field} canvas HTMLCanvas
+  {method} _setupScene():void
   {method} pickObjectOfNames():PickResultThreeJs
+  {method} _pickScenePosition(pointerEvent: any):any
+  {method} _getCanvasRelativePosition(pointerEvent: any):any
+  {method} _findClosestObjectMatching(intersectArray:any[], filterNames: string[]):MatchingThreeJs
+  {method} _getHierarchyObjects(item:THREE.Object3D, ):THREE.Object3D[]
 }
 
 interface PlaygroundInteractionEvent{
@@ -48,7 +58,10 @@ class PlaygroundThreeJs {
   {field} THREE.WebGLRenderer _renderer
 }
 
-abstract class PlaygroundViewHudThreeJs {}
+abstract class PlaygroundViewHudThreeJs {
+  {method} addComponent(component:HudComponentThreeJs)
+  {method} repositionComponents()
+}
 abstract class PlaygroundViewMainThreeJs {}
 
 
@@ -60,8 +73,12 @@ PlaygroundInteractions .. "many" PlaygroundViewInteractionHandler
 PlaygroundView .. PlaygroundViewInteractionHandler
 Playground .. PlaygroundInteractions : coordinates ui interactions between views and container
 PlaygroundView <|-- PlaygroundViewThreeJs
+PlaygroundView3D <|.. PlaygroundViewThreeJs
+
 PlaygroundViewMain <|.. PlaygroundViewMainThreeJs
 PlaygroundViewThreeJs <|-- PlaygroundViewMainThreeJs
+PlaygroundViewMainThreeJs <|-- PlaygroundViewMainThreeJsDefault
+PlaygroundViewHudThreeJs <|-- PlaygroundViewHudThreeJsDefault
 PlaygroundViewHud <|.. PlaygroundViewHudThreeJs
 PlaygroundViewThreeJs <|-- PlaygroundViewHudThreeJs
 Playground <|-- PlaygroundThreeJs

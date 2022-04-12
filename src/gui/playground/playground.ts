@@ -29,6 +29,136 @@ export abstract class Playground{
     
 }
 
+export class PlaygroundThreeJs extends Playground{
+    
+    _renderer: THREE.WebGLRenderer|any;
+
+    constructor(canvasHTMLElement:any, emitter: EventEmitter){
+        super(canvasHTMLElement, emitter);        
+        
+    }
+    initialize(): void {
+        super.initialize();
+        this._setupRenderer(this.container);
+    }
+    attach(view: PlaygroundView): Promise<void> {
+        
+        view._preAttach(this);
+        
+        const potentialHudView = (view as any) as PlaygroundViewHud;
+
+        // important for multiple scenes/cameras handling
+        if(potentialHudView.isViewHud && this._renderer){
+            this._renderer!.autoClear = false;
+        }
+        
+        // remove previous if was added already
+        this.views = this.views.filter((item:PlaygroundView)=>{
+            return item.name != view.name
+        })
+        
+        this.views.push(view);
+        
+        return Promise.resolve();
+    }
+
+    run(): void {
+
+        requestAnimationFrame(this.run.bind(this));
+        const mainView = this.views.find((item:PlaygroundView)=>{
+            const potentialHudView = (item as any) as PlaygroundViewHud;
+            return !potentialHudView.isViewHud
+        }) as PlaygroundViewMainThreeJs;
+
+        const hudView = this.views.find((item:PlaygroundView)=>{
+            const potentialHudView = (item as any) as PlaygroundViewHud;
+            return potentialHudView.isViewHud
+        }) as PlaygroundViewHudThreeJs;
+
+        
+        
+    
+        if (this._resizeRendererToDisplaySize()) {
+            const canvas = this._renderer!.domElement;
+            mainView.camera!.aspect = canvas.clientWidth / canvas.clientHeight;
+            mainView.camera!.updateProjectionMatrix();
+            if(hudView){
+                hudView.camera!.left = - canvas.clientWidth / 2;
+				hudView.camera!.right = canvas.clientWidth / 2;
+				hudView.camera!.top = canvas.clientHeight / 2;
+				hudView.camera!.bottom = - canvas.clientHeight / 2;
+				hudView.camera!.updateProjectionMatrix();
+            }
+            
+        }
+                
+        // render scene
+        if(hudView){
+            this._renderer!.clear();
+            // renderer.render(hudSceneHolder.scene, hudSceneHolder.camera);                
+        }
+
+            
+        this._renderer!.render(mainView.scene!, mainView.camera!);                
+        
+
+        // if HUD is available
+        if(hudView){
+            this._renderer!.clearDepth()
+            this._renderer!.render(hudView.scene!, hudView.camera!);                
+        }
+    }
+
+    _attachInteractionListeners(): void {        
+        this.container.addEventListener( 'pointermove', this._onInteraction.bind(this) );
+        this.container.addEventListener( 'pointerdown', this._onInteraction.bind(this) );
+    }
+    _onInteraction(...event:any[]): void {        
+        for (let index = 0; this.views&&index < this.views.length; index++) {
+            const view = this.views[index];
+            const interactionResult = view._onInteraction(...event);
+            if(interactionResult)
+                break;
+        }
+        
+    }
+
+    /* istanbul ignore next */
+    _setupRenderer(canvasElement:any):void{
+        if(canvasElement.nodeName!="CANVAS")
+            throw new Error(`Invalid canvas html element`);
+
+        // initialize renderer
+        var renderer = new THREE.WebGLRenderer({
+            canvas: canvasElement,
+            antialias: true
+        });
+        // renderer.setClearColor(0x000000);
+        renderer.setClearColor( 0xffffff, 1 );
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        // https://discourse.threejs.org/t/gltfexported-model-is-way-darker/6686
+        // renderer.gammaOutput = true;
+        // // renderer.gammaFactor = 2.2;
+        // renderer.gammaFactor =2.2;
+            
+        this._renderer = renderer;
+    }
+
+    _resizeRendererToDisplaySize():boolean {
+
+        const canvas = this._renderer!.domElement;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        const needResize = canvas.width !== width || canvas.height !== height;
+        if (needResize) {
+            this._renderer!.setSize(width, height, false);
+        }
+        return needResize;
+      }
+    
+}
+
 export abstract class PlaygroundView{
     name:string;
     emitter: EventEmitter;
@@ -88,6 +218,8 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
     scene: THREE.Scene|any;
 
     _raycaster: THREE.Raycaster|any = new THREE.Raycaster();
+
+    abstract _setupScene():void
 
     _preAttach(parentPlayground: Playground): void {
         this.container = parentPlayground.container;
@@ -270,137 +402,167 @@ export abstract class PlaygroundViewMainThreeJs extends PlaygroundViewThreeJS im
         this.isViewMain = true;
     }             
 }
-export class PlaygroundInteractions{}
 
-export class PlaygroundThreeJs extends Playground{
-    
-    _renderer: THREE.WebGLRenderer|any;
 
-    constructor(canvasHTMLElement:any, emitter: EventEmitter){
-        super(canvasHTMLElement, emitter);        
-        
-    }
-    initialize(): void {
-        super.initialize();
-        this._setupRenderer(this.container);
-    }
-    attach(view: PlaygroundView): Promise<void> {
-        
-        view._preAttach(this);
-        
-        const potentialHudView = (view as any) as PlaygroundViewHud;
 
-        // important for multiple scenes/cameras handling
-        if(potentialHudView.isViewHud && this._renderer){
-            this._renderer!.autoClear = false;
+
+
+export interface SizingHudThreeJs {
+    camera: number
+}
+export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
+    static CAMERA_NAME:string = "PLAYGROUND_HUD_CAM"
+    static SCENE_NAME:string = "PLAYGROUND_HUD_SCENE"
+    _sizing: SizingHudThreeJs;
+
+    constructor(emitter:EventEmitter, _sizing?: SizingHudThreeJs){
+        super(emitter)
+        this._sizing = _sizing || {
+            camera: 20,            
         }
-        
-        // remove previous if was added already
-        this.views = this.views.filter((item:PlaygroundView)=>{
-            return item.name != view.name
-        })
-        
-        this.views.push(view);
-        
-        return Promise.resolve();
+        this._setupScene();
     }
-
-    run(): void {
-
-        requestAnimationFrame(this.run.bind(this));
-        const mainView = this.views.find((item:PlaygroundView)=>{
-            const potentialHudView = (item as any) as PlaygroundViewHud;
-            return !potentialHudView.isViewHud
-        }) as PlaygroundViewMainThreeJs;
-
-        const hudView = this.views.find((item:PlaygroundView)=>{
-            const potentialHudView = (item as any) as PlaygroundViewHud;
-            return potentialHudView.isViewHud
-        }) as PlaygroundViewHudThreeJs;
-
-        
-        
     
-        if (this._resizeRendererToDisplaySize()) {
-            const canvas = this._renderer!.domElement;
-            mainView.camera!.aspect = canvas.clientWidth / canvas.clientHeight;
-            mainView.camera!.updateProjectionMatrix();
-            if(hudView){
-                hudView.camera!.left = - canvas.clientWidth / 2;
-				hudView.camera!.right = canvas.clientWidth / 2;
-				hudView.camera!.top = canvas.clientHeight / 2;
-				hudView.camera!.bottom = - canvas.clientHeight / 2;
-				hudView.camera!.updateProjectionMatrix();
+
+    _setupScene(){
+        // this._camera = new THREE.OrthographicCamera( - this._width / 2, this._width / 2, this._height / 2, - this._height / 2, 10, 100 );
+        this.camera = new THREE.OrthographicCamera(- this._sizing.camera, this._sizing.camera, this._sizing.camera, - this._sizing.camera, .1, 1000);
+        // this._camera.position.z = this._cameraSettings.z;
+        this.camera.position.set(0, 0, 1);
+        // this._camera.up.set( 0, 0, 1 );
+        // this._camera.lookAt(0,0,0);
+        this.camera.name = PlaygroundViewHudThreeJsDefault.CAMERA_NAME
+
+        this.scene = new THREE.Scene();
+        this.scene.name = PlaygroundViewHudThreeJsDefault.SCENE_NAME
+    }
+    _onInteraction(...event: any[]) {
+        const pointerEvent:any =  event as any;
+        // const eventType:string = pointerEvent.type;
+        
+        // check if any hud element is hit
+        const hudPickResult = this.pickObjectOfNames(pointerEvent,[])
+        if(hudPickResult?.object){
+            const interactionEvent: PlaygroundInteractionEvent = {
+                viewName: this.name,
+                interactingObject: hudPickResult.object,
+                originalEvent: pointerEvent,
+                data: hudPickResult
             }
-            
-        }
-                
-        // render scene
-        if(hudView){
-            this._renderer!.clear();
-            // renderer.render(hudSceneHolder.scene, hudSceneHolder.camera);                
-        }
-
-            
-        this._renderer!.render(mainView.scene!, mainView.camera!);                
-        
-
-        // if HUD is available
-        if(hudView){
-            this._renderer!.clearDepth()
-            this._renderer!.render(hudView.scene!, hudView.camera!);                
+            this.emitter.emit(Events.INTERACTIONS.HUD,interactionEvent)
         }
     }
-
-    _attachInteractionListeners(): void {        
-        this.container.addEventListener( 'pointermove', this._onInteraction.bind(this) );
-        this.container.addEventListener( 'pointerdown', this._onInteraction.bind(this) );
-    }
-    _onInteraction(...event:any[]): void {        
-        for (let index = 0; this.views&&index < this.views.length; index++) {
-            const view = this.views[index];
-            const interactionResult = view._onInteraction(...event);
-            if(interactionResult)
-                break;
-        }
-        
-    }
-
-    /* istanbul ignore next */
-    _setupRenderer(canvasElement:any):void{
-        if(canvasElement.nodeName!="CANVAS")
-            throw new Error(`Invalid canvas html element`);
-
-        // initialize renderer
-        var renderer = new THREE.WebGLRenderer({
-            canvas: canvasElement,
-            antialias: true
-        });
-        // renderer.setClearColor(0x000000);
-        renderer.setClearColor( 0xffffff, 1 );
-        renderer.setPixelRatio(window.devicePixelRatio);
-
-        // https://discourse.threejs.org/t/gltfexported-model-is-way-darker/6686
-        // renderer.gammaOutput = true;
-        // // renderer.gammaFactor = 2.2;
-        // renderer.gammaFactor =2.2;
-            
-        this._renderer = renderer;
-    }
-
-    _resizeRendererToDisplaySize():boolean {
-
-        const canvas = this._renderer!.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
-        if (needResize) {
-            this._renderer!.setSize(width, height, false);
-        }
-        return needResize;
-      }
     
 }
+
+export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
+    static CAMERA_NAME:string = "PLAYGROUND_MAIN_CAM"
+    static SCENE_NAME:string = "PLAYGROUND_MAIN_SCENE"
+    constructor(emitter: EventEmitter){
+        super(emitter)
+    }
+
+    _setupScene(){
+        
+        let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
+        camera.position.set(0, -50, 20);
+        camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
+        
+        camera.up.set( 0, 0, 1 );
+    
+        // initialize scene
+        let scene = new THREE.Scene();
+        scene.name = PlaygroundViewMainThreeJsDefault.SCENE_NAME;
+    
+        
+    
+        // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444,1 );
+        // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff,0.8 );
+        // hemiLight.position.set( 0, 0, 60 );
+        // // hemiLight.up.set(0, 0, 1)
+        // scene.add( hemiLight );
+
+
+        // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444,0.6 );
+        // hemiLight.position.set( 0, 0, 1600 );
+        // scene.add( hemiLight );
+        
+        // const light = new THREE.AmbientLight( 0x404040 ,0.3); // soft white light
+        // scene.add(light);
+
+        var dirLight = new THREE.DirectionalLight( 0xffffff,1.2);
+        dirLight.position.set( 45, -45, 130 );
+        scene.add( dirLight );
+
+        var dirLight2 = new THREE.DirectionalLight( 0xffffff,0.3 );
+        dirLight2.position.set( -45, 45, 5 );
+        scene.add( dirLight2 );
+
+        // const dirLightHelper = new THREE.DirectionalLightHelper( dirLight, 10 );
+		// 		scene.add( dirLightHelper );
+        
+        // const dirLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
+		// 		dirLight.color.setHSL( 0.1, 1, 0.95 );
+		// 		dirLight.position.set( - 1, 1.75, 1 );
+		// 		dirLight.position.multiplyScalar( 10 );
+		// 		scene.add( dirLight );
+
+		// 		dirLight.castShadow = true;
+
+		// 		dirLight.shadow.mapSize.width = 2048;
+		// 		dirLight.shadow.mapSize.height = 2048;
+
+		// 		const d = 50;
+
+		// 		dirLight.shadow.camera.left = - d;
+		// 		dirLight.shadow.camera.right = d;
+		// 		dirLight.shadow.camera.top = d;
+		// 		dirLight.shadow.camera.bottom = - d;
+
+		// 		dirLight.shadow.camera.far = 3500;
+		// 		dirLight.shadow.bias = - 0.0001;
+    
+        //         const dirLightHelper = new THREE.DirectionalLightHelper( dirLight, 10 );
+		// 		scene.add( dirLightHelper );
+        // initialize controls
+        
+        // Handling map operations
+        // let controls = GUIMapControls.getInstance(camera, this.container, this.emitter);
+        
+    
+        this.camera = camera;
+        this.scene = scene;
+    }
+    _onInteraction(...event: any[]) {
+        const pointerEvent:any =  event as any;
+        // const eventType:string = pointerEvent.type;
+        
+        // first see what tile did we hit
+        const tilePickResult = this.pickObjectOfNames(pointerEvent,["_TILE"])
+        if(tilePickResult?.object){
+            const interactionEvent: PlaygroundInteractionEvent = {
+                viewName: this.name,
+                interactingObject: tilePickResult.object,
+                originalEvent: pointerEvent,
+                data: tilePickResult
+            }
+            this.emitter.emit(Events.INTERACTIONS.TILE,interactionEvent)
+        }
+        // then also check what unit did we hit
+        const unitPickResult = this.pickObjectOfNames(pointerEvent,["_UNIT"])
+        if(unitPickResult?.object){
+            const interactionEvent: PlaygroundInteractionEvent = {
+                viewName: this.name,
+                interactingObject: unitPickResult.object,
+                originalEvent: pointerEvent,
+                data: tilePickResult
+            }
+            this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
+        }                
+    }
+}
+
+export class PlaygroundInteractions{}
 
 export interface PlaygroundInteractionEvent{
     viewName: string, // name of the view that took part in the interaction
@@ -408,8 +570,6 @@ export interface PlaygroundInteractionEvent{
     interactingObject: any, // the object that took part in the interaction
     data: any // additional interaction data
 }
-
-
 
 export abstract class SpriteFactory {
     abstract initialize():Promise<void>;
@@ -592,7 +752,8 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
             // backward.position.set( this._size-this._size/2, 0, 0 );
             down.name = 'DOWN'
 
-            // now normalize hud origin
+            // now normalize hud origin so the origin is in 
+            // lower left corner of the hud element
             hud.position.set(1.5, 1.5,0);
             const holder = new Object3D();
             holder.add(hud);
@@ -603,160 +764,5 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
             // return holder;
             return that;
         })
-    }
-}
-
-export interface SizingHudThreeJs {
-    camera: number
-}
-export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
-    static CAMERA_NAME:string = "PLAYGROUND_HUD_CAM"
-    static SCENE_NAME:string = "PLAYGROUND_HUD_SCENE"
-    _sizing: SizingHudThreeJs;
-
-    constructor(emitter:EventEmitter, _sizing?: SizingHudThreeJs){
-        super(emitter)
-        this._sizing = _sizing || {
-            camera: 20,            
-        }
-        this._setupScene();
-    }
-    
-
-    _setupScene(){
-        // this._camera = new THREE.OrthographicCamera( - this._width / 2, this._width / 2, this._height / 2, - this._height / 2, 10, 100 );
-        this.camera = new THREE.OrthographicCamera(- this._sizing.camera, this._sizing.camera, this._sizing.camera, - this._sizing.camera, .1, 1000);
-        // this._camera.position.z = this._cameraSettings.z;
-        this.camera.position.set(0, 0, 1);
-        // this._camera.up.set( 0, 0, 1 );
-        // this._camera.lookAt(0,0,0);
-        this.camera.name = PlaygroundViewHudThreeJsDefault.CAMERA_NAME
-
-        this.scene = new THREE.Scene();
-        this.scene.name = PlaygroundViewHudThreeJsDefault.SCENE_NAME
-    }
-    _onInteraction(...event: any[]) {
-        const pointerEvent:any =  event as any;
-        // const eventType:string = pointerEvent.type;
-        
-        // check if any hud element is hit
-        const hudPickResult = this.pickObjectOfNames(pointerEvent,[])
-        if(hudPickResult?.object){
-            const interactionEvent: PlaygroundInteractionEvent = {
-                viewName: this.name,
-                interactingObject: hudPickResult.object,
-                originalEvent: pointerEvent,
-                data: hudPickResult
-            }
-            this.emitter.emit(Events.INTERACTIONS.HUD,interactionEvent)
-        }
-    }
-    
-}
-
-export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
-    static CAMERA_NAME:string = "PLAYGROUND_MAIN_CAM"
-    static SCENE_NAME:string = "PLAYGROUND_MAIN_SCENE"
-    constructor(emitter: EventEmitter){
-        super(emitter)
-    }
-
-    initialize(){
-        
-        let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
-        camera.position.set(0, -50, 20);
-        camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
-        
-        camera.up.set( 0, 0, 1 );
-    
-        // initialize scene
-        let scene = new THREE.Scene();
-        scene.name = PlaygroundViewMainThreeJsDefault.SCENE_NAME;
-    
-        
-    
-        // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444,1 );
-        // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff,0.8 );
-        // hemiLight.position.set( 0, 0, 60 );
-        // // hemiLight.up.set(0, 0, 1)
-        // scene.add( hemiLight );
-
-
-        // var hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444,0.6 );
-        // hemiLight.position.set( 0, 0, 1600 );
-        // scene.add( hemiLight );
-        
-        // const light = new THREE.AmbientLight( 0x404040 ,0.3); // soft white light
-        // scene.add(light);
-
-        var dirLight = new THREE.DirectionalLight( 0xffffff,1.2);
-        dirLight.position.set( 45, -45, 130 );
-        scene.add( dirLight );
-
-        var dirLight2 = new THREE.DirectionalLight( 0xffffff,0.3 );
-        dirLight2.position.set( -45, 45, 5 );
-        scene.add( dirLight2 );
-
-        // const dirLightHelper = new THREE.DirectionalLightHelper( dirLight, 10 );
-		// 		scene.add( dirLightHelper );
-        
-        // const dirLight = new THREE.DirectionalLight( 0xffffff, 0.7 );
-		// 		dirLight.color.setHSL( 0.1, 1, 0.95 );
-		// 		dirLight.position.set( - 1, 1.75, 1 );
-		// 		dirLight.position.multiplyScalar( 10 );
-		// 		scene.add( dirLight );
-
-		// 		dirLight.castShadow = true;
-
-		// 		dirLight.shadow.mapSize.width = 2048;
-		// 		dirLight.shadow.mapSize.height = 2048;
-
-		// 		const d = 50;
-
-		// 		dirLight.shadow.camera.left = - d;
-		// 		dirLight.shadow.camera.right = d;
-		// 		dirLight.shadow.camera.top = d;
-		// 		dirLight.shadow.camera.bottom = - d;
-
-		// 		dirLight.shadow.camera.far = 3500;
-		// 		dirLight.shadow.bias = - 0.0001;
-    
-        //         const dirLightHelper = new THREE.DirectionalLightHelper( dirLight, 10 );
-		// 		scene.add( dirLightHelper );
-        // initialize controls
-        
-        // Handling map operations
-        // let controls = GUIMapControls.getInstance(camera, this.container, this.emitter);
-        
-    
-        this.camera = camera;
-        this.scene = scene;
-    }
-    _onInteraction(...event: any[]) {
-        const pointerEvent:any =  event as any;
-        // const eventType:string = pointerEvent.type;
-        
-        // first see what tile did we hit
-        const tilePickResult = this.pickObjectOfNames(pointerEvent,["_TILE"])
-        if(tilePickResult?.object){
-            const interactionEvent: PlaygroundInteractionEvent = {
-                viewName: this.name,
-                interactingObject: tilePickResult.object,
-                originalEvent: pointerEvent,
-                data: tilePickResult
-            }
-            this.emitter.emit(Events.INTERACTIONS.TILE,interactionEvent)
-        }
-        // then also check what unit did we hit
-        const unitPickResult = this.pickObjectOfNames(pointerEvent,["_UNIT"])
-        if(unitPickResult?.object){
-            const interactionEvent: PlaygroundInteractionEvent = {
-                viewName: this.name,
-                interactingObject: unitPickResult.object,
-                originalEvent: pointerEvent,
-                data: tilePickResult
-            }
-            this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
-        }                
     }
 }
