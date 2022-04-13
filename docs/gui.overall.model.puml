@@ -1,0 +1,21 @@
+@startuml
+
+
+GameContainer .. "many" Playground : displays/embeds
+Playground .. "1..2" PlaygroundView : Map and Hud
+
+abstract class Playground {
+  {field} any container
+}
+
+abstract class PlaygroundView {  }
+
+
+abstract class Renderer {
+  {method} setView(view: PlaygroundView):void
+}
+
+
+PlaygroundView <.. Renderer : renders into view
+
+@enduml

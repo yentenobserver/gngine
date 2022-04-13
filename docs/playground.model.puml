@@ -64,6 +64,9 @@ abstract class PlaygroundViewHudThreeJs {
 }
 abstract class PlaygroundViewMainThreeJs {}
 
+abstract class Renderer {
+  {method} setView(view: PlaygroundView):void
+}
 
 abstract class PlaygroundInteractions {    
 }
@@ -84,4 +87,6 @@ PlaygroundViewThreeJs <|-- PlaygroundViewHudThreeJs
 Playground <|-- PlaygroundThreeJs
 Playground .. EventEmitter
 PlaygroundView .. PlaygroundInteractionEvent : emits on interaction
+
+PlaygroundView <.. Renderer : target view
 @enduml

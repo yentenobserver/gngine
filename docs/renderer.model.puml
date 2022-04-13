@@ -1,0 +1,59 @@
+@startuml
+
+
+
+abstract class PlaygroundView {  }
+
+
+abstract class Renderer {
+  view: PlaygroundView|undefined;
+  {method} setView(view: PlaygroundView):void
+}
+
+abstract class HudRenderer {
+  components: HudComponent[];
+  {method} addComponent(component:HudComponent):void;
+  {method} repositionComponents():void;
+}
+
+abstract class HudRendererThreeJs {}
+
+abstract class MapRenderer {
+  {field} width: number;
+  {field} height: number;
+  {field} assets: string;
+
+  {method} initialize():Promise<void>;
+  {method} remove(tile: TileBase):void;
+  {method} replace(tile: TileBase, direction:string):void;
+  {method} put(tile: TileBase, direction:string):void;
+  {method} onTileChanged(tile: TileBase, direction: string):void;
+  {method} xyToScenePosition(y: number, x:number):ScenePosition;
+}
+
+abstract class MapRendererThreeJs {
+  tileSize: number;
+  mapHolderObject: THREE.Object3D;
+  tileFactory: RenderableThreeJSObject3DFactory;
+
+  {method} _dispose(object3D:THREE.Mesh)
+}
+
+class MapQuadRendererThreeJs {
+  {method} _directionRotate(object3D:THREE.Object3D, direction:string)
+}
+
+interface ScenePosition {
+  x: number,
+  y: number,
+  z: number
+}
+
+PlaygroundView <.. Renderer : target view
+
+Renderer <|-- MapRenderer
+Renderer <|-- HudRenderer
+HudRenderer <|-- HudRendererThreeJs
+MapRenderer <|-- MapRendererThreeJs
+MapRendererThreeJs <|-- MapQuadRendererThreeJs
+@enduml

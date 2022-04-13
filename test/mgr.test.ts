@@ -21,7 +21,8 @@ import {MapsMocks, TerrainMocks} from './data.mock'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
-import {HudComponentDefaultThreeJs, MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
+import {MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
+import {HudComponentDefaultThreeJs, HudComponentThreeJs, HudRendererThreeJs} from '../src/gui/renderer/Renderers'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
@@ -1340,6 +1341,7 @@ describe('Gamengine', () => {
         
     })
 })
+
 describe('Playground', () => {
     let messageBusMocked = new EventEmitter();
     describe('PlaygroundThreeJs', () => {
@@ -1996,105 +1998,7 @@ describe('Playground', () => {
 
         })
     })
-    describe("PlaygroundViewHudThreeJs", ()=>{
-        let s1:SinonStub;
-        let s2:SinonStub;
-        let view:PlaygroundViewHudThreeJsDefault;
-        let c: HudComponentDefaultThreeJs;
-        let c2: HudComponentDefaultThreeJs;
-        describe("addComponent",()=>{
-            
-            beforeEach(()=>{
-                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
-                view.container = {
-                    clientWidth: 100
-                }               
-                s1 = sinon.stub(view,"repositionComponents");
-                c = new HudComponentDefaultThreeJs();
-                s2 = sinon.stub(view.scene,"add");
-            })
-            afterEach(()=>{
-                s1.restore();
-                s2.restore();
-            })
-            it("adds component to scene",()=>{
-                view.addComponent(c);
-                return expect(s2.callCount).eq(1);
-
-            });
-            it("adds component to components list",()=>{
-                view.addComponent(c);
-                return expect(view.components[0]).eq(c);
-            });
-
-            it("repositions components",()=>{
-                view.addComponent(c);
-                return expect(s1.callCount).eq(1);
-            });
-            it("shares view cointainer with component",()=>{
-                view.addComponent(c);
-                return expect(c.container).eq(view.container);
-            });
-        })
-
-        describe("repositionComponents",()=>{
-            beforeEach(()=>{
-                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
-                view.container = {
-                    clientWidth: 200,
-                    clientHeight: 100
-                }               
-                
-                c = new HudComponentDefaultThreeJs();
-                s1 = sinon.stub(c,"getSize").returns({
-                    x: 40,
-                    y:40
-                })
-                c2 = new HudComponentDefaultThreeJs();
-                s2 = sinon.stub(c2,"getSize").returns({
-                    x: 40,
-                    y:40
-                })
-            })
-            afterEach(()=>{
-                // s1.restore();
-                // s2.restore();
-            })
-            it("sets position of all components",()=>{
-                view.components = [c,c2];                
-                view.repositionComponents();
-                
-                return expect(view.components[0].object!.position.x).eq(-view.container.clientWidth/2)
-
-            })
-            it("sets position of all components",()=>{
-                view.components = [c,c2];                
-                view.repositionComponents();
-                
-                return expect(view.components[1].object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
-
-            })
-            it("moves components along x axis according to the component position on the list",()=>{
-                view.components = [c,c2];                
-                view.repositionComponents();
-                
-                return expect(view.components[1].object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
-            })
-            it("starts placing components in the lower, left corner of the view",()=>{
-                view.components = [c,c2];                
-                view.repositionComponents();
-                
-                return expect(view.components[0].object!.position.x).eq(-view.container.clientWidth/2)
-            })
-            it("starts placing components in the lower, left corner of the view",()=>{
-                view.components = [c,c2];                
-                view.repositionComponents();
-                
-                return expect(view.components[0].object!.position.y).eq(-view.container.clientHeight/2)
-            })
-        })
-        
-    })
+    
     describe("PlaygroundViewHudThreeJsDefault",()=>{
         describe("_onInteraction",()=>{
             let p1:PlaygroundViewHudThreeJsDefault;
@@ -2133,66 +2037,184 @@ describe('Playground', () => {
         })
     })
 
-    describe("HudComponentThreeJs",()=>{
-        let c1: HudComponentDefaultThreeJs;
-        let c2: HudComponentDefaultThreeJs;
-        let ct1: any;
-        let o1: THREE.Object3D;
-        let o2: THREE.Object3D;
-        let perc: number;
+   
+    
+})
 
-        describe("resize",()=>{            
-            beforeEach(()=>{                
-                const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-                const geometry2 = new THREE.BoxGeometry( 10000, 10000, 10000 );
-                const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
-                const cube = new THREE.Mesh( geometry, material );
-                const cube2 = new THREE.Mesh( geometry2, material );
-                o1 = cube;
-                o2 = cube2;
-                c1 = new HudComponentDefaultThreeJs();
+describe("Renderers",()=>{
+    let messageBusMocked = new EventEmitter();
+    describe("HudRendererThreeJs",()=>{
+        
+        let s1:SinonStub;
+        let s2:SinonStub;
+        let view:PlaygroundViewHudThreeJsDefault;
+        let renderer: HudRendererThreeJs;
+        let c: HudComponentDefaultThreeJs;
+        let c2: HudComponentDefaultThreeJs;
+        describe("addComponent",()=>{
+            
+            beforeEach(()=>{
+                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
+                view.container = {
+                    clientWidth: 100
+                }      
+                renderer = new HudRendererThreeJs();       
+                renderer.setView(view);
+
+                s1 = sinon.stub(renderer,"repositionComponents");
+                c = new HudComponentDefaultThreeJs();
+                s2 = sinon.stub(view.scene,"add");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("adds component to scene",()=>{
+                renderer.addComponent(c);
+                return expect(s2.callCount).eq(1);
+
+            });
+            it("adds component to components list",()=>{
+                renderer.addComponent(c);
+                return expect(renderer.components[0]).eq(c);
+            });
+
+            it("repositions components",()=>{
+                renderer.addComponent(c);
+                return expect(s1.callCount).eq(1);
+            });
+            it("shares view cointainer with component",()=>{
+                renderer.addComponent(c);
+                return expect(c.container).eq(view.container);
+            });
+        })
+
+        describe("repositionComponents",()=>{
+
+            beforeEach(()=>{
+                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
+                view.container = {
+                    clientWidth: 200,
+                    clientHeight: 100
+                }               
+
+                renderer = new HudRendererThreeJs();       
+                renderer.setView(view);
+
+                c = new HudComponentDefaultThreeJs();
+                s1 = sinon.stub(c,"getSize").returns({
+                    x: 40,
+                    y:40
+                })
                 c2 = new HudComponentDefaultThreeJs();
-                ct1 = {
-                    clientWidth: 1000,
-                    clientHeight: 500
-                }
-                c1.container = ct1;
-                c2.container = ct1;
-                c1.object = o1;
-                c2.object = o2;
-                perc = 0.1;
-                c1.sizePercentage = perc;
-                c2.sizePercentage = perc;
+                s2 = sinon.stub(c2,"getSize").returns({
+                    x: 40,
+                    y:40
+                })
             })
-            it("resizes object accordingly to size percentage - making larger",()=>{
-                c1.resize();                
-                const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
-                const size = new THREE.Vector3();
-                updatedBBox.getSize(size);
-                return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
             })
-            it("resizes object accordingly to size percentage - size is updated",()=>{
-                c1.resize();                
-                const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
-                const size = new THREE.Vector3();
-                updatedBBox.getSize(size);
-                return expect(c1.getSize().x).eq(50);
+            it("sets position of all components",()=>{
+                renderer.components = [c,c2];                
+                renderer.repositionComponents();
+                
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(-view.container.clientWidth/2)
+
             })
-            it("resizes object accordingly to size percentage - size is updated",()=>{
-                c1.resize();                
-                const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
-                const size = new THREE.Vector3();
-                updatedBBox.getSize(size);
-                return expect(c1.getSize().y).eq(50);
+            it("sets position of all components",()=>{
+                renderer.components = [c,c2];                
+                renderer.repositionComponents();
+                
+                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
+
             })
-            it("resizes object accordingly to size percentage - making smaller",()=>{
-                c2.resize();                
-                const updatedBBox = new THREE.Box3().setFromObject(c2.object!);
-                const size = new THREE.Vector3();
-                updatedBBox.getSize(size);
-                return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+            it("moves components along x axis according to the component position on the list",()=>{
+                renderer.components = [c,c2];                
+                renderer.repositionComponents();
+                
+                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
+            })
+            it("starts placing components in the lower, left corner of the view",()=>{
+                renderer.components = [c,c2];                
+                renderer.repositionComponents();
+                
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(-view.container.clientWidth/2)
+            })
+            it("starts placing components in the lower, left corner of the view",()=>{
+                renderer.components = [c,c2];                
+                renderer.repositionComponents();
+                
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.y).eq(-view.container.clientHeight/2)
             })
         })
+            
+        
+    })
+    describe("HudComponents",()=>{
+        describe("HudComponentThreeJs",()=>{
+            let c1: HudComponentDefaultThreeJs;
+            let c2: HudComponentDefaultThreeJs;
+            let ct1: any;
+            let o1: THREE.Object3D;
+            let o2: THREE.Object3D;
+            let perc: number;
+    
+            describe("resize",()=>{            
+                beforeEach(()=>{                
+                    const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                    const geometry2 = new THREE.BoxGeometry( 10000, 10000, 10000 );
+                    const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+                    const cube = new THREE.Mesh( geometry, material );
+                    const cube2 = new THREE.Mesh( geometry2, material );
+                    o1 = cube;
+                    o2 = cube2;
+                    c1 = new HudComponentDefaultThreeJs();
+                    c2 = new HudComponentDefaultThreeJs();
+                    ct1 = {
+                        clientWidth: 1000,
+                        clientHeight: 500
+                    }
+                    c1.container = ct1;
+                    c2.container = ct1;
+                    c1.object = o1;
+                    c2.object = o2;
+                    perc = 0.1;
+                    c1.sizePercentage = perc;
+                    c2.sizePercentage = perc;
+                })
+                it("resizes object accordingly to size percentage - making larger",()=>{
+                    c1.resize();                
+                    const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
+                    const size = new THREE.Vector3();
+                    updatedBBox.getSize(size);
+                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+                })
+                it("resizes object accordingly to size percentage - size is updated",()=>{
+                    c1.resize();                
+                    const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
+                    const size = new THREE.Vector3();
+                    updatedBBox.getSize(size);
+                    return expect(c1.getSize().x).eq(50);
+                })
+                it("resizes object accordingly to size percentage - size is updated",()=>{
+                    c1.resize();                
+                    const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
+                    const size = new THREE.Vector3();
+                    updatedBBox.getSize(size);
+                    return expect(c1.getSize().y).eq(50);
+                })
+                it("resizes object accordingly to size percentage - making smaller",()=>{
+                    c2.resize();                
+                    const updatedBBox = new THREE.Box3().setFromObject(c2.object!);
+                    const size = new THREE.Vector3();
+                    updatedBBox.getSize(size);
+                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+                })
+            })
+        })
+
     })
     
 })
