@@ -11,7 +11,7 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 
 // Sinon is a library used for mocking or verifying function calls in JavaScript.
-import sinon, { SinonStub } from 'sinon';
+import sinon, { SinonSpy, SinonStub } from 'sinon';
 
 // import SomeClass from '../src/mgr'
 import * as THREE from 'three'
@@ -22,11 +22,12 @@ import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
-import {HudComponentDefaultThreeJs, HudComponentThreeJs, HudRendererThreeJs} from '../src/gui/renderer/Renderers'
+import {HudComponentDefaultThreeJs, HudComponentThreeJs, HudRendererThreeJs, MapQuadRendererThreeJs} from '../src/gui/renderer/renderers'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Vector3 } from 'three';
+import { RenderablesDefaultFactory } from '../src/gui/renderer/renderables-factory';
 
 
 describe('Gamengine', () => {
@@ -2043,6 +2044,7 @@ describe('Playground', () => {
 
 describe("Renderers",()=>{
     let messageBusMocked = new EventEmitter();
+    
     describe("HudRendererThreeJs",()=>{
         
         let s1:SinonStub;
@@ -2216,7 +2218,259 @@ describe("Renderers",()=>{
         })
 
     })
-    
+    describe("MapQuadRendererThreeJs",()=>{
+        let s1: SinonStub;
+        let s2: SinonStub;
+        let s3: SinonStub;
+        let s4: SinonStub;
+
+        let s10: SinonSpy;
+        let map: MapQuadRendererThreeJs;
+        let view: PlaygroundViewDefault;
+        let rf: RenderablesDefaultFactory;
+        const width = 40;
+        const height = 20; 
+        const assets = "https://some.assets.url"
+        describe("MapRendererThreeJs", ()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);
+
+            })
+
+            it("sets holder object name",()=>{
+                return expect(map.mapHolderObject.name).eq(MapQuadRendererThreeJs.NAME);
+            })
+        })
+        describe("setView",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);
+                view = new PlaygroundViewDefault("name", messageBusMocked);
+                view.scene = {
+                    add: function(){}
+                }
+                s1 = sinon.stub(view.scene,"add");
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("adds map 3d objects to view for display",()=>{
+                map.setView(view);
+                return expect(s1.getCall(0).args[0]).eq(map.mapHolderObject)
+            })            
+        })
+        describe("_dispose",()=>{
+            let m1: THREE.Mesh;
+            // let m2: THREE.Mesh;
+            let s1: SinonStub;
+            let s2: SinonStub;
+
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);
+                m1 = new THREE.Mesh(new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffff00 } ))
+                s1 = sinon.stub(m1.geometry,"dispose");
+                s2 = sinon.stub(<THREE.Material>m1.material,"dispose");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("release memory for geometry",()=>{
+                map._dispose(m1);
+                return expect(s1.callCount).eq(1);
+            })
+            it("release memory for material",()=>{
+                map._dispose(m1);
+                return expect(s2.callCount).eq(1);
+            })            
+        })
+        describe("initialize",()=>{
+            beforeEach(()=>{
+                rf = new RenderablesDefaultFactory();
+                map.setRenderablesFactory(rf);
+                s1 = sinon.stub(rf,"loadRenderablesObjectsTemplate").resolves();
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("loads templates",()=>{
+                return map.initialize().then(()=>{
+                    return expect(s1.callCount).eq(1);
+                })
+                
+            })            
+        })
+        describe("onTileChanged",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);
+                rf = new RenderablesDefaultFactory();
+                map.setRenderablesFactory(rf);
+                s1 = sinon.stub(map,"replace");
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("replaces tile",()=>{
+                
+                map.onTileChanged({id: "id", t: "t", x:1, y: 1},"W");
+                return expect(s1.callCount).eq(1);
+            })
+        })
+        describe("replace",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);
+                s1 = sinon.stub(map,"remove");
+                s2 = sinon.stub(map,"put");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("removes",()=>{
+                map.replace({id: "id", t: "t", x:1, y: 1},"W");
+                return expect(s1.callCount).eq(1);
+            })
+            it("adds",()=>{
+                map.replace({id: "id", t: "t", x:1, y: 1},"W");
+                return expect(s2.callCount).eq(1);
+            })
+        })
+        describe("remove",()=>{
+            const holder = new THREE.Object3D();
+            beforeEach(()=>{     
+                map = new MapQuadRendererThreeJs(width, height, assets);           
+                const item1 = new THREE.Object3D();
+                item1.userData = {
+                    tileData: {
+                        x: 1,
+                        y: 1
+                    }
+                };
+                
+                const item2 = new THREE.Object3D();
+                item2.userData = {
+                    tileData: {
+                        x: 2,
+                        y: 2
+                    }
+                };
+                const item3 = new THREE.Object3D();
+                item3.userData = {
+                    tileData: {
+                        x: 3,
+                        y: 3
+                    }
+                };
+                item1.add(item3);
+                
+
+                holder.add(item1);
+                holder.add(item2);
+
+                map.mapHolderObject = holder;
+
+                s1 = sinon.stub(holder,"remove");
+                s2 = sinon.stub(map,"_dispose");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("removes when object exists",()=>{
+                map.remove({id: "id", t: "t", x:1, y: 1});
+                return expect(s1.callCount).eq(1);
+            })
+            it("disposes memory for object and it's children",()=>{
+                map.remove({id: "id", t: "t", x:1, y: 1});
+                return expect(s2.callCount).eq(2);
+            })
+            it("does nothing when object does not exist",()=>{
+                map.remove({id: "id", t: "t", x:4, y: 4});
+                return expect(s1.callCount).eq(0);
+            })
+        })
+        describe("put",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);           
+                rf = new RenderablesDefaultFactory();
+                map.setRenderablesFactory(rf);
+
+                s1 = sinon.stub(map,"xyToScenePosition").returns({
+                    x: 100, y: 100, z: 100
+                })
+                s10 = sinon.spy(map.mapHolderObject,"add");
+                s3 = sinon.stub(map,"_directionRotate");
+                s4 = sinon.stub(rf,"spawnRenderableObject").returns({
+                    data: new THREE.Object3D(),
+                    name:"name"
+                });
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+                s4.restore();
+            })
+            it("spawns proper tile 3d object",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                return expect(s4.callCount).eq(1);
+            })
+            it("calculates 3d object position on scene accordingly to its tile x,y",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                return expect(s1.callCount).eq(1);
+            })
+            it("add tile to map holder",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                return expect(s10.callCount).eq(1);
+            })
+            it("positions the object on scene",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4},"W");                
+                return expect(map.mapHolderObject.children[0].position.x).eq(100);
+            })
+            it("rotates object on scene",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                return expect(s3.callCount).eq(1);
+            })
+            it("annotates object with tile data",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4},"W");                
+                return expect(map.mapHolderObject.children[0].userData.tileData.id).eq("id");
+            })
+        })
+        describe("xyToScenePosition",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets); 
+            })
+            it("positions upper left tile",()=>{
+                const r = map.xyToScenePosition(0,0);
+                return expect(JSON.stringify(r)).eq(JSON.stringify({
+                    x: -map.width/2, y: map.height/2-1, z: 0
+                }))
+            })
+            it("positions upper right tile",()=>{
+                const r = map.xyToScenePosition(0,39);
+                return expect(JSON.stringify(r)).eq(JSON.stringify({
+                    x: map.width/2-1, y: map.height/2-1, z: 0
+                }))
+            })
+            it("positions lower left tile",()=>{
+                const r = map.xyToScenePosition(19,0);
+                return expect(JSON.stringify(r)).eq(JSON.stringify({
+                    x: -map.width/2, y: -map.height/2, z: 0
+                }))
+            })
+            it("positions lower right tile",()=>{
+                const r = map.xyToScenePosition(19,39);
+                return expect(JSON.stringify(r)).eq(JSON.stringify({
+                    x: map.width/2-1, y: -map.height/2, z: 0
+                }))
+            })
+            it("positions center tile",()=>{
+                const r = map.xyToScenePosition(9,19);
+                return expect(JSON.stringify(r)).eq(JSON.stringify({
+                    x: -1, y: 0, z: 0
+                }))
+            })
+        })
+    })
 })
 
 

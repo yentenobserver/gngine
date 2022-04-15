@@ -5,7 +5,7 @@ import { Material } from 'three';
 
 import { TileBase } from "../../logic/map/common.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
-import { RenderableThreeJSObject3DFactory } from './ObjectFactory';
+import { RenderablesFactory, RenderablesThreeJSFactory } from './renderables-factory';
 
 export interface ScenePosition {
     x: number,
@@ -15,8 +15,17 @@ export interface ScenePosition {
 
 export abstract class Renderer {
     view: PlaygroundView|undefined;
+    renderablesFactory: RenderablesFactory|undefined;
     
+    /**
+     * Renderer renders the game into provided view
+     * @param view target view where to draw the game
+     */
     abstract setView(view: PlaygroundView):void;
+
+    setRenderablesFactory(factory: RenderablesFactory):void{
+        this.renderablesFactory = factory;
+    }
 }
 
 export abstract class HudRenderer extends Renderer{
@@ -83,35 +92,38 @@ export class HudRendererThreeJs extends HudRenderer {
 }
 
 export abstract class MapRendererThreeJs extends MapRenderer{
+    static NAME: string = "THE_MAP";
     tileSize: number;
     
     mapHolderObject: THREE.Object3D;
-    tileFactory: RenderableThreeJSObject3DFactory;
+    renderablesFactory: RenderablesThreeJSFactory|undefined;
     view: PlaygroundViewThreeJS|undefined;
 
     constructor(width: number, height: number, assets: string){
         super(width, height, assets);
         
         this.mapHolderObject = new THREE.Object3D();
-        this.mapHolderObject.name = 'THE_MAP',
+        this.mapHolderObject.name = MapRendererThreeJs.NAME,
         
-        this.tileSize = 1;
-        this.tileFactory = new RenderableThreeJSObject3DFactory();
+        this.tileSize = 1;        
     }   
-    
+    /**
+     * Provides renderer with a view to which renderer will render;
+     * @param view target view where to render
+     */
     setView(view: PlaygroundView):void{
         this.view = view as PlaygroundViewThreeJS;
         this.view.scene.add(this.mapHolderObject);
     }
     
     _dispose(object3D:THREE.Mesh){
-        if(object3D.geometry){
-            object3D.geometry.dispose();
-        }
-        if(object3D.material){
-            const material =  object3D.material as Material;
-            material.dispose()
-        }
+        
+        object3D.geometry.dispose();
+        
+        // warning, material may be an array
+        const material =  object3D.material as Material;
+        material.dispose()
+        
         // todo texture?
     }
 }
@@ -120,7 +132,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 // tile changed(tileUpdated)
 export class MapQuadRendererThreeJs extends MapRendererThreeJs{    
     initialize(): Promise<void> {
-        return this.tileFactory.loadRenderableObjectsTemplate(this.assets);
+        return this.renderablesFactory!.loadRenderablesObjectsTemplate(this.assets);
     }
 
     remove(tile: TileBase): void {
@@ -134,10 +146,13 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
             let object3D = objects3D[0];
             // remove
             that.mapHolderObject.remove(object3D);
-                    
+            
+            
+
             // release memory            
-            that._dispose(object3D as THREE.Mesh);
+            // that._dispose(object3D as THREE.Mesh);
             object3D.traverse((child)=>{
+                
                 that._dispose(child as THREE.Mesh)
             })
         }
@@ -147,7 +162,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         this.put(tile, direction)
     }
     put(tile: TileBase, direction?: string): void {
-        const renderable = this.tileFactory.spawnRenderableObject(tile.t);
+        const renderable = this.renderablesFactory!.spawnRenderableObject(tile.t);
         const object3D = renderable.data as THREE.Object3D;
 
         const scenePosition = this.xyToScenePosition(tile.y,tile.x);
@@ -157,13 +172,20 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)
         this._directionRotate(object3D, cDirection)
 
-        if(object3D.userData){
-            object3D.userData.tileData = tile
-        }
+        
+        object3D.userData.tileData = tile
+        
     }
     onTileChanged(tile: TileBase, direction: string): void {
         this.replace(tile, direction);
     }
+    /**
+     * It is assumed that tile origin that is used for positioning is located at lower left corner
+     * of the tile object
+     * @param y 
+     * @param x 
+     * @returns 
+     */
     xyToScenePosition(y: number, x:number){
         // const originTilePosition = {
         //     x: this._width/2+1,
@@ -175,7 +197,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
 
         const position = {
             x: x-_normalizedWidth/2,
-            y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-1:-Math.abs(y-_normalizedHeight/2)-1,
+            y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize:-Math.abs(y-_normalizedHeight/2)-this.tileSize,
             z: 0
         }
         // console.log(x,y,position);

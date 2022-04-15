@@ -7,7 +7,9 @@ abstract class PlaygroundView {  }
 
 abstract class Renderer {
   view: PlaygroundView|undefined;
+  renderablesFactory: RenderablesFactory|undefined;
   {method} setView(view: PlaygroundView):void
+  {method} setRenderablesFactory(factory: RenderablesFactory):void
 }
 
 abstract class HudRenderer {
@@ -43,17 +45,35 @@ class MapQuadRendererThreeJs {
   {method} _directionRotate(object3D:THREE.Object3D, direction:string)
 }
 
+abstract class RenderablesFactory {
+  {method} spawnRenderableObject(objectName:string):Renderable;
+  {method} loadRenderablesObjectsTemplate(path:string):Promise<void>;
+}
+
+interface Renderable{
+  name: string,
+  data: any
+}
+
+interface RenderableThreeJS {
+  data: THREE.Object3D
+}
+
 interface ScenePosition {
   x: number,
   y: number,
   z: number
 }
 
-PlaygroundView <.. Renderer : target view
+PlaygroundView <.. Renderer : renders/draws Renderables on target view
 
 Renderer <|-- MapRenderer
 Renderer <|-- HudRenderer
 HudRenderer <|-- HudRendererThreeJs
 MapRenderer <|-- MapRendererThreeJs
 MapRendererThreeJs <|-- MapQuadRendererThreeJs
+Renderer .. RenderablesFactory
+RenderablesFactory .. Renderable
+
+Renderable <|-- RenderableThreeJS
 @enduml
