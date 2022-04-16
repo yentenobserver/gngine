@@ -34,6 +34,13 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         this.templates = new Map<string, THREE.Object3D>();
     }
 
+    /**
+     * Creates new instance of 3D object from given template.
+     * IMPORTANT - object must have it's origin placed at
+     * "lower left" corner of the object when one look's at the object from top.
+     * @param objectName 
+     * @returns 
+     */
     spawnRenderableObject(objectName: string): RenderableThreeJS {        
         if(this.templates.has(objectName)){
             const cloned:THREE.Object3D|undefined = this.templates.get(objectName)?.clone();

@@ -2121,34 +2121,35 @@ describe("Renderers",()=>{
             it("sets position of all components",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
+                const position = -view.container.clientWidth/2 + (<HudComponentThreeJs>renderer.components[0]).getSize().x!/2;
                 
-                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(-view.container.clientWidth/2)
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(position)
 
             })
             it("sets position of all components",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
-                
-                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
+                const position = -view.container.clientWidth/2 + c.getSize().x! + c2.getSize().x!/2 ;
+                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(position)
 
             })
             it("moves components along x axis according to the component position on the list",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
-                
-                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(c2.getSize().x!-view.container.clientWidth/2)
+                const position = -view.container.clientWidth/2 + c.getSize().x! + c2.getSize().x!/2 ;
+                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(position)
             })
             it("starts placing components in the lower, left corner of the view",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
                 
-                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(-view.container.clientWidth/2)
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(-view.container.clientWidth/2+c.getSize().x!/2)
             })
             it("starts placing components in the lower, left corner of the view",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
                 
-                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.y).eq(-view.container.clientHeight/2)
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.y).eq(-view.container.clientHeight/2+c.getSize().y!/2)
             })
         })
             
@@ -2440,35 +2441,38 @@ describe("Renderers",()=>{
                 map = new MapQuadRendererThreeJs(width, height, assets); 
             })
             it("positions upper left tile",()=>{
-                const r = map.xyToScenePosition(0,0);
+                const r = map.xyToScenePosition(0,0);                
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: -map.width/2, y: map.height/2-1, z: 0
+                    x: -map.width/2+map.tileSize/2, y: map.height/2-map.tileSize/2, z: 0
                 }))
             })
             it("positions upper right tile",()=>{
                 const r = map.xyToScenePosition(0,39);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: map.width/2-1, y: map.height/2-1, z: 0
+                    x: map.width/2-map.tileSize/2, y: map.height/2-map.tileSize/2, z: 0
                 }))
             })
             it("positions lower left tile",()=>{
                 const r = map.xyToScenePosition(19,0);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: -map.width/2, y: -map.height/2, z: 0
+                    x: -map.width/2+map.tileSize/2, y: -map.height/2+map.tileSize/2, z: 0
                 }))
             })
             it("positions lower right tile",()=>{
                 const r = map.xyToScenePosition(19,39);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: map.width/2-1, y: -map.height/2, z: 0
+                    x: map.width/2-map.tileSize/2, y: -map.height/2+map.tileSize/2, z: 0
                 }))
             })
             it("positions center tile",()=>{
                 const r = map.xyToScenePosition(9,19);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: -1, y: 0, z: 0
+                    x: -map.tileSize/2, y: map.tileSize/2, z: 0
                 }))
             })
+        })
+        describe("_directionRotate",()=>{
+            it("")
         })
     })
 })

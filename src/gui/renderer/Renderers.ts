@@ -59,6 +59,10 @@ export abstract class MapRenderer extends Renderer{
     abstract xyToScenePosition(y: number, x:number):ScenePosition;
 }
 
+/**
+ * Renders components from the lower left corner of the view to the right.
+ * Order of components is important.
+ */
 export class HudRendererThreeJs extends HudRenderer {
     view: PlaygroundViewThreeJS|undefined;
     setView(view: PlaygroundViewThreeJS): void {
@@ -78,15 +82,21 @@ export class HudRendererThreeJs extends HudRenderer {
     }
     /**
      * Recalculates components' positions using current cointainer dimensions.
+     * It assumes that objects pivot/origin is at the center of the object
      */
     repositionComponents(){
         let x = -this.view!.container.clientWidth/2;
-        const y = -this.view!.container.clientHeight/2;
+        
         
         this.components.forEach((item:HudComponent)=>{
+            // component pivot is as its center so we need to position 
+            // it center accordingly
+            x+=(<HudComponentThreeJs>item).getSize().x!/2;
+
+            let y = -this.view!.container.clientHeight/2+(<HudComponentThreeJs>item).getSize().y!/2;
         
             (<HudComponentThreeJs>item).object!.position.set(x,y,0);
-            x += (<HudComponentThreeJs>item).getSize().x!;
+            x += (<HudComponentThreeJs>item).getSize().x!/2;
         })
     }
 }
@@ -126,6 +136,11 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         
         // todo texture?
     }
+}
+
+export interface Rotations {
+    RIGHT: 90,
+    LEFT: -90
 }
 
 // unit changed(unitUpdated, location/path)
@@ -196,8 +211,8 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         const _normalizedHeight = this.height/this.tileSize
 
         const position = {
-            x: x-_normalizedWidth/2,
-            y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize:-Math.abs(y-_normalizedHeight/2)-this.tileSize,
+            x: x-_normalizedWidth/2+this.tileSize/2,
+            y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2,
             z: 0
         }
         // console.log(x,y,position);
@@ -206,6 +221,19 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // 33,31 -> 0,-1,0
 
     }
+
+
+
+
+    /**
+     * Rotates 3d object that represents tile. It is assumed that the object must be
+     * in it's original/default (i.e. "South") position.
+     * It is also assumed that we are rotating along the Z-axis (i.e. we are rotating tile in
+     * the plane of the map).
+     * It is also assumed that object origin/pivot point is at lower left corner
+     * @param object3D 
+     * @param direction 
+     */
     _directionRotate(object3D:THREE.Object3D, direction:string){
         const prevPosition = object3D.position;
         switch (direction) {
@@ -293,6 +321,9 @@ export class SpriteFactoryx128x128x4xL extends SpriteFactory{
 
 }
 
+/**
+ * Hud component is a 2D object displayed in Hud ortographic view.
+ */
 export abstract class HudComponent {
     container: any;
 
@@ -429,6 +460,7 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
             // lower left corner of the hud element
             hud.position.set(1.5, 1.5,0);
             const holder = new Object3D();
+            holder.name = "HANDLE"
             holder.add(hud);
             
             that.object = holder;
