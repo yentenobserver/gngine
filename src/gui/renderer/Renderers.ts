@@ -154,7 +154,8 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         const that = this;
         // find the object
         let objects3D = that.mapHolderObject.children.filter((item)=>{
-            return item.userData&&item.userData.tileData?item.userData.tileData.x == tile.x && item.userData.tileData.y == tile.y:false;
+            // return item.userData&&item.userData.tileData?item.userData.tileData.x == tile.x && item.userData.tileData.y == tile.y:false;
+            return item.userData.tileData.x == tile.x && item.userData.tileData.y == tile.y;
         })
 
         if(objects3D&&objects3D[0]){
@@ -195,8 +196,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         this.replace(tile, direction);
     }
     /**
-     * It is assumed that tile origin that is used for positioning is located at lower left corner
-     * of the tile object
+     * It is assumed that tile pivot point is at its base (x,y) center
      * @param y 
      * @param x 
      * @returns 
@@ -234,22 +234,53 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
      * @param object3D 
      * @param direction 
      */
+    // _directionRotate(object3D:THREE.Object3D, direction:string){
+    //     const prevPosition = object3D.position;
+    //     switch (direction) {
+    //         case 'N':                
+    //           object3D.rotateZ(THREE.MathUtils.degToRad(180));
+    //           object3D.position.setX(prevPosition.x+this.tileSize)
+    //           object3D.position.setY(prevPosition.y+this.tileSize)
+    //           break;
+    //         case 'E':
+    //           object3D.rotateZ(THREE.MathUtils.degToRad(90));
+    //           // move back
+    //           object3D.position.setX(prevPosition.x+this.tileSize)
+    //           break;
+    //         case 'W':
+    //           object3D.rotateZ(THREE.MathUtils.degToRad(-90));
+    //           object3D.position.setY(prevPosition.y+this.tileSize)
+    //           break;
+    //         default:
+    //             // default is S south
+    //             //   object3D.rotateZ(THREE.Math.degToRad(90));
+    //           break;
+    //     }
+    // }
+    /**
+     * It is assumed that object pivot point is at its base center.
+     * It is also assumed that by default when loaded/spawned tile is S oriented.
+     * Do not use it for rotation - only once when one wants to
+     * put tile in proper orientation/direction.
+     * @param object3D 
+     * @param direction 
+     */
     _directionRotate(object3D:THREE.Object3D, direction:string){
-        const prevPosition = object3D.position;
+        // const prevPosition = object3D.position;
         switch (direction) {
             case 'N':                
               object3D.rotateZ(THREE.MathUtils.degToRad(180));
-              object3D.position.setX(prevPosition.x+this.tileSize)
-              object3D.position.setY(prevPosition.y+this.tileSize)
+            //   object3D.position.setX(prevPosition.x+this.tileSize)
+            //   object3D.position.setY(prevPosition.y+this.tileSize)
               break;
             case 'E':
               object3D.rotateZ(THREE.MathUtils.degToRad(90));
               // move back
-              object3D.position.setX(prevPosition.x+this.tileSize)
+            //   object3D.position.setX(prevPosition.x+this.tileSize)
               break;
             case 'W':
               object3D.rotateZ(THREE.MathUtils.degToRad(-90));
-              object3D.position.setY(prevPosition.y+this.tileSize)
+            //   object3D.position.setY(prevPosition.y+this.tileSize)
               break;
             default:
                 // default is S south
@@ -427,21 +458,23 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
      */
      build(): Promise<HudComponentThreeJs> {
         const that = this;
-        const hud = new Object3D();
-        hud.name = "HUD"
-        return this.buttonsFactory.initialize().then(()=>{
-            const up = this.buttonsFactory.getInstance(0);
+        let hud = new Object3D();
+        hud.name = "COMP_HUD_NAV"
+        return this.buttonsFactory.initialize().then(()=>{            
+            const up = this.buttonsFactory.getInstance(0);            
             hud.add(up);
             up.position.set(0, 1, 0);
             // up.scale.set(this._sizing.items, this._sizing.items, 1);            
             up.name = 'UP'
+            
 
-            const left = this.buttonsFactory.getInstance(1);
+            const left = this.buttonsFactory.getInstance(1);            
             hud.add(left);
             left.position.set(-1, 0, 0);
             // left.scale.set(this._sizing.items, this._sizing.items, 1);
             // rotLeft.position.set( 0, 0, this._size );
             left.name = 'LEFT'
+            
 
             const right = this.buttonsFactory.getInstance(2);
             hud.add(right);
@@ -456,14 +489,14 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
             // backward.position.set( this._size-this._size/2, 0, 0 );
             down.name = 'DOWN'
 
-            // now normalize hud origin so the origin is in 
-            // lower left corner of the hud element
-            hud.position.set(1.5, 1.5,0);
-            const holder = new Object3D();
-            holder.name = "HANDLE"
-            holder.add(hud);
+            // // now normalize hud origin so the origin is in 
+            // // lower left corner of the hud element
+            // hud.position.set(1.5, 1.5,0);
+            // const holder = new Object3D();
+            // holder.name = "HANDLE"
+            // holder.add(hud);
             
-            that.object = holder;
+            that.object = hud;
             that.width = 3;
             that.height = 3;
             // return holder;

@@ -22,7 +22,7 @@ import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
-import {HudComponentDefaultThreeJs, HudComponentThreeJs, HudRendererThreeJs, MapQuadRendererThreeJs} from '../src/gui/renderer/renderers'
+import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs, MapQuadRendererThreeJs} from '../src/gui/renderer/renderers'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
@@ -2435,6 +2435,10 @@ describe("Renderers",()=>{
                 map.put({id: "id", t: "t", x:4, y: 4},"W");                
                 return expect(map.mapHolderObject.children[0].userData.tileData.id).eq("id");
             })
+            it("defaults to S-south when none provided",()=>{
+                map.put({id: "id", t: "t", x:4, y: 4});                
+                return expect(s3.getCall(0).args[1]).eq("S");
+            })
         })
         describe("xyToScenePosition",()=>{
             beforeEach(()=>{
@@ -2472,7 +2476,99 @@ describe("Renderers",()=>{
             })
         })
         describe("_directionRotate",()=>{
-            it("")
+            const o = new THREE.Object3D();
+            beforeEach(()=>{
+                s1 = sinon.stub(o,"rotateZ");
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("rotates 180 degree along z-axis for N-north",()=>{                
+                map._directionRotate(o,"N");
+                return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(180));
+            })
+            it("rotates -90 degree along z-axis for W-west",()=>{                
+                map._directionRotate(o,"W");
+                return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(-90));
+            })
+            it("rotates 90 degree along z-axis for E-east",()=>{                
+                map._directionRotate(o,"E");
+                return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(90));
+            })
+            it("does nothing for S-south as this is default orientation for tile",()=>{                
+                map._directionRotate(o,"S");
+                return expect(s1.callCount).eq(0);
+            })
+        })
+    })
+    describe("HudComponentMapNavigationThreeJs",()=>{
+        let s1: SinonStub;
+        let s2: SinonStub;
+        // let s3: SinonStub;
+        // let s4: SinonStub;
+
+        // let s10: SinonSpy;
+        let c: HudComponentMapNavigationThreeJs;
+
+        describe("build",()=>{
+            beforeEach(()=>{
+                c = new HudComponentMapNavigationThreeJs("https://some.url");
+                s1 = sinon.stub(c.buttonsFactory,"initialize").resolves();
+                s2 = sinon.stub(c.buttonsFactory,"getInstance");
+                s2.onCall(0).returns(new THREE.Sprite());
+                s2.onCall(1).returns(new THREE.Sprite());
+                s2.onCall(2).returns(new THREE.Sprite());
+                s2.onCall(3).returns(new THREE.Sprite());
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("makes nav component height 3",()=>{
+                return c.build().then(()=>{
+                    return expect(c.getSize().y).eq(3);
+                })
+            })
+            it("makes nav component width 3",()=>{
+                return c.build().then(()=>{
+                    return expect(c.getSize().x).eq(3);
+                })
+            })
+            it("adds four buttons/sprites",()=>{
+                return c.build().then(()=>{
+                    return expect(c.object!.children.length).eq(4);
+                })
+            })
+            it("up button position is set accordingly",()=>{
+                return c.build().then(()=>{
+                    return expect(JSON.stringify(c.object!.children[0].position)).eq(JSON.stringify({x: 0, y: 1, z:0}));
+                })
+            })
+            it("down button position is set accordingly",()=>{
+                return c.build().then(()=>{
+                    return expect(JSON.stringify(c.object!.children[3].position)).eq(JSON.stringify({x: 0, y: -1, z:0}));
+                })
+            })
+            it("left button position is set accordingly",()=>{
+                return c.build().then(()=>{
+                    return expect(JSON.stringify(c.object!.children[1].position)).eq(JSON.stringify({x: -1, y: 0, z:0}));
+                })
+            })
+            it("right button position is set accordingly",()=>{
+                return c.build().then(()=>{
+                    return expect(JSON.stringify(c.object!.children[2].position)).eq(JSON.stringify({x: 1, y: 0, z:0}));
+                })
+            })
+            it("populates hud object with newly created controls",()=>{
+                return c.build().then(()=>{
+                    return expect(c.object!.children.length).eq(4);
+                })
+            })
+            it("uses 'COMP_HUD_NAV' as name for this component", ()=>{
+                return c.build().then(()=>{
+                    return expect(c.object!.name).eq("COMP_HUD_NAV");
+                })
+            })
         })
     })
 })
