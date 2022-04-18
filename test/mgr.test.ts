@@ -2697,6 +2697,34 @@ describe("Renderers",()=>{
                 return expect(result[0]).eq(o1);
             })
         })
+        describe("_cloneMaterials",()=>{
+            let material:THREE.MeshBasicMaterial;
+            let material2:THREE.MeshBasicMaterial;
+
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                rf = new RenderablesThreeJSFactory(l);
+
+                const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+                material  = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+                o1 = new THREE.Mesh( geometry, material );
+                const geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
+                material2 = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+                o2 = new THREE.Mesh( geometry2, material2 );
+
+                o1.add(o2);
+            })
+            it("clones the material",()=>{
+                (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o2);
+                return expect(material2).not.eq((<THREE.Mesh>o2).material);                
+            })
+            it("makes sure that all descendants also have their materials cloned",()=>{
+                (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o1);
+                return expect(material2).not.eq((<THREE.Mesh>o2).material);                
+            })
+        })
     })
 })
 
