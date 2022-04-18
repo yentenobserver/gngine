@@ -2582,6 +2582,7 @@ describe("Renderers",()=>{
         let s1:SinonStub;
         let s2:SinonStub;
 
+        let s10:SinonSpy;
 
         let rf: RenderablesFactory;
         let rf2: RenderablesFactory;
@@ -2715,6 +2716,13 @@ describe("Renderers",()=>{
                 o2 = new THREE.Mesh( geometry2, material2 );
 
                 o1.add(o2);
+
+                o3 = new THREE.Object3D();
+
+                s10 = sinon.spy(<RenderablesThreeJSFactory>rf,"_cloneMaterials");
+            })
+            afterEach(()=>{
+                s10.restore();                
             })
             it("clones the material",()=>{
                 (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o2);
@@ -2723,6 +2731,24 @@ describe("Renderers",()=>{
             it("makes sure that all descendants also have their materials cloned",()=>{
                 (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o1);
                 return expect(material2).not.eq((<THREE.Mesh>o2).material);                
+            })
+            it("skips non mesh objects",()=>{
+                (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o3);
+                return expect(s10.callCount).eq(1);
+            })
+        })
+        describe("_addTemplate",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                rf = new RenderablesThreeJSFactory(l);
+                o1 = new THREE.Object3D();
+            })
+            it("adds template",()=>{
+                (<RenderablesThreeJSFactory>rf)._addTemplate("somename",o1);
+
+                return expect( (<RenderablesThreeJSFactory>rf).templates.get("somename")).eq(o1);
             })
         })
     })

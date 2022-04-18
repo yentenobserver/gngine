@@ -110,7 +110,8 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
     _cloneMaterials(parent:THREE.Mesh){
         let that = this;
         
-        if(parent.material){
+        
+        if(parent.isMesh){
             const originalMaterial: Material = parent.material as Material;
             const clonedMaterial = originalMaterial.clone();
             // console.log(`O - ${originalMaterial.id} M2 - ${clonedMaterial.id}`)
