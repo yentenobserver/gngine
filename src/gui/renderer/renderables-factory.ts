@@ -22,6 +22,7 @@ export abstract class RenderablesFactory{
     abstract loadRenderablesObjectsTemplate(path:string, filterNames: string[]):Promise<void>;
 }
 
+/* istanbul ignore next */
 export class RenderablesDefaultFactory extends RenderablesFactory{
     spawnRenderableObject(_objectName: string): Renderable {
         throw new Error('Method not implemented.');
@@ -55,7 +56,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
     spawnRenderableObject(objectName: string): RenderableThreeJS {   
         
         if(this.templates.has(objectName)){
-            const cloned:THREE.Object3D|undefined = this.templates.get(objectName)?.clone();
+            const cloned:THREE.Object3D|undefined = this.templates.get(objectName)!.clone();
             this._cloneMaterials(cloned as THREE.Mesh);
             cloned!.castShadow = true;
             cloned!.receiveShadow = true;
