@@ -27,7 +27,8 @@ import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudCompone
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Vector3 } from 'three';
-import { RenderablesDefaultFactory } from '../src/gui/renderer/renderables-factory';
+import { RenderablesDefaultFactory, RenderablesFactory, RenderablesThreeJSFactory } from '../src/gui/renderer/renderables-factory';
+
 
 
 describe('Gamengine', () => {
@@ -2286,6 +2287,7 @@ describe("Renderers",()=>{
         })
         describe("initialize",()=>{
             beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, assets);
                 rf = new RenderablesDefaultFactory();
                 map.setRenderablesFactory(rf);
                 s1 = sinon.stub(rf,"loadRenderablesObjectsTemplate").resolves();
@@ -2298,7 +2300,12 @@ describe("Renderers",()=>{
                     return expect(s1.callCount).eq(1);
                 })
                 
-            })            
+            })  
+            it("loads 'C_' or 'instance' named templates",()=>{
+                return map.initialize().then(()=>{
+                    return expect(JSON.stringify(s1.getCall(0).args[1])).eq(JSON.stringify(["C_","instance"]));
+                })
+            })          
         })
         describe("onTileChanged",()=>{
             beforeEach(()=>{
@@ -2568,6 +2575,126 @@ describe("Renderers",()=>{
                 return c.build().then(()=>{
                     return expect(c.object!.name).eq("COMP_HUD_NAV");
                 })
+            })
+        })
+    })
+    describe("RenderablesThreeJSFactory",()=>{
+        let s1:SinonStub;
+        let s2:SinonStub;
+
+
+        let rf: RenderablesFactory;
+        let rf2: RenderablesFactory;
+        let l: any;
+        let l2: any;
+        let s: THREE.Scene;
+        const T1:string = "TEMPLATE_1";
+        const T2:string = "TEMPLATE_2";
+        let o1: THREE.Object3D;
+        let o2: THREE.Object3D;
+        let o3: THREE.Object3D;
+        describe("spawnRenderableObject",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                o1 = new THREE.Object3D();
+                o2 = new THREE.Object3D();
+
+                rf = new RenderablesThreeJSFactory(l);
+                (<RenderablesThreeJSFactory>rf).templates.set(T1,o1);
+                (<RenderablesThreeJSFactory>rf).templates.set(T2,o2);
+                s1 = sinon.stub(o1,"clone").returns(o1);  
+                s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_cloneMaterials");      
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("throws error on nonexisting template",()=>{                
+                return expect(()=>{rf.spawnRenderableObject.bind(rf)("T3")}).to.throw("No template found");                                      
+            })
+            it("clones object from template",()=>{
+                rf.spawnRenderableObject(T1);
+                return expect(s1.callCount).eq(1);
+            })
+            it("clones object materials from template",()=>{
+                rf.spawnRenderableObject(T1);
+                return expect(s2.callCount).eq(1);
+            })
+            it("enables shadows",()=>{
+                const spawned = rf.spawnRenderableObject(T1);
+                const shadows = (<THREE.Object3D>spawned.data).castShadow && (<THREE.Object3D>spawned.data).receiveShadow;
+                return expect(shadows).is.true;
+            })
+        })
+        describe("loadRenderablesObjectsTemplate",()=>{
+            beforeEach(()=>{
+                s = new THREE.Scene();
+                o1 = new THREE.Object3D();
+                o1.name = "SomeName"
+                s.add(o1);
+                l = {
+                    load(_a1:any,a2:any,_a3:any,_a4:any){
+                        a2({scene:s})
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(l);
+                s1 = sinon.stub((<RenderablesThreeJSFactory>rf),"_matchingChildren").returns([o1]);
+                s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_addTemplate")
+
+                l2 = {
+                    load(_a1:any,_a2:any,_a3:any,a4:any){
+                        a4("Some error occured")
+                    }
+                }
+                rf2 = new RenderablesThreeJSFactory(l2);
+
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("applies name test on objects",()=>{
+                return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                    return expect(s1.callCount).eq(1);
+                })
+
+            })
+            it("adds template from matching objects",()=>{
+                return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                    return expect(s2.getCall(0).args[1]).eq(o1);
+                })
+            })
+            it("rejects on error",()=>{
+                return rf2.loadRenderablesObjectsTemplate("",["SomeName"]).should.be.rejectedWith("Some error")
+            })
+        })
+        describe("_matchingChildren",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                o1 = new THREE.Object3D();
+                o1.type = "OBJECT3D"
+                o1.name = "My fancy name"
+                o2 = new THREE.Object3D();
+                o2.type = "Scene"
+                o2.name = "Scene"
+                o3 = new THREE.Object3D();
+                o3.type = "Object3D"
+                o3.name = "My other name is"
+
+                rf = new RenderablesThreeJSFactory(l);
+            })
+            it("returns items of type Object3D when no names provided",()=>{
+                const result = (<RenderablesThreeJSFactory>rf)._matchingChildren([o1,o2,o3],[]);
+                return expect(result.length).eq(2);
+            })
+
+            it("returns items whose name contains any of the names provided",()=>{
+                const result = (<RenderablesThreeJSFactory>rf)._matchingChildren([o1,o2,o3],["Fancy"]);
+                return expect(result[0]).eq(o1);
             })
         })
     })

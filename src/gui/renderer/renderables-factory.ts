@@ -7,8 +7,19 @@ export interface Renderable{
 }
 
 export abstract class RenderablesFactory{
+    /**
+     * Creates new instance of Renderable that can be 
+     * drawn on view
+     * @param objectName name of the Renderable to be spawned
+     */
     abstract spawnRenderableObject(objectName:string):Renderable;
-    abstract loadRenderablesObjectsTemplate(path:string):Promise<void>;
+    /**
+     * Populates renderables' templates library so new instances
+     * of Renderable can be created from template.
+     * @param path Path to the template file with Renderables specifications
+     * @param filterNames When provided only specifications that match (include) any of the names provided are returned
+     */
+    abstract loadRenderablesObjectsTemplate(path:string, filterNames: string[]):Promise<void>;
 }
 
 export class RenderablesDefaultFactory extends RenderablesFactory{
@@ -35,13 +46,14 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
     }
 
     /**
-     * Creates new instance of 3D object from given template.
+     * Creates new instance of 3D object from given template (as a clone with materials of the original template object).
      * IMPORTANT - object must have it's origin placed at
      * "lower left" corner of the object when one look's at the object from top.
      * @param objectName 
      * @returns 
      */
-    spawnRenderableObject(objectName: string): RenderableThreeJS {        
+    spawnRenderableObject(objectName: string): RenderableThreeJS {   
+        
         if(this.templates.has(objectName)){
             const cloned:THREE.Object3D|undefined = this.templates.get(objectName)?.clone();
             this._cloneMaterials(cloned as THREE.Mesh);
@@ -56,28 +68,43 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         }        
     }
 
-    loadRenderablesObjectsTemplate(path: string): Promise<void> {
+    /**
+     * Populates renderables' templates library with 3D template objects from file that is downloaded using provided 3D loader
+     * so new instances of Renderable can be created from template.
+     * @param path Path to the template file with 3D template objects
+     * @param filterNames When provided only specifications that match (include) any of the names provided are returned
+     */
+    loadRenderablesObjectsTemplate(path: string, filterNames: string[]): Promise<void> {
         const that = this;
         
 
         return new Promise((resolve, reject)=>{
-            that.loader.load( path, function ( gltf:any ) {
-                // console.log(gltf);
-                // scene.add( gltf.scene );
-
+            that.loader.load( path, function ( gltf:any ) {   
                 // load component templates
-                gltf.scene.children[0].children[0].children.filter((item:any)=>{return item.type.toUpperCase()=='OBJECT3D' && (item.name.startsWith('C_')||item.name.startsWith('instance'))}).forEach((item:any)=>{
-                    that._addTemplate(item.name, item)
-                    // console.log('Loaded object', item.type, item.name)
+                const searchRoot = gltf.scene.children;
+                that._matchingChildren(searchRoot, filterNames)
+                .forEach((item:any)=>{
+                    that._addTemplate(item.name, item)                    
                 })
-                // console.log(that._templates);                    
                 resolve();    
-
-            },()=>{},(error:any)=>{
-                console.error('Error loading model', error);
+            },
+            /* istanbul ignore next */
+            ()=>{},
+            (error:any)=>{
+                console.error('Error loading model:', error);
                 reject(error);
             } );
         });
+    }
+
+    _matchingChildren(children:any[], filterNames: string[]):any[]{
+        return children.filter((item:any)=>{
+            if(filterNames&&filterNames.length>0){
+                return filterNames.some(name => item.name.toUpperCase().includes(name.toUpperCase()))
+            }else{
+                return item.type.toUpperCase()=='OBJECT3D'
+            }
+        })
     }
 
     _cloneMaterials(parent:THREE.Mesh){

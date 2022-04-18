@@ -147,7 +147,7 @@ export interface Rotations {
 // tile changed(tileUpdated)
 export class MapQuadRendererThreeJs extends MapRendererThreeJs{    
     initialize(): Promise<void> {
-        return this.renderablesFactory!.loadRenderablesObjectsTemplate(this.assets);
+        return this.renderablesFactory!.loadRenderablesObjectsTemplate(this.assets,["C_","instance"]);
     }
 
     remove(tile: TileBase): void {
