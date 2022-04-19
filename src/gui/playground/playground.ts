@@ -437,7 +437,7 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
         this.scene.name = PlaygroundViewHudThreeJsDefault.SCENE_NAME
     }
     _onInteraction(...event: any[]) {
-        const pointerEvent:any =  event as any;
+        const pointerEvent:any =  event[0] as any;
         // const eventType:string = pointerEvent.type;
         
         // check if any hud element is hit
@@ -534,7 +534,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         this.scene = scene;
     }
     _onInteraction(...event: any[]) {
-        const pointerEvent:any =  event as any;
+        const pointerEvent:any =  event[0] as any;
         // const eventType:string = pointerEvent.type;
         
         // first see what tile did we hit

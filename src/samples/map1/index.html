@@ -1,0 +1,764 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>gngine - Sample 3d quad map #1</title>
+    <meta name="description" content="Presentation of gngine features">
+    <meta name="author" content="yentenobserver">
+
+    <meta property="og:title" content="gngine sample page">
+    <meta property="og:type" content="website">
+    <meta property="og:url"
+        content="https://nftcity.rhodl.com/?pixelMapping=https://nftcity.rhodl.com/assets/pixelMapping.json&pixelMap=https://nftcity.rhodl.com/assets/monte-carlo.png&t=https://nftcity.rhodl.com/assets/terrain-prod.gltf">
+    <meta property="og:description" content="Presentation of gngine features">
+    <meta property="og:image" content="https://nftcity.rhodl.com/assets/ogimage.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+
+    <script src="js/rivet.js"></script>
+    <script src="js/rivet-ext.js"></script>
+
+    
+
+    
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r124/three.min.js"
+        integrity="sha512-jeYvJdyAYkpQCY/omvCYQo89qA5YxDW4JBT7COPsHT2sOAanwxkZRFeP9gc69b5reSDpZIoyCqZQZcWZkbB5Gw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- this part MUST be after all global libs like THREE.js-->
+    <script src="../../../dist/gamengine.umd.js"></script>
+</head>
+
+<body>
+    <style type="text/css">
+        /* Set the size of the div element that contains the map */
+        #gmap {
+            height: 400px;
+            /* The height is 400 pixels */
+            width: 100%;
+            /* The width is the width of the web page */
+        }
+    </style>
+    <style>
+        .container-canvas {
+            /* This could be done in one single declaration. See the extended sample. */
+            margin-right: auto;
+            margin-left: auto;
+            width: 100%
+        }
+
+        .v3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .table.is-borderless td,
+        .table.is-borderless th {
+            border: 0;
+        }
+    </style>
+    <section id="app" class="section">
+        <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
+            <div class="notification is-success" rv-each-item="model.notify.success">
+                <button class="delete" rv-on-click="model._handleNotifyClose"></button>
+                <strong>{item.title}</strong>
+                {item.msg}
+                <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
+                        details</a></span>
+            </div>
+            <div class="notification is-danger" rv-each-item="model.notify.error">
+                <button class="delete" rv-on-click="model._handleNotifyClose"></button>
+                <strong>{item.title}</strong>
+                {item.msg}
+                <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
+                        details</a></span>
+            </div>
+        </div>
+        <h1 class="title">
+            {model.city.n} <span class="is-size-6">@NFT City</span>
+        </h1>
+        <div class="columns">
+            <div class="column is-three-quarters">
+                <div class="container-canvas">
+                    <div class="lds-facebook" rv-class-is-hidden="model.loading.done">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <canvas id="map" class="v3d"></canvas>
+                </div>
+
+                <p class="is-size-6 is-hidden-mobile"><a target="_blank"
+                        rv-href="model.city.d.w">{model.city.d.l}<br />Learn more on
+                        Wikipedia</a></p>
+                <p class="is-size-6 is-hidden-mobile"><a target="_blank" rv-href="model.city.d.m">See
+                        original city on Google Maps</a></p>
+
+            </div>
+            <div class="column">
+                <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
+                    <div class="notification is-warning" rv-class-is-hidden="model.currentTile.tileData.i | notEmpty">
+                        &#8678&nbsp;To begin please select place on map
+                        <span class="is-hidden-mobile"><br><br>Use mouse to navigate (rotate, zoom, pan)</span>
+                    </div>
+                </div>
+
+                <div class="is-hidden" rv-class-is-hidden="model.currentTile.tileData.i | empty">
+
+                    <p class="subtitle">Place info <span class="is-size-7"><a rv-on-click="_handleCopyPlaceLink"
+                                rv-href="model.currentTile.tileData.d.l.x | hrefBuilder '?city=@1&p=@value,@0' model.currentTile.tileData.d.l.y model.city.i">(place
+                                link)</a></span></p>
+                    <table class="table is-fullwidth is-borderless">
+                        <tbody>
+                            <tr>
+                                <th>Name: </th>
+                                <td class="is-borderless"><a
+                                        rv-on-click="_handleTileVisit">{model.currentTile.tileData.d.n} (see place)</a>
+                                </td>
+                            </tr>
+                            <tr rv-class-is-hidden="model.mode | neq 'STATS'">
+                                <th>Address: </th>
+                                <td class="is-borderless">{model.currentTile.address} <span
+                                        class="is-hidden">{model.currentTile.tileData.d.l.g}</span></td>
+                            </tr>
+                            <tr>
+                                <th>Plot Type: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.t.n}</td>
+                            </tr>
+                            <tr rv-class-is-hidden="model.mode | neq 'STATS'">
+                                <th class="is-borderless">Net Worth: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.d.f.n | GWEItoETH} ETH&nbsp;
+                                    <!-- <span
+                                        class="tag is-success">+28%</span> 
+                                        
+                                        (<a
+                                        rv-href="model.currentTile.tileData.d.f.t | hrefBuilder 'https://etherscan.io/tx/@value'">latest
+                                        transaction)</a> -->
+                                </td>
+                            </tr>
+                            <tr rv-class-is-hidden="model.mode | neq 'STATS'">
+                                <th rv-class-is-hidden="model.currentTile.tileData.d.f.o | empty">Owner: </th>
+                                <td rv-class-is-hidden="model.currentTile.tileData.d.f.o | empty" class="is-borderless">
+
+                                    <p class="is-size-7"><a
+                                            rv-href="model.currentTile.tileData.d.f.o | hrefBuilder 'https://etherscan.io/address/@value'">{model.currentTile.tileData.d.f.o}</a>
+                                    </p>
+                                </td>
+                                <!-- <th rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty"></th> -->
+                                <td colspan="2" rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty">
+                                    <button class="button is-success mx-3"
+                                        rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty"
+                                        rv-on-click="_handleTileClaim">
+                                        <ion-icon name="golf"></ion-icon>&nbsp;Claim Plot
+                                    </button>
+                                    <p rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty">Plot is
+                                        claimable <a rv-href="model.city.i | hrefBuilder 'c/claimlist/?city=@value'">(See current claim list)</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <!-- <th></th> -->
+                                <td colspan="2" class="is-borderless" rv-class-is-hidden="model.mode | neq 'STATS'">
+
+
+                                    <div rv-class-is-hidden="model.dapp.isLoggedIn | neq true">
+                                        <div
+                                        class="p-3 is-flex is-flex-direction-row is-flex-wrap-wrap is-justify-content-start is-align-items-center is-align-content-center" rv-class-is-hidden="model.currentTile.tileData.d.f.o | empty">
+                                            <div
+                                                class="is-flex is-align-self-auto is-flex-grow-0 is-flex-shrink-1 is-hidden-touch">
+                                                <button class="button is-light mx-3"
+                                                    
+                                                    rv-on-click="_handleConstruction" rv-disabled="model.currentTile.tileData.d.f.o | neqCI model.dapp.account">
+                                                    <ion-icon name="business"></ion-icon>&nbsp;Build
+                                                </button>
+                                            </div>
+                                            <div class="is-flex is-align-self-auto is-flex-grow-0 is-flex-shrink-1">
+                                                <button class="button is-light mx-3"                                                    
+                                                    rv-on-click="_handlePersonalize" rv-disabled="model.currentTile.tileData.d.f.o | neqCI model.dapp.account">
+                                                    <ion-icon name="videocam"></ion-icon>&nbsp;Personalize
+                                                </button>
+                                            </div>
+                                            <p class="help is-danger" rv-class-is-hidden="model.currentTile.tileData.d.f.o | eqCI model.dapp.account">You must be the owner of the land to build or personalize. You are logged in as {model.dapp.account}. Either switch your Metamask account or buy this plot on the NFT market.</p>
+                                            <p class="help is-primary" rv-class-is-hidden="model.currentTile.tileData.d.f.o | neqCI model.dapp.account">You are managing this plot as {model.dapp.account}.</p>
+                                            <!-- <div class="is-flex is-align-self-auto is-flex-grow-0 is-flex-shrink-1 is-hidden-touch" rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty">
+                                                <button class="button is-light mx-3"
+                                                    rv-class-is-hidden="model.currentTile.tileData.d.f.o | eq model.dapp.account"
+                                                    rv-on-click="_handleConstruction">
+                                                    <ion-icon name="business-outline"></ion-icon>Buy Plot
+                                                </button>
+                                            </div> -->
+
+                                        </div>
+                                    </div>
+                                    
+
+                                    <!-- <div rv-class-is-hidden="model.dapp.isLoggedIn | neq true"> -->
+
+
+
+
+
+                                    <!-- </div> -->
+                                    <div rv-class-is-hidden="model.dapp.isLoggedIn">
+
+                                        <div class="notification is-warning">
+                                            <p class="is-size-7">In order to buy or manage the plot please log in into
+                                                Your
+                                                Metamask wallet</p>
+                                        </div>
+                                        <button class="button is-light mx-3" rv-on-click="_handleLogIn">
+                                            <ion-icon name="log-in-outline"></ion-icon>Log in using Metamask
+                                        </button>
+                                        <p class="is-size-7">Not having Metamask wallet already? <span> <a
+                                                    href="https://metamask.io/" target="_blank">Get
+                                                    one for free.</a></span></p>
+
+                                    </div>
+
+                                    <!-- <button class="button is-light mx-3" >
+                                        <ion-icon name="pricetags-outline"></ion-icon>Put up for sale
+                                    </button></td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div rv-class-is-hidden="model.mode | neq 'STATS'">
+                        <p class="subtitle">Real World View</p>
+                        <div id="gmap"></div>
+                        <p class="subtitle">Place data</p>
+                        <table class="table is-fullwidth is-borderless">
+                            <tbody>
+                                <tr>
+                                    <th>Happiness: <p class="is-size-7">
+                                        <!-- <a target="_blank" href="#">See top 10
+                                                places</a> -->
+                                            </p>
+                                    </th>
+                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.h}pts</span></td>
+                                    <th>Commerce: <p class="is-size-7">
+                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
+                                        </p>
+                                    </th>
+                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.w}pts</span></td>
+                                </tr>
+                                <tr>
+
+                                    <th>Science: <p class="is-size-7">
+                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
+                                        </p>
+                                    </th>
+                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.s}pts</span></td>
+                                    <th>Culture: <p class="is-size-7">
+                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
+                                        </p>
+                                    </th>
+                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.c}pts</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Military: <p class="is-size-7">
+                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
+                                        </p>
+                                    </th>
+                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.m}pts</span></td>
+                                    <th>Religion: <p class="is-size-7">
+                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
+                                        </p>
+                                    </th>
+                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.r}pts</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+
+                    <!-- <div rv-class-is-hidden="model.mode | neq 'CONSTRUCTION'">
+                        <p class="subtitle">Construction</p>                        
+                        <button class="button is-light mx-3" rv-on-click="_handleConstruction">
+                            <ion-icon name="swap-horizontal-outline"></ion-icon>&nbsp;Build
+                        </button>
+                        
+                    </div> -->
+                    <!-- <p class="subtitle mt-3">Developmet mode</p> -->
+                    <!-- development mode -->
+                    <!-- <button class="button is-light mx-3" rv-on-click="triggerExportMap">
+                        <ion-icon name="cloud-download-outline"></ion-icon>Export map
+                    </button>
+                    <button class="button is-light mx-3" rv-on-click="triggerOwnerFix">
+                        <ion-icon name="cloud-download-outline"></ion-icon>Fix ownership
+                    </button> -->
+                    
+                    <button class="button is-light mx-3" rv-class-is-hidden="model.user | lacksRole 'ADMIN'" rv-on-click="_handleOwnerChange">
+                        <ion-icon name="cloud-download-outline"></ion-icon>Change ownership
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+    <!-- <form action='#' onsubmit="return false;">
+        <input type='file' id='imgfile' />
+        <input type='button' id='btnLoad' value='Load' onclick='loadImage();' />
+    </form>
+    <canvas id="canvas"></canvas> -->
+    <!-- <div id="wrapper"></div> -->
+
+    <!-- Modals -->
+
+    <!-- Construction Modal -->
+    <div id="construction">
+        <div class="modal" rv-class-is-active="model.display">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Select construction</p>
+                    <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
+                </header>
+
+
+                <section class="modal-card-body">
+                    <div class="tabs is-hidden-touch">
+                        <ul>
+                            <li rv-class-is-active="model.currentCategory.i | eq category.i"
+                                rv-each-category="model.categories">
+                                <!-- <a>{category.n}</a> -->
+                                <a href="#" rv-on-click="model.setCategory"
+                                    rv-data-category-id="category.i">{category.n}</a>
+                            </li>
+                            <!-- <li><a>Residential</a></li>
+                        <li><a>Amenities</a></li>
+                        <li><a>Industry</a></li>
+                        <li><a>Commerce</a></li> -->
+                        </ul>
+                    </div>
+
+                    <div class="dropdown is-active is-hidden-desktop">
+                        <div class="dropdown-trigger">
+                            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu"
+                                rv-on-click="_handleMobileCategoryMenuShow">
+                                <span>{model.currentCategory.n}</span>
+                                <span class="icon is-small">
+                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="dropdown-menu is-hidden" id="dropdown-menu" role="menu"
+                            rv-class-is-hidden="model.mobileMenu.hide">
+                            <div class="dropdown-content">
+                                <a href="#" class="dropdown-item" rv-data-category-id="category.i"
+                                    rv-on-click="model._handleMobileCategoryMenuClick"
+                                    rv-each-category="model.categories">
+                                    {category.n}
+                                </a>
+                                <!-- <a class="dropdown-item">
+                                Residential
+                            </a>
+                            <a href="#" class="dropdown-item is-active">
+                                Amenities
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                Industry
+                            </a>-->
+                                <!-- <hr class="dropdown-divider"> -->
+                                <!-- <a href="#" class="dropdown-item">
+                                Commerce
+                            </a> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown is-active ">
+                        <div class="dropdown-trigger">
+                            <button class="button" aria-haspopup="true" aria-controls="dropdown-direction"
+                                rv-on-click="_handleDirectionMenuShow">
+                                <span>{model.objectDirection.name}</span>
+                                <span class="icon is-small">
+                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="dropdown-menu is-hidden" id="dropdown-direction" role="menu"
+                            rv-class-is-hidden="model.directionMenu.hide">
+                            <div class="dropdown-content">
+                                <a href="#" class="dropdown-item" rv-data-direction-id="direction.code"
+                                    rv-on-click="model._handleDirectionMenuClick"
+                                    rv-each-direction="model.objectDirectionDict">
+                                    {direction.name}
+                                </a>
+                                <!-- <a class="dropdown-item">
+                                Residential
+                            </a>
+                            <a href="#" class="dropdown-item is-active">
+                                Amenities
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                Industry
+                            </a>-->
+                                <!-- <hr class="dropdown-divider"> -->
+                                <!-- <a href="#" class="dropdown-item">
+                                Commerce
+                            </a> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container-canvas "
+                        style="min-width: 220px; min-height: 320px; height: 45%; width: 100%">
+                        <canvas id="resourceSelector" class="v3d"></canvas>
+                    </div>
+                    <div class="columns is-mobile">
+                        <div class="column">
+                            <button class="button is-link is-outlined is-fullwidth" rv-on-click="prev">
+                                Prev
+                            </button>
+                        </div>
+                        <div class="column is-half has-text-centered">
+                            <p class="is-size-7">{model.currentCategoryItemNo} of {model.currentCategoryItemCount}</p>
+                        </div>
+                        <div class="column">
+                            <button class="button is-link is-outlined is-fullwidth" rv-on-click="next">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    <p class="subtitle">{model.currentTileTypeDefinition.n}</p>
+                    <table class="table is-fullwidth is-borderless">
+                        <tbody>
+                            <tr>
+                                <th>Happiness: <p class="is-size-7"></p>
+                                </th>
+                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.h}pts</span></td>
+                                <th>Commerce: <p class="is-size-7"></p>
+                                </th>
+                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.w}pts</span></td>
+                            </tr>
+                            <tr>
+
+                                <th>Science: <p class="is-size-7"></p>
+                                </th>
+                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.s}pts</span></td>
+                                <th>Culture: <p class="is-size-7"></p>
+                                </th>
+                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.c}pts</span></td>
+                            </tr>
+                            <tr>
+                                <th>Military: <p class="is-size-7"></p>
+                                </th>
+                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.m}pts</span></td>
+                                <th>Religion: <p class="is-size-7"></p>
+                                </th>
+                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.r}pts</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" rv-on-click="_handleBuild">Build</button>
+                    <button class="button" rv-on-click="_handleCancel">Cancel</button>
+                </footer>
+            </div>
+
+            <!-- <button class="modal-close is-large" aria-label="close" rv-class-is-hidden="model.user | hasRole ADMIN"></button> -->
+
+        </div>
+    </div>
+
+    <!-- Personalize Modal -->
+    <div id="personalize">
+
+        <div class="modal" rv-class-is-active="model.display">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Personalize Place</p>
+                    <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
+                </header>
+                <section class="modal-card-body">
+                    <div class="field">
+                        <label class="label">Message</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="Hi folks..." rv-value="model.message">
+                        </div>
+                        <p class="help">This message will be displayed when user clicks your building</p>
+                    </div>
+                    <div class="field">
+                        <label class="label">YouTube video URL</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="https://..." rv-value="model.ytURL">
+                        </div>
+                        <p class="help">This video will be displayed when user clicks your building</p>
+                    </div>
+                    <div class="field">
+                        <label class="label">Image URL</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="https://..." rv-value="model.imgURL">
+                        </div>
+                        <p class="help">This image will be displayed when user clicks your building unless there is a
+                            video provided instead</p>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" rv-on-click="_handleOK">Save</button>
+                    <button class="button" rv-on-click="_handleCancel">Cancel</button>
+                </footer>
+            </div>
+            <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleConstructionCancel"></button> -->
+        </div>
+    </div>
+
+    <!-- Promo Display Modal -->
+    <div id="promote">
+
+        <div class="modal" rv-class-is-active="model.display">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <p class="image is-4by3" rv-class-is-hidden="model.hide.img">
+                    <img rv-src="model.data.imgURL" alt="">
+                </p>
+                <div class="js-lazytube" rv-data-embed="model.data.ytId" rv-class-is-hidden="model.hide.yt"></div>
+
+                <p class="subtitle my-3 px-2 py-2" style="background-color: #eff0f1; display: inline-block;">
+                    {model.data.message}
+                </p>
+            </div>
+            <button class="modal-close is-large" aria-label="close" rv-on-click="_handleCancel"></button>
+        </div>
+    </div>
+
+    <!-- Busy Modal -->
+    <div id="busy">
+
+        <div class="modal" rv-class-is-active="model.display">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <button class="button is-warning is-loading" disabled></button><br>
+                <p class="subtitle my-3 px-2 py-2" style="background-color: #eff0f1; display: inline-block;">
+                    {model.message}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Modal -->
+    <div id="claim">
+
+        <div class="modal" rv-class-is-active="model.display">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Claim Place</p>
+                    <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
+                </header>
+                <section class="modal-card-body">
+                    <table class="table is-fullwidth is-borderless">
+                        <tbody>
+                            <tr>
+                                <th>Name: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.d.n}
+                                    ({model.currentTile.tileData.d.l.x},{model.currentTile.tileData.d.l.y})</td>
+                            </tr>
+
+                            <tr>
+                                <th>Address: </th>
+                                <td class="is-borderless">{model.currentTile.address} <span
+                                        class="is-hidden">{model.currentTile.tileData.d.l.g}</span></td>
+                            </tr>
+                            <!-- <tr>
+                                <th>Plot Type: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.t.n}</td>
+                            </tr> -->
+                            <tr>
+                                <th class="is-borderless">Net Worth: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.d.f.n | GWEItoETH} ETH&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="field">
+                        <label class="label">Claim e-mail</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="Your notification email"
+                                rv-value="model.form.email" rv-class-is-danger="model.validation.f1.error">
+                        </div>
+                        <p class="help" rv-class-is-hidden="model.validation.f1.error">You will get notified on claim results using this email.</p>
+                        <p class="help is-danger" rv-class-is-hidden="model.validation.f1.error | neq true">{model.validation.f1.msg}</p>
+                    </div>
+                    <div class="field">
+                        <label class="label">Your Ethereum Address</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="0x..." rv-value="model.form.caddr" rv-class-is-danger="model.validation.f2.error">
+                        </div>
+                        <p class="help" rv-class-is-hidden="model.validation.f2.error">When claimed this addres will be set as the plot owner.</p>
+                        <p class="help is-danger" rv-class-is-hidden="model.validation.f2.error | neq true">{model.validation.f2.msg}</p>
+                    </div>
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" rv-on-click="_handleOK">Send</button>
+                    <button class="button" rv-on-click="_handleCancel">Cancel</button>
+                </footer>
+            </div>
+            <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleCancel"></button> -->
+        </div>
+    </div>
+
+    <!-- Admin Change Ownership Modal -->
+    <div id="admin">
+
+        <div class="modal" rv-class-is-active="model.action.changeOwnership.display">
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Change Ownership</p>
+                    <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
+                </header>
+                <section class="modal-card-body">
+                    <table class="table is-fullwidth is-borderless">
+                        <tbody>
+                            <tr>
+                                <th>Name: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.d.n}
+                                    ({model.currentTile.tileData.d.l.x},{model.currentTile.tileData.d.l.y})</td>
+                            </tr>
+
+                            <tr>
+                                <th>Address: </th>
+                                <td class="is-borderless">{model.currentTile.address} <span
+                                        class="is-hidden">{model.currentTile.tileData.d.l.g}</span></td>
+                            </tr>
+                            <!-- <tr>
+                                <th>Plot Type: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.t.n}</td>
+                            </tr> -->
+                            <tr>
+                                <th class="is-borderless">Current owner: </th>
+                                <td class="is-borderless">{model.currentTile.tileData.d.f.o}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="field">
+                        <label class="label">Owner Caddr</label>
+                        <div class="control">
+                            <input class="input" type="text" placeholder="New owner address"
+                                rv-value="model.action.changeOwnership.form.f1" rv-class-is-danger="model.action.changeOwnership.validation.f1.error">
+                        </div>
+                        <p class="help" rv-class-is-hidden="model.action.changeOwnership.validation.f1.error">Plot will be assigned to this address.</p>
+                        <p class="help is-danger" rv-class-is-hidden="model.action.changeOwnership.validation.f1.error | neq true">{model.action.changeOwnership.validation.f1.msg}</p>
+                    </div>                    
+                </section>
+                <footer class="modal-card-foot">
+                    <button class="button is-success" rv-on-click="_handleOKOwnerChange">Save</button>
+                    <button class="button" rv-on-click="_handleCancel">Cancel</button>
+                </footer>
+            </div>
+            <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleCancel"></button> -->
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-functions-compat.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore-compat.js"></script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth-compat.js"></script> -->
+
+
+
+    <!-- <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.2/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyBtm9pcskkQXrQRtEoXdPWB021kSaLXJX0",
+          authDomain: "nftcity.firebaseapp.com",
+          projectId: "nftcity",
+          storageBucket: "nftcity.appspot.com",
+          messagingSenderId: "505754736809",
+          appId: "1:505754736809:web:008a7c482578076fa871b8"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+      </script> -->
+
+    <script>
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBtm9pcskkQXrQRtEoXdPWB021kSaLXJX0",
+            authDomain: "nftcity.firebaseapp.com",
+            projectId: "nftcity",
+            storageBucket: "nftcity.appspot.com",
+            databaseURL: "https://nftcity-default-rtdb.firebaseio.com",
+            messagingSenderId: "505754736809",
+            appId: "1:505754736809:web:008a7c482578076fa871b8"
+        };
+
+        const firebaseApp = firebase.initializeApp(firebaseConfig);
+
+
+
+        class EventEmitter {
+            constructor() {
+                this.listeners = {};
+            }
+
+            static getInstance() {
+                return new EventEmitter();
+            }
+
+            on(event, callback) {
+                if (!this.listeners.hasOwnProperty(event)) {
+                    this.listeners[event] = [];
+                }
+
+                this.listeners[event].push(callback);
+
+                return this;
+            }
+
+            emit(event, ...data) {
+                if (!this.listeners.hasOwnProperty(event)) {
+                    return null;
+                }
+
+                for (let i = 0; i < this.listeners[event].length; i++) {
+                    const callback = this.listeners[event][i];
+
+                    callback.call(this, ...data);
+                }
+            }
+        }
+        const emitter = EventEmitter.getInstance();
+        const mapCanvas = document.getElementById(map);
+
+
+
+
+
+
+
+    </script>
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                Made with <span style="color: #e25555;">&#9829;</span> in Switzerland<br>
+                &copy;
+                <span id="copyright">
+                    <script>document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))</script>
+                </span>
+                NFT City
+            </p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

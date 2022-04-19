@@ -8,6 +8,10 @@ import { EventEmitter } from "./util/events.notest";
 export { MapSquare, MapHexOddQ } from "./logic/map/map";
 export { CostCalculatorConst, CostCalculatorTerrain } from "./logic/map/costs"
 
+export {Playground, PlaygroundInteractions, PlaygroundThreeJs, PlaygroundView, PlaygroundViewDefault, PlaygroundViewHudThreeJs, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJs, PlaygroundViewMainThreeJsDefault, PlaygroundViewThreeJS} from "./gui/playground/playground"
+
+export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"
+
 export interface BattleActor {
   unit: UnitBase,
   damage: {
