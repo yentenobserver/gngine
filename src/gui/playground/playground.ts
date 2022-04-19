@@ -32,6 +32,10 @@ export abstract class Playground{
 export class PlaygroundThreeJs extends Playground{
     
     _renderer: THREE.WebGLRenderer|any;
+    _resizeInfo: any = {
+        prevWidth: 0,
+        prevHeight: 0
+    };
 
     constructor(canvasHTMLElement:any, emitter: EventEmitter){
         super(canvasHTMLElement, emitter);        
@@ -150,9 +154,14 @@ export class PlaygroundThreeJs extends Playground{
         const canvas = this._renderer!.domElement;
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
+        const needResize = (canvas.width !== width || canvas.height !== height) && (width != this._resizeInfo.prevWidth || height != this._resizeInfo.prevHeight);
+        
         if (needResize) {
             this._renderer!.setSize(width, height, false);
+            this._resizeInfo = {
+                prevWidth: width,
+                prevHeight: height
+            }
         }
         return needResize;
       }
