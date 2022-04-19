@@ -50,6 +50,14 @@ abstract class RenderablesFactory {
   {method} loadRenderablesObjectsTemplate(path:string):Promise<void>;
 }
 
+class RenderablesThreeJSFactory {
+  templates:Map<string, THREE.Object3D>;
+  loader: any;
+  {method} _matchingChildren(children:any[], filterNames: string[]):any[]
+  {method} _cloneMaterials(parent:THREE.Mesh)
+  {method} _addTemplate(name:string, object3D:THREE.Object3D)
+}
+
 interface Renderable{
   name: string,
   data: any
@@ -74,6 +82,8 @@ MapRenderer <|-- MapRendererThreeJs
 MapRendererThreeJs <|-- MapQuadRendererThreeJs
 Renderer .. RenderablesFactory
 RenderablesFactory .. Renderable
+
+RenderablesFactory <|.. RenderablesThreeJSFactory
 
 Renderable <|-- RenderableThreeJS
 @enduml
