@@ -13,7 +13,7 @@ const expect = chai.expect;
 // Sinon is a library used for mocking or verifying function calls in JavaScript.
 import sinon, { SinonSpy, SinonStub } from 'sinon';
 
-// import SomeClass from '../src/mgr'
+
 import * as THREE from 'three'
 import {TileBase} from '../src/logic/map/common.notest'
 import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'

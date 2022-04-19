@@ -10,7 +10,7 @@ export default {
     {
       file: 'dist/gamengine.umd.js',
       format: 'umd',
-      name: 'Mgr22',
+      name: 'gngine',
     },
   ],
   plugins: [typescript()],
