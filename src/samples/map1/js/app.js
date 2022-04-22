@@ -4,6 +4,7 @@ class AppDemo {
         this.emitter = emitter
         this.mapCanvas = mapCanvas
         this.assets3DLoader = new THREE.GLTFLoader();
+        this.map = new gngine.MapSquare(2,2)
     }
     static getInstance(emitter, mapCanvas){
         const a = new AppDemo(emitter, mapCanvas)
@@ -15,15 +16,38 @@ class AppDemo {
         let p = new gngine.PlaygroundThreeJs(mapCanvas,emitter);
         p.initialize();
         
-        let v = new gngine.PlaygroundViewMainThreeJsDefault(emitter); 
-        p.attach(v);
-        v._setupScene(); 
+        let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(emitter); 
+        p.attach(mainMapView);
+        mainMapView._setupScene(); 
         
         p.run();
 
+        let that = this;
 
         this.playground = p;
-        this.loadAsset("./assets/Monte_Carlo_MC-tileMap.json", "JSON");
+
+        let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());
+
+        let mapRenderer = new gngine.MapQuadRendererThreeJs(2,2,"./assets/models-prod.gltf")
+        mapRenderer.setRenderablesFactory(mapTileFactory);
+        // map renderer will render map tiles into main map view
+        mapRenderer.setView(mainMapView);
+        
+        this.loadAsset("./assets/map.json", "JSON").then(mapjson=>{
+            that.map.fromTiles(2,mapjson);
+            that.map.tile("0,1");
+        })
+        .then(()=>{
+            // now let's download 3d assets for renderer
+            return mapRenderer.initialize();
+        })
+        .then(()=>{
+            that.map.theMap.forEach((val, _key) => {
+                mapRenderer.put(val, val.d);
+            });
+        })
+
+
     }
 
     loadAsset(url, type){

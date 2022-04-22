@@ -2634,7 +2634,11 @@ describe("Renderers",()=>{
                 s = new THREE.Scene();
                 o1 = new THREE.Object3D();
                 o1.name = "SomeName"
+                o2 = new THREE.Object3D();
+                o2.name = "HitMe"
                 s.add(o1);
+                // nested, descendant object
+                o1.add(o2);
                 l = {
                     load(_a1:any,a2:any,_a3:any,_a4:any){
                         a2({scene:s})
@@ -2659,6 +2663,12 @@ describe("Renderers",()=>{
             it("applies name test on objects",()=>{
                 return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
                     return expect(s1.callCount).eq(1);
+                })
+
+            })
+            it("applies name test on scene and all scene descendant objects",()=>{
+                return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                    return expect(s1.getCall(0).args[0].length).eq(3);
                 })
 
             })

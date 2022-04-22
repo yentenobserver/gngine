@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Material } from 'three';
+import { Material, Object3D } from 'three';
 
 export interface Renderable{
     name: string,
@@ -82,9 +82,18 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         return new Promise((resolve, reject)=>{
             that.loader.load( path, function ( gltf:any ) {   
                 // load component templates
-                const searchRoot = gltf.scene.children;
+
+                // traverse all scene descendants
+                const searchRoot:Object3D[] = []
+
+                gltf.scene.traverse((item:THREE.Object3D)=>{
+                    searchRoot.push(item);
+                    console.log(item.name, item.type);
+                })
+                
                 that._matchingChildren(searchRoot, filterNames)
                 .forEach((item:any)=>{
+                    
                     that._addTemplate(item.name, item)                    
                 })
                 resolve();    

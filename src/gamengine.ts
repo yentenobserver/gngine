@@ -10,6 +10,12 @@ export { CostCalculatorConst, CostCalculatorTerrain } from "./logic/map/costs"
 
 export {Playground, PlaygroundInteractions, PlaygroundThreeJs, PlaygroundView, PlaygroundViewDefault, PlaygroundViewHudThreeJs, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJs, PlaygroundViewMainThreeJsDefault, PlaygroundViewThreeJS} from "./gui/playground/playground"
 
+export {RenderablesFactory, RenderablesThreeJSFactory} from './gui/renderer/renderables-factory';
+export type {Renderable, RenderableThreeJS} from './gui/renderer/renderables-factory';
+
+export {HudComponent, HudComponentLargeThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRenderer, HudRendererThreeJs, MapRenderer, MapRendererThreeJs, Renderer, SpriteFactory, SpriteFactoryx128x128x4xL,MapQuadRendererThreeJs} from './gui/renderer/renderers'
+export type {Rotations, ScenePosition} from './gui/renderer/renderers'
+
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"
 
 export interface BattleActor {
