@@ -88,7 +88,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
 
                 gltf.scene.traverse((item:THREE.Object3D)=>{
                     searchRoot.push(item);
-                    console.log(item.name, item.type);
+                    
                 })
                 
                 that._matchingChildren(searchRoot, filterNames)
