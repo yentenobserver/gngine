@@ -1858,9 +1858,9 @@ describe('Playground', () => {
         describe("_findClosestObjectMatching",()=>{
             it("returns closest match - the first one",()=>{
                 const intersections =  [ 
-                    { object: {name: "the_name"}, distance: 3 },
-                    { object: {name: "other"}, distance: 5 },
-                    { object: {name: "name_another"}, distance: 12 }
+                    { object: {name: "the_name", traverseAncestors: function(){return []}}, distance: 3 },
+                    { object: {name: "other", traverseAncestors: function(){return []}}, distance: 5 },
+                    { object: {name: "name_another", traverseAncestors: function(){return []}}, distance: 12 }
                 ]
                 const filters = ["name","nonmatching"]
                 playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
@@ -1868,11 +1868,26 @@ describe('Playground', () => {
                 
                 return expect(matching).eq(intersections[0])
             })
+            it("returns closest match - the first one - also checking ancestors",()=>{
+                const intersections =  [                     
+                    { object: {name: "other2withancestor", traverseAncestors: function(f:Function){
+                        f({ name: "the_name_ancestor", traverseAncestors:function(){}})
+                    }}, distance: 2 },
+                    { object: {name: "the_name", traverseAncestors: function(){}}, distance: 3 },
+                    { object: {name: "other", traverseAncestors: function(){}}, distance: 5 },
+                    { object: {name: "name_another", traverseAncestors: function(){}}, distance: 12 }
+                ]
+                const filters = ["name","nonmatching"]
+                playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
+                const matching = playgroundView1._findClosestObjectMatching(intersections,filters);
+                
+                return expect(matching?.object.name).eq("the_name_ancestor")
+            })
             it("uses cases insensitive filtering",()=>{
                 const intersections =  [ 
-                    { object: {name: "the_name"}, distance: 3 },
-                    { object: {name: "OTHER"}, distance: 5 },
-                    { object: {name: "name_another"}, distance: 12 }
+                    { object: {name: "the_name", traverseAncestors: function(){return []}}, distance: 3 },
+                    { object: {name: "OTHER", traverseAncestors: function(){return []}}, distance: 5 },
+                    { object: {name: "name_another", traverseAncestors: function(){return []}}, distance: 12 }
                 ]
                 const filters = ["nonmatching","other"]
                 playgroundView1 = new PlaygroundViewMainThreeJsDefault(messageBusMocked);
@@ -1957,15 +1972,15 @@ describe('Playground', () => {
             })
             it("sets proper camera position",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.position.x).eq(0)
+                return expect(playgroundView.camera!.position.x).eq(0.2)
             })
             it("sets proper camera position",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.position.y).eq(-50)
+                return expect(playgroundView.camera!.position.y).eq(-5)
             })
             it("sets proper camera position",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.position.z).eq(20)
+                return expect(playgroundView.camera!.position.z).eq(4)
             })
             it("sets proper camera name",()=>{
                 playgroundView._setupScene();

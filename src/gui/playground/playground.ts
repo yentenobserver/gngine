@@ -263,16 +263,39 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
      * @param filterNames when provided only objects that match name will be taken into consideration
      * @returns closest intersected object matching name criteria
      */
-    _findClosestObjectMatching(intersectArray:any[], filterNames: string[]):MatchingThreeJs{        
+    _findClosestObjectMatching(intersectArray:any[], filterNames: string[]):MatchingThreeJs|undefined{        
         // [ { distance, point, face, faceIndex, object }, ... ]   
-        let matching:MatchingThreeJs;
+        let matching:MatchingThreeJs|undefined;
         
         if(filterNames&&filterNames.length>0){
+            const candidates:MatchingThreeJs[] = [];
+
+            intersectArray.forEach((item)=>{
+                candidates.push(item);
+                // now also check ancestors
+                item.object.traverseAncestors((ancestor:THREE.Object3D)=>{
+                    candidates.push({
+                        distance: item.distance,
+                        face: item.face,
+                        faceIndex: item.faceIndex,
+                        object: ancestor,
+                        point: item.point
+                    })
+                })
+
+            })
+            console.log(candidates);
             // filter objects by name
-            matching = intersectArray.find((item:any)=>{                  
+            matching = candidates.find((item:any)=>{                  
                 return filterNames.some(name => item.object.name.toUpperCase().includes(name.toUpperCase()))
                 // return item.object.name.toUpperCase().includes()
             })    
+            
+            // // filter objects by name
+            // matching = intersectArray.find((item:any)=>{                  
+            //     return filterNames.some(name => item.object.name.toUpperCase().includes(name.toUpperCase()))
+            //     // return item.object.name.toUpperCase().includes()
+            // })    
         }else{
             matching = intersectArray[0];
         }        
@@ -319,6 +342,7 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
 
         if ( matching ) {
 
+            // const o = matching.object;
             const o = matching.object;
             const hierarchy:THREE.Object3D[] = this._getHierarchyObjects(o);
             
