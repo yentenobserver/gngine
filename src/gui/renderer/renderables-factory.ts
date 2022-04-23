@@ -40,10 +40,12 @@ export interface RenderableThreeJS extends Renderable{
 export class RenderablesThreeJSFactory extends RenderablesFactory {
     templates:Map<string, THREE.Object3D>;
     loader: any; // threejs objects loader
-    constructor(loader:any){
+    pivotPositionCorrection: THREE.Vector3|undefined;
+    constructor(loader:any, pivotPositionCorrection?:THREE.Vector3){
         super();
         this.loader = loader;
         this.templates = new Map<string, THREE.Object3D>();
+        this.pivotPositionCorrection = pivotPositionCorrection;
     }
 
     /**
@@ -60,10 +62,30 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             this._cloneMaterials(cloned as THREE.Mesh);
             cloned!.castShadow = true;
             cloned!.receiveShadow = true;
+
+
+            let result:THREE.Object3D|undefined;
+
+            if(this.pivotPositionCorrection){
+                // it is assumed that pivot point of spawned objects must be at
+                // (center, center, 0)
+                // so if the templated object has some other pivot configuration
+                // one can translate accordingly so the spawned object has its pivot
+                // located at correct place            
+                
+                // cloned.position.set(-0.5,-0.5,0);
+                cloned.position.set(this.pivotPositionCorrection.x, this.pivotPositionCorrection.y, this.pivotPositionCorrection.z);
+                const wrap = new THREE.Object3D();
+                wrap.add(cloned);
+                result = wrap;
+            }else{
+                result = cloned
+            }
+            
             return {
                 name: objectName,
-                data: cloned!
-            }
+                data: result
+            }     
         }else{
             throw new Error(`No template found ${objectName}`);
         }        

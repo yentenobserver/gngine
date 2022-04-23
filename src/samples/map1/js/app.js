@@ -13,27 +13,31 @@ class AppDemo {
     }
 
     _start(){
+        let that = this;
         let p = new gngine.PlaygroundThreeJs(mapCanvas,emitter);
         p.initialize();
         
+        let mapRenderer;
+
         let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(emitter); 
-        p.attach(mainMapView);
-        mainMapView._setupScene(); 
-        
-        p.run();
+        p.attach(mainMapView).then(()=>{
+            mainMapView._setupScene(); 
+            p.run();
+            
 
-        let that = this;
+            this.playground = p;
 
-        this.playground = p;
+            let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader(), new THREE.Vector3(-0.5,-0.5,0));
 
-        let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());
-
-        let mapRenderer = new gngine.MapQuadRendererThreeJs(2,2,"./assets/models-prod.gltf")
-        mapRenderer.setRenderablesFactory(mapTileFactory);
-        // map renderer will render map tiles into main map view
-        mapRenderer.setView(mainMapView);
-        
-        this.loadAsset("./assets/map.json", "JSON").then(mapjson=>{
+            mapRenderer = new gngine.MapQuadRendererThreeJs(2,2,"./assets/models-prod.gltf")
+            mapRenderer.setRenderablesFactory(mapTileFactory);
+            // map renderer will render map tiles into main map view
+            mapRenderer.setView(mainMapView);
+        })
+        .then(()=>{
+            return this.loadAsset("./assets/map.json", "JSON");
+        })        
+        .then(mapjson=>{
             that.map.fromTiles(2,mapjson);
             that.map.tile("0,1");
         })

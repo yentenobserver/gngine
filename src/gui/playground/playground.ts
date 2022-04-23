@@ -138,7 +138,7 @@ export class PlaygroundThreeJs extends Playground{
             antialias: true
         });
         // renderer.setClearColor(0x000000);
-        renderer.setClearColor( 0xffffff, 1 );
+        renderer.setClearColor( 0xeeeeee, 1 );
         renderer.setPixelRatio(window.devicePixelRatio);
 
         // https://discourse.threejs.org/t/gltfexported-model-is-way-darker/6686
@@ -474,7 +474,9 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
     _setupScene(){
         
         let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
-        camera.position.set(0, -50, 20);
+        // camera.position.set(0, -50, 20);
+        camera.position.set(0.2, -5, 4);
+        camera.lookAt(0,0,0);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
         
         camera.up.set( 0, 0, 1 );

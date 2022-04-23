@@ -147,7 +147,19 @@ export interface Rotations {
 // tile changed(tileUpdated)
 export class MapQuadRendererThreeJs extends MapRendererThreeJs{    
     initialize(): Promise<void> {
+        this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
+            // grid
+            var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            var grid = new THREE.Mesh( geometry, material );
+            // grid.rotation.order = 'YXZ';
+            // grid.rotation.y = - Math.PI / 2;
+            // grid.rotation.x = - Math.PI / 2;
+            grid.position.z=-0.01
+            this.mapHolderObject.add( grid );
         return this.renderablesFactory!.loadRenderablesObjectsTemplate(this.assets,["C_","instance"]);
+
+        
     }
 
     remove(tile: TileBase): void {
