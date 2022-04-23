@@ -13,6 +13,9 @@ class AppDemo {
     }
 
     _start(){
+
+        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e)});
+        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
         let that = this;
         let p = new gngine.PlaygroundThreeJs(mapCanvas,emitter);
         p.initialize();

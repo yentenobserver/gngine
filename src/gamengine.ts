@@ -19,6 +19,9 @@ export type {Rotations, ScenePosition} from './gui/renderer/renderers'
 
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"
 
+
+export {Events} from './util/eventDictionary.notest'
+
 export interface BattleActor {
   unit: UnitBase,
   damage: {

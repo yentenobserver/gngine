@@ -284,7 +284,7 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
                 })
 
             })
-            console.log(candidates);
+            
             // filter objects by name
             matching = candidates.find((item:any)=>{                  
                 return filterNames.some(name => item.object.name.toUpperCase().includes(name.toUpperCase()))
