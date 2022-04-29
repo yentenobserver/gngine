@@ -241,7 +241,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 // traverse all descendants
                 const searchRoot:Object3D[] = []
                 searchRoot.push(object);
-
+                
                 object.traverse((item:THREE.Object3D)=>{
                     searchRoot.push(item);                    
                 })
