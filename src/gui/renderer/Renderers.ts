@@ -43,13 +43,11 @@ export abstract class HudRenderer extends Renderer{
 export abstract class MapRenderer extends Renderer{
     width: number;
     height: number;
-    assets: string;
     // tiles = Map<string,  // "x,y"->{o: object3D, d: direction N|S|E|W, p: scene position origin relative{x: , y: , z:}}
-    constructor(width:number, height:number, assets:string){
+    constructor(width:number, height:number){
         super();
         this.height = height;
-        this.width = width
-        this.assets = assets;
+        this.width = width        
     }
     abstract initialize():Promise<void>;
     abstract remove(tile: TileBase):void;
@@ -108,15 +106,18 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     mapHolderObject: THREE.Object3D;
     renderablesFactory: RenderablesThreeJSFactory|undefined;
     view: PlaygroundViewThreeJS|undefined;
+    
 
-    constructor(width: number, height: number, assets: string){
-        super(width, height, assets);
+    constructor(width: number, height: number){
+        super(width, height);
         
         this.mapHolderObject = new THREE.Object3D();
         this.mapHolderObject.name = MapRendererThreeJs.NAME,
         
-        this.tileSize = 1;        
+        this.tileSize = 1;                
     }   
+
+
     /**
      * Provides renderer with a view to which renderer will render;
      * @param view target view where to render
@@ -143,10 +144,21 @@ export interface Rotations {
     LEFT: -90
 }
 
+export interface MapQuadRendererThreeJsHelpers {
+    Highlighter: THREE.Object3D|undefined
+}
+
 // unit changed(unitUpdated, location/path)
 // tile changed(tileUpdated)
-export class MapQuadRendererThreeJs extends MapRendererThreeJs{    
+export class MapQuadRendererThreeJs extends MapRendererThreeJs{   
+    static HELPERS_HIGHLIGHTER = "MAP_HLPR_HIGHLIGHT";
+
+    HELPERS:MapQuadRendererThreeJsHelpers = {
+        Highlighter: undefined
+    }
+
     initialize(): Promise<void> {
+        // const that = this;
         this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
             // grid
             var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
@@ -157,9 +169,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
             // grid.rotation.x = - Math.PI / 2;
             grid.position.z=-0.01
             this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadRenderablesObjectsTemplate(this.assets,["C_","instance"]);
-
-        
+        return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER])            
     }
 
     remove(tile: TileBase): void {
@@ -299,6 +309,19 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
                 //   object3D.rotateZ(THREE.Math.degToRad(90));
               break;
         }
+    }
+
+    _createMapHelpers(){
+        const renderable = this.renderablesFactory!.spawnRenderableObject("MAP_HLPR_HIGHLIGHT");
+        const object3D = renderable.data as THREE.Object3D;
+
+        const scenePosition = this.xyToScenePosition(0,0);
+        
+
+        this.mapHolderObject.add(object3D);
+        object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)   
+        
+        this.HELPERS.Highlighter = object3D;
     }
     
 }

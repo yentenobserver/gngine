@@ -40,8 +40,8 @@ class AppDemo {
             mapRenderer.setView(mainMapView);
 
             const l2 = new THREE.GLTFLoader()
-            l2.load("./assets/i1.gltf",(item)=>{
-                console.log(""+JSON.stringify(item.scene.toJSON());
+            l2.load("./assets/i1.gltf",(item)=>{                
+                console.log(""+JSON.stringify(item.scene.toJSON()));       
             })
         })
         .then(()=>{

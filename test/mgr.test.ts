@@ -27,7 +27,7 @@ import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudCompone
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Vector3 } from 'three';
-import { RenderablesDefaultFactory, RenderablesFactory, RenderablesThreeJSFactory } from '../src/gui/renderer/renderables-factory';
+import { RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory } from '../src/gui/renderer/renderables-factory';
 
 
 
@@ -2246,11 +2246,13 @@ describe("Renderers",()=>{
         let view: PlaygroundViewDefault;
         let rf: RenderablesDefaultFactory;
         const width = 40;
-        const height = 20; 
-        const assets = "https://some.assets.url"
+        const height = 20;         
+
+        let specification: RenderablesSpecification;
+
         describe("MapRendererThreeJs", ()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);
+                map = new MapQuadRendererThreeJs(width, height);
 
             })
 
@@ -2260,7 +2262,7 @@ describe("Renderers",()=>{
         })
         describe("setView",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);
+                map = new MapQuadRendererThreeJs(width, height);
                 view = new PlaygroundViewDefault("name", messageBusMocked);
                 view.scene = {
                     add: function(){}
@@ -2282,7 +2284,7 @@ describe("Renderers",()=>{
             let s2: SinonStub;
 
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);
+                map = new MapQuadRendererThreeJs(width, height);
                 m1 = new THREE.Mesh(new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffff00 } ))
                 s1 = sinon.stub(m1.geometry,"dispose");
                 s2 = sinon.stub(<THREE.Material>m1.material,"dispose");
@@ -2302,10 +2304,15 @@ describe("Renderers",()=>{
         })
         describe("initialize",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);
-                rf = new RenderablesDefaultFactory();
+                map = new MapQuadRendererThreeJs(width, height);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesDefaultFactory(specification);
                 map.setRenderablesFactory(rf);
-                s1 = sinon.stub(rf,"loadRenderablesObjectsTemplate").resolves();
+                s1 = sinon.stub(rf,"loadTemplates").resolves();
             })
             afterEach(()=>{
                 s1.restore();
@@ -2318,14 +2325,19 @@ describe("Renderers",()=>{
             })  
             it("loads 'C_' or 'instance' named templates",()=>{
                 return map.initialize().then(()=>{
-                    return expect(JSON.stringify(s1.getCall(0).args[1])).eq(JSON.stringify(["C_","instance"]));
+                    return expect(JSON.stringify(s1.getCall(0).args[0])).eq(JSON.stringify(["C_","instance","MAP_HLPR_HIGHLIGHT"]));
                 })
             })          
         })
         describe("onTileChanged",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);
-                rf = new RenderablesDefaultFactory();
+                map = new MapQuadRendererThreeJs(width, height);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesDefaultFactory(specification);
                 map.setRenderablesFactory(rf);
                 s1 = sinon.stub(map,"replace");
             })
@@ -2340,7 +2352,7 @@ describe("Renderers",()=>{
         })
         describe("replace",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);
+                map = new MapQuadRendererThreeJs(width, height);
                 s1 = sinon.stub(map,"remove");
                 s2 = sinon.stub(map,"put");
             })
@@ -2360,7 +2372,7 @@ describe("Renderers",()=>{
         describe("remove",()=>{
             const holder = new THREE.Object3D();
             beforeEach(()=>{     
-                map = new MapQuadRendererThreeJs(width, height, assets);           
+                map = new MapQuadRendererThreeJs(width, height);           
                 const item1 = new THREE.Object3D();
                 item1.userData = {
                     tileData: {
@@ -2413,8 +2425,13 @@ describe("Renderers",()=>{
         })
         describe("put",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets);           
-                rf = new RenderablesDefaultFactory();
+                map = new MapQuadRendererThreeJs(width, height);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesDefaultFactory(specification);
                 map.setRenderablesFactory(rf);
 
                 s1 = sinon.stub(map,"xyToScenePosition").returns({
@@ -2464,7 +2481,7 @@ describe("Renderers",()=>{
         })
         describe("xyToScenePosition",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, assets); 
+                map = new MapQuadRendererThreeJs(width, height); 
             })
             it("positions upper left tile",()=>{
                 const r = map.xyToScenePosition(0,0);                
@@ -2599,8 +2616,8 @@ describe("Renderers",()=>{
 
         let s10:SinonSpy;
 
-        let rf: RenderablesFactory;
-        let rf2: RenderablesFactory;
+        let rf: RenderablesThreeJSFactory;
+        let rf2: RenderablesThreeJSFactory;
         let l: any;
         let l2: any;
         let s: THREE.Scene;
@@ -2609,6 +2626,8 @@ describe("Renderers",()=>{
         let o1: THREE.Object3D;
         let o2: THREE.Object3D;
         let o3: THREE.Object3D;
+
+        let specification: RenderablesSpecification;        
         describe("spawnRenderableObject",()=>{
             beforeEach(()=>{
                 l = {
@@ -2616,8 +2635,13 @@ describe("Renderers",()=>{
                 }
                 o1 = new THREE.Object3D();
                 o2 = new THREE.Object3D();
-
-                rf = new RenderablesThreeJSFactory(l);
+                specification = {
+                    main: {
+                        name: T1,
+                        pivotCorrection: "0.1,0.1,0.1"
+                    },
+                }
+                rf = new RenderablesThreeJSFactory(specification, l);
                 (<RenderablesThreeJSFactory>rf).templates.set(T1,o1);
                 (<RenderablesThreeJSFactory>rf).templates.set(T2,o2);
                 s1 = sinon.stub(o1,"clone").returns(o1);  
@@ -2643,6 +2667,63 @@ describe("Renderers",()=>{
                 const shadows = (<THREE.Object3D>spawned.data).castShadow && (<THREE.Object3D>spawned.data).receiveShadow;
                 return expect(shadows).is.true;
             })
+            it("enables shadows on wrapped child",()=>{
+                const spawned = rf.spawnRenderableObject(T1);
+                const shadows = (<THREE.Object3D>spawned.data).children[0].castShadow && (<THREE.Object3D>spawned.data).children[0].receiveShadow;
+                return expect(shadows).is.true;
+            })
+            it("applies pivot correction when requested in specification",()=>{
+                
+                const spawned = rf.spawnRenderableObject(T1);
+                return expect((<THREE.Object3D>spawned.data).children[0].position.x).eq(0.1);
+            })
+            it("throws error on invalid pivot specification",()=>{
+                specification.main.pivotCorrection = "abc"
+                return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply pivot correction for specification");                    
+            })            
+        })
+        describe("loadTemplates",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(_a1:any,a2:any,_a3:any,_a4:any){
+                        a2({scene:s})
+                    }
+                }
+                specification = {
+                    main: {
+                        name: "someName",
+                        json: '{"metadata":{"version":4.5,"type":"Object","generator":"Object3D.toJSON"},"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}',
+                        url: 'https://someurl'
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(specification, l);
+                s1 = sinon.stub(rf,"_loadRenderablesObjectsTemplate").resolves();
+                s2 = sinon.stub(rf,"_parseRenderablesObjectsTemplate").resolves();
+
+                
+                
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            it("when json is provided then template is parsed from json",()=>{
+                return rf.loadTemplates([]).then(()=>{                    
+                    return expect(s2.callCount).eq(1);
+                })
+            })
+            it("when url is provided then template is loaded from url",()=>{
+                return rf.loadTemplates([]).then(()=>{
+                    return expect(s1.callCount).eq(1);
+                })
+            })
+            it("when url and json are provided then template is loaded both from url and json",()=>{
+                return rf.loadTemplates([]).then(()=>{
+                    const result = s1.callCount==1 && s2.callCount==1;
+                    return expect(result).is.true;
+                })
+                
+            })
         })
         describe("loadRenderablesObjectsTemplate",()=>{
             beforeEach(()=>{
@@ -2659,7 +2740,12 @@ describe("Renderers",()=>{
                         a2({scene:s})
                     }
                 }
-                rf = new RenderablesThreeJSFactory(l);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(specification, l);
                 s1 = sinon.stub((<RenderablesThreeJSFactory>rf),"_matchingChildren").returns([o1]);
                 s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_addTemplate")
 
@@ -2668,7 +2754,7 @@ describe("Renderers",()=>{
                         a4("Some error occured")
                     }
                 }
-                rf2 = new RenderablesThreeJSFactory(l2);
+                rf2 = new RenderablesThreeJSFactory(specification, l2);
 
             })
             afterEach(()=>{
@@ -2676,24 +2762,24 @@ describe("Renderers",()=>{
                 s2.restore();
             })
             it("applies name test on objects",()=>{
-                return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
                     return expect(s1.callCount).eq(1);
                 })
 
             })
             it("applies name test on scene and all scene descendant objects",()=>{
-                return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
                     return expect(s1.getCall(0).args[0].length).eq(3);
                 })
 
             })
             it("adds template from matching objects",()=>{
-                return rf.loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
                     return expect(s2.getCall(0).args[1]).eq(o1);
                 })
             })
             it("rejects on error",()=>{
-                return rf2.loadRenderablesObjectsTemplate("",["SomeName"]).should.be.rejectedWith("Some error")
+                return (<RenderablesThreeJSFactory>rf2)._loadRenderablesObjectsTemplate("",["SomeName"]).should.be.rejectedWith("Some error")
             })
         })
         describe("_matchingChildren",()=>{
@@ -2711,7 +2797,13 @@ describe("Renderers",()=>{
                 o3.type = "Object3D"
                 o3.name = "My other name is"
 
-                rf = new RenderablesThreeJSFactory(l);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+
+                rf = new RenderablesThreeJSFactory(specification, l);
             })
             it("returns items of type Object3D when no names provided",()=>{
                 const result = (<RenderablesThreeJSFactory>rf)._matchingChildren([o1,o2,o3],[]);
@@ -2731,7 +2823,12 @@ describe("Renderers",()=>{
                 l = {
                     load(){}
                 }
-                rf = new RenderablesThreeJSFactory(l);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(specification, l);
 
                 const geometry = new THREE.BoxGeometry( 1, 1, 1 );
                 material  = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
@@ -2767,7 +2864,12 @@ describe("Renderers",()=>{
                 l = {
                     load(){}
                 }
-                rf = new RenderablesThreeJSFactory(l);
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(specification, l);
                 o1 = new THREE.Object3D();
             })
             it("adds template",()=>{
@@ -2775,6 +2877,26 @@ describe("Renderers",()=>{
 
                 return expect( (<RenderablesThreeJSFactory>rf).templates.get("somename")).eq(o1);
             })
+        })
+        describe("_findSpecificationItem",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                specification = {
+                    main: {
+                        name: "someName"
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(specification, l);
+            })
+            it("finds matching",()=>{
+                const item = (<RenderablesThreeJSFactory>rf)._findSpecificationItem("someName");
+                return expect(item).is.not.undefined;
+            });
+            it("throws error when none found",()=>{
+                return expect(()=>{(<RenderablesThreeJSFactory>rf)._findSpecificationItem("otherName")}).to.throw("Can't find renderable specification item for");      
+            });
         })
     })
 })

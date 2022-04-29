@@ -19,6 +19,7 @@ export type {Rotations, ScenePosition} from './gui/renderer/renderers'
 
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"
 
+export {DICT_RENDERABLES} from "./gui/renderer/assets/threejs3d.notest"
 
 export {Events} from './util/eventDictionary.notest'
 

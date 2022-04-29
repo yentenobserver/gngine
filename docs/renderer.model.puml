@@ -23,7 +23,7 @@ abstract class HudRendererThreeJs {}
 abstract class MapRenderer {
   {field} width: number;
   {field} height: number;
-  {field} assets: string;
+  
 
   {method} initialize():Promise<void>;
   {method} remove(tile: TileBase):void;
@@ -46,8 +46,9 @@ class MapQuadRendererThreeJs {
 }
 
 abstract class RenderablesFactory {
+  specification: RenderablesSpecification
   {method} spawnRenderableObject(objectName:string):Renderable;
-  {method} loadRenderablesObjectsTemplate(path:string):Promise<void>;
+  {method} loadTemplates(filterNames: string[]):Promise<void>;
 }
 
 class RenderablesThreeJSFactory {
@@ -56,6 +57,9 @@ class RenderablesThreeJSFactory {
   {method} _matchingChildren(children:any[], filterNames: string[]):any[]
   {method} _cloneMaterials(parent:THREE.Mesh)
   {method} _addTemplate(name:string, object3D:THREE.Object3D)
+  {method} _findSpecificationItem(objectName: string):RenderableSpecificationItem
+  {method} _loadRenderablesObjectsTemplate(path: string, filterNames: string[]): Promise<void>
+  {method} _parseRenderablesObjectsTemplate(objectsStringRepresentation: string, filterNames: string[]): Promise<void>
 }
 
 interface Renderable{
@@ -63,8 +67,25 @@ interface Renderable{
   data: any
 }
 
-interface RenderableThreeJS {
+interface RenderableThreeJS{
   data: THREE.Object3D
+}
+
+
+
+interface RenderableSpecificationItem {
+  name: string,
+  url: string,
+  json: string
+  pivotCorrection: string
+}
+
+interface RenderablesSpecification {
+  main: RenderableSpecificationItem  
+}
+
+interface RenderablesSpecificationMap {
+  helpers: RenderableSpecificationItem
 }
 
 interface ScenePosition {
@@ -86,4 +107,10 @@ RenderablesFactory .. Renderable
 RenderablesFactory <|.. RenderablesThreeJSFactory
 
 Renderable <|-- RenderableThreeJS
+
+RenderablesSpecification <|-- RenderablesSpecificationMap
+
+RenderablesSpecification .. RenderableSpecificationItem
+
+RenderablesFactory .. RenderablesSpecification
 @enduml
