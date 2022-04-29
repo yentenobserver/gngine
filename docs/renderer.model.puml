@@ -47,6 +47,7 @@ class MapQuadRendererThreeJs {
 
 abstract class RenderablesFactory {
   specification: RenderablesSpecification
+  {method} constructor(specification: RenderablesSpecification)
   {method} spawnRenderableObject(objectName:string):Renderable;
   {method} loadTemplates(filterNames: string[]):Promise<void>;
 }
@@ -54,6 +55,7 @@ abstract class RenderablesFactory {
 class RenderablesThreeJSFactory {
   templates:Map<string, THREE.Object3D>;
   loader: any;
+  {method} constructor(specification: RenderablesSpecification, loader:any)
   {method} _matchingChildren(children:any[], filterNames: string[]):any[]
   {method} _cloneMaterials(parent:THREE.Mesh)
   {method} _addTemplate(name:string, object3D:THREE.Object3D)
