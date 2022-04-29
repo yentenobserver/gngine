@@ -14,8 +14,10 @@ class AppDemo {
 
     _start(){
 
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e)});
+        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
         this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
+
+
         let that = this;
         let p = new gngine.PlaygroundThreeJs(mapCanvas,emitter);
         p.initialize();
@@ -36,6 +38,11 @@ class AppDemo {
             mapRenderer.setRenderablesFactory(mapTileFactory);
             // map renderer will render map tiles into main map view
             mapRenderer.setView(mainMapView);
+
+            const l2 = new THREE.GLTFLoader()
+            l2.load("./assets/i1.gltf",(item)=>{
+                console.log(""+JSON.stringify(item.scene.toJSON());
+            })
         })
         .then(()=>{
             return this.loadAsset("./assets/map.json", "JSON");
