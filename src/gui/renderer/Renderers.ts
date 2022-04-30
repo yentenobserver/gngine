@@ -4,7 +4,9 @@ import { Object3D } from 'three';
 import { Material } from 'three';
 
 import { TileBase } from "../../logic/map/common.notest";
-import { PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
+import { Events } from '../../util/eventDictionary.notest';
+import { EventEmitter } from '../../util/events.notest';
+import { PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
 import { RenderablesFactory, RenderablesThreeJSFactory } from './renderables-factory';
 
 export interface ScenePosition {
@@ -16,7 +18,10 @@ export interface ScenePosition {
 export abstract class Renderer {
     view: PlaygroundView|undefined;
     renderablesFactory: RenderablesFactory|undefined;
-    
+    emitter: EventEmitter;
+    constructor(emitter:EventEmitter){
+        this.emitter = emitter;
+    }
     /**
      * Renderer renders the game into provided view
      * @param view target view where to draw the game
@@ -31,8 +36,8 @@ export abstract class Renderer {
 export abstract class HudRenderer extends Renderer{
     components: HudComponent[];
 
-    constructor(){
-        super()
+    constructor(emitter:EventEmitter){
+        super(emitter)
         this.components = [];
     }
 
@@ -44,8 +49,8 @@ export abstract class MapRenderer extends Renderer{
     width: number;
     height: number;
     // tiles = Map<string,  // "x,y"->{o: object3D, d: direction N|S|E|W, p: scene position origin relative{x: , y: , z:}}
-    constructor(width:number, height:number){
-        super();
+    constructor(width:number, height:number, emitter:EventEmitter){
+        super(emitter);
         this.height = height;
         this.width = width        
     }
@@ -106,15 +111,25 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     mapHolderObject: THREE.Object3D;
     renderablesFactory: RenderablesThreeJSFactory|undefined;
     view: PlaygroundViewThreeJS|undefined;
+
+    static HELPERS_HIGHLIGHTER = "MAP_HLPR_HIGHLIGHT";
+
+    HELPERS:MapQuadRendererThreeJsHelpers = {
+        Highlighter: undefined
+    }
     
 
-    constructor(width: number, height: number){
-        super(width, height);
+    constructor(width: number, height: number, emitter:EventEmitter){
+        super(width, height, emitter);
         
         this.mapHolderObject = new THREE.Object3D();
         this.mapHolderObject.name = MapRendererThreeJs.NAME,
         
         this.tileSize = 1;                
+
+        this.emitter.on(Events.INTERACTIONS.TILE,this._onEvent.bind(this))
+        this.emitter.on(Events.INTERACTIONS.UNIT, this._onEvent.bind(this))
+
     }   
 
 
@@ -137,6 +152,29 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         
         // todo texture?
     }
+    /**
+     * Default handling of mouse move and click events. Shows highligh indicator
+     * on tile that is the target of the event.
+     * @param event 
+     */
+    _onEvent(event: PlaygroundInteractionEvent){
+        let tileData:TileBase|undefined = undefined;
+
+        for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+            if(event.data.hierarchy[i].userData.tileData){                
+                tileData = event.data.hierarchy[i].userData.tileData
+            }
+        } 
+        const pos = this.xyToScenePosition(tileData!.y, tileData!.x);
+        if(this.HELPERS.Highlighter){
+            if(this.HELPERS.Highlighter?.position.x !=pos.x || this.HELPERS.Highlighter?.position.y != pos.y){
+                this.HELPERS.Highlighter?.position.set(pos.x, pos.y, this.HELPERS.Highlighter.position.z);
+            }
+        }
+
+        
+        
+    }
 }
 
 export interface Rotations {
@@ -151,13 +189,10 @@ export interface MapQuadRendererThreeJsHelpers {
 // unit changed(unitUpdated, location/path)
 // tile changed(tileUpdated)
 export class MapQuadRendererThreeJs extends MapRendererThreeJs{   
-    static HELPERS_HIGHLIGHTER = "MAP_HLPR_HIGHLIGHT";
-
-    HELPERS:MapQuadRendererThreeJsHelpers = {
-        Highlighter: undefined
-    }
+    
 
     initialize(): Promise<void> {
+        
         // const that = this;
         this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
             // grid

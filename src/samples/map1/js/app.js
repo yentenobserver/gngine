@@ -14,8 +14,8 @@ class AppDemo {
 
     _start(){
 
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
-        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
+        // this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
+        // this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
 
 
         let that = this;
@@ -45,7 +45,7 @@ class AppDemo {
             }
             let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
 
-            mapRenderer = new gngine.MapQuadRendererThreeJs(2,2)
+            mapRenderer = new gngine.MapQuadRendererThreeJs(2,2, this.emitter)
             mapRenderer.setRenderablesFactory(mapTileFactory);
             // map renderer will render map tiles into main map view
             mapRenderer.setView(mainMapView);

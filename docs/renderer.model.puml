@@ -37,8 +37,10 @@ abstract class MapRendererThreeJs {
   tileSize: number;
   mapHolderObject: THREE.Object3D;
   tileFactory: RenderableThreeJSObject3DFactory;
+  HELPERS:MapQuadRendererThreeJsHelpers;
 
   {method} _dispose(object3D:THREE.Mesh)
+  {method} _onEvent(event: PlaygroundInteractionEvent)
 }
 
 class MapQuadRendererThreeJs {

@@ -2076,7 +2076,7 @@ describe("Renderers",()=>{
                 view.container = {
                     clientWidth: 100
                 }      
-                renderer = new HudRendererThreeJs();       
+                renderer = new HudRendererThreeJs(messageBusMocked);       
                 renderer.setView(view);
 
                 s1 = sinon.stub(renderer,"repositionComponents");
@@ -2116,7 +2116,7 @@ describe("Renderers",()=>{
                     clientHeight: 100
                 }               
 
-                renderer = new HudRendererThreeJs();       
+                renderer = new HudRendererThreeJs(messageBusMocked);       
                 renderer.setView(view);
 
                 c = new HudComponentDefaultThreeJs();
@@ -2252,7 +2252,7 @@ describe("Renderers",()=>{
 
         describe("MapRendererThreeJs", ()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
 
             })
 
@@ -2262,7 +2262,7 @@ describe("Renderers",()=>{
         })
         describe("setView",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 view = new PlaygroundViewDefault("name", messageBusMocked);
                 view.scene = {
                     add: function(){}
@@ -2284,7 +2284,7 @@ describe("Renderers",()=>{
             let s2: SinonStub;
 
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 m1 = new THREE.Mesh(new THREE.BoxGeometry( 1, 1, 1 ), new THREE.MeshBasicMaterial( { color: 0xffff00 } ))
                 s1 = sinon.stub(m1.geometry,"dispose");
                 s2 = sinon.stub(<THREE.Material>m1.material,"dispose");
@@ -2304,7 +2304,7 @@ describe("Renderers",()=>{
         })
         describe("initialize",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 specification = {
                     main: {
                         name: "someName"
@@ -2313,9 +2313,11 @@ describe("Renderers",()=>{
                 rf = new RenderablesDefaultFactory(specification);
                 map.setRenderablesFactory(rf);
                 s1 = sinon.stub(rf,"loadTemplates").resolves();
+                s2 = sinon.stub(map,"_createMapHelpers");
             })
             afterEach(()=>{
                 s1.restore();
+                s2.restore();
             })
             it("loads templates",()=>{
                 return map.initialize().then(()=>{
@@ -2331,7 +2333,7 @@ describe("Renderers",()=>{
         })
         describe("onTileChanged",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 specification = {
                     main: {
                         name: "someName"
@@ -2352,7 +2354,7 @@ describe("Renderers",()=>{
         })
         describe("replace",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 s1 = sinon.stub(map,"remove");
                 s2 = sinon.stub(map,"put");
             })
@@ -2372,7 +2374,7 @@ describe("Renderers",()=>{
         describe("remove",()=>{
             const holder = new THREE.Object3D();
             beforeEach(()=>{     
-                map = new MapQuadRendererThreeJs(width, height);           
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);           
                 const item1 = new THREE.Object3D();
                 item1.userData = {
                     tileData: {
@@ -2425,7 +2427,7 @@ describe("Renderers",()=>{
         })
         describe("put",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 specification = {
                     main: {
                         name: "someName"
@@ -2481,7 +2483,7 @@ describe("Renderers",()=>{
         })
         describe("xyToScenePosition",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height); 
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked); 
             })
             it("positions upper left tile",()=>{
                 const r = map.xyToScenePosition(0,0);                
