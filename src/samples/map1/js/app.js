@@ -39,7 +39,8 @@ class AppDemo {
                 },
                 helpers: {
                     name: "mapHelpers",
-                    json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight)                    
+                    json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
+                    pivotCorrection: "0,0,0.12"
                 }
             }
             let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());

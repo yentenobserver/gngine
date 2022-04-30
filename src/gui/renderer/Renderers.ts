@@ -169,7 +169,9 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
             // grid.rotation.x = - Math.PI / 2;
             grid.position.z=-0.01
             this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER])            
+        return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+            this._createMapHelpers();
+        })            
     }
 
     remove(tile: TileBase): void {
