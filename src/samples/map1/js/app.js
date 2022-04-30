@@ -31,10 +31,16 @@ class AppDemo {
             
 
             this.playground = p;
+            const mapRenderablesSpecification = {
+                main: {
+                    name: "",
+                    url: "./assets/models-prod.gltf",
+                    pivotCorrection: "-0.5,-0.5,0"
+                }
+            }
+            let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
 
-            let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader(), new THREE.Vector3(-0.5,-0.5,0));
-
-            mapRenderer = new gngine.MapQuadRendererThreeJs(2,2,"./assets/models-prod.gltf")
+            mapRenderer = new gngine.MapQuadRendererThreeJs(2,2)
             mapRenderer.setRenderablesFactory(mapTileFactory);
             // map renderer will render map tiles into main map view
             mapRenderer.setView(mainMapView);

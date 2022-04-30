@@ -27,7 +27,7 @@ import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudCompone
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Vector3 } from 'three';
-import { RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory } from '../src/gui/renderer/renderables-factory';
+import { RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
 
 
 
@@ -2654,14 +2654,36 @@ describe("Renderers",()=>{
                     },
                 }
                 rf = new RenderablesThreeJSFactory(specification, l);
-                (<RenderablesThreeJSFactory>rf).templates.set(T1,o1);
-                (<RenderablesThreeJSFactory>rf).templates.set(T2,o2);
+                
+                const template1:RenderableTemplateThreeJS = {
+                    name: T1,
+                    object: o1,
+                    specification: specification.main
+                };
+                const template2:RenderableTemplateThreeJS = {
+                    name: T2,
+                    object: o2,
+                    specification: specification.main
+                };
+
+                (<RenderablesThreeJSFactory>rf).templates.set(T1,template1);
+                (<RenderablesThreeJSFactory>rf).templates.set(T2,template2);
                 s1 = sinon.stub(o1,"clone").returns(o1);  
                 s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_cloneMaterials");      
 
                 rf2 = new RenderablesThreeJSFactory(specification2, l);
-                (<RenderablesThreeJSFactory>rf2).templates.set(T1,o1);
-                (<RenderablesThreeJSFactory>rf2).templates.set(T2,o2);
+                const template3:RenderableTemplateThreeJS = {
+                    name: T1,
+                    object: o1,
+                    specification: specification2.main
+                };
+                const template4:RenderableTemplateThreeJS = {
+                    name: T2,
+                    object: o2,
+                    specification: specification2.main
+                };
+                (<RenderablesThreeJSFactory>rf2).templates.set(T1,template3);
+                (<RenderablesThreeJSFactory>rf2).templates.set(T2,template4);
                 s3 = sinon.stub((<RenderablesThreeJSFactory>rf2),"_cloneMaterials");      
             })
             afterEach(()=>{
@@ -2815,21 +2837,21 @@ describe("Renderers",()=>{
             it("throws an error on invalid json",()=>{
                 specification.main.json = 'some random string not json';
                 
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"]).should.be.rejected;
+                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).should.be.rejected;
             })
             it("throws an error on invalid json metadata",()=>{
                 specification.main.json = '{"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}';
                 
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"]).should.be.rejectedWith("Invalid threejs objects metadata")
+                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).should.be.rejectedWith("Invalid threejs objects metadata")
 
             })
             it("checks children",()=>{
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"]).then(()=>{
+                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).then(()=>{
                     return expect(s1.callCount).eq(1);
                 });
             })
             it("adds template",()=>{
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"]).then(()=>{
+                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).then(()=>{
                     return expect(s2.callCount).eq(1);
                 });
             })
@@ -2872,24 +2894,24 @@ describe("Renderers",()=>{
                 s2.restore();
             })
             it("applies name test on objects",()=>{
-                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).then(()=>{
                     return expect(s1.callCount).eq(1);
                 })
 
             })
             it("applies name test on scene and all scene descendant objects",()=>{
-                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).then(()=>{
                     return expect(s1.getCall(0).args[0].length).eq(3);
                 })
 
             })
             it("adds template from matching objects",()=>{
-                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"]).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).then(()=>{
                     return expect(s2.getCall(0).args[1]).eq(o1);
                 })
             })
             it("rejects on error",()=>{
-                return (<RenderablesThreeJSFactory>rf2)._loadRenderablesObjectsTemplate("",["SomeName"]).should.be.rejectedWith("Some error")
+                return (<RenderablesThreeJSFactory>rf2)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).should.be.rejectedWith("Some error")
             })
         })
         describe("_matchingChildren",()=>{
@@ -2983,9 +3005,9 @@ describe("Renderers",()=>{
                 o1 = new THREE.Object3D();
             })
             it("adds template",()=>{
-                (<RenderablesThreeJSFactory>rf)._addTemplate("somename",o1);
+                (<RenderablesThreeJSFactory>rf)._addTemplate("somename",o1, specification.main);
 
-                return expect( (<RenderablesThreeJSFactory>rf).templates.get("somename")).eq(o1);
+                return expect( (<RenderablesThreeJSFactory>rf).templates.get("somename")!.object).eq(o1);
             })
         })
         describe("_findSpecificationItem",()=>{
