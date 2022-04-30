@@ -223,7 +223,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
     /**
      * Populates renderables' templates library with 3D template objects from string represtation that is provided and then loads it using provided 3D loader
      * so new instances of Renderable can be created from template.
-     * @param objectsStringRepresentation textual representation (threejs json export format) of scene/objects
+     * @param objectsStringRepresentation textual representation (threejs object json export format) of scene/objects
      * @param filterNames When provided only specifications that match (include) any of the names provided are returned
      * @returns resolves on success
      */
@@ -245,7 +245,9 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 reject("Invalid threejs objects metadata");
             }
 
-            that.loader.parse( json, (object:any)=>{
+            const loader = new THREE.ObjectLoader();
+
+            loader.parse( json, (object:any)=>{
                 // traverse all descendants
                 const searchRoot:Object3D[] = []
                 searchRoot.push(object);

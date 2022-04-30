@@ -33,9 +33,13 @@ class AppDemo {
             this.playground = p;
             const mapRenderablesSpecification = {
                 main: {
-                    name: "",
+                    name: "mapAssets",
                     url: "./assets/models-prod.gltf",
                     pivotCorrection: "-0.5,-0.5,0"
+                },
+                helpers: {
+                    name: "mapHelpers",
+                    json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight)                    
                 }
             }
             let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
@@ -45,10 +49,10 @@ class AppDemo {
             // map renderer will render map tiles into main map view
             mapRenderer.setView(mainMapView);
 
-            const l2 = new THREE.GLTFLoader()
-            l2.load("./assets/i1.gltf",(item)=>{                
-                console.log(""+JSON.stringify(item.scene.toJSON()));       
-            })
+            // const l2 = new THREE.GLTFLoader()
+            // l2.load("./assets/i1.gltf",(item)=>{                
+            //     // console.log(""+JSON.stringify(item.scene.toJSON()));       
+            // })
         })
         .then(()=>{
             return this.loadAsset("./assets/map.json", "JSON");

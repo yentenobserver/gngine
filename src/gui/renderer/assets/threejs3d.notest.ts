@@ -1,4 +1,4 @@
-export const DICT_RENDERABLES = { 
+export const RENDERABLES = { 
     MAP: {
         SQUARE: {
             highlight: {
