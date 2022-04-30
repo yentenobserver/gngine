@@ -150,23 +150,23 @@ describe('Gamengine', () => {
 
             it('map size', () => {    
                 let mappy:MapSquare = new MapSquare(6, 5);
-                mappy.fromTiles(6, MapsMocks.map_6x5);
+                mappy.fromTiles(MapsMocks.map_6x5);
                 return expect(Array.from(mappy.theMap).length).eq(30);                
             })   
             
             it('size check', () => {    
                 let mappy:MapSquare = new MapSquare(6, 5);
-                mappy.fromTiles(6, MapsMocks.map_5x6);
+                mappy.fromTiles(MapsMocks.map_5x6);
                 return expect(Array.from(mappy.theMap).length).eq(30);                
             }) 
 
             it('size check #2', () => {    
                 let mappy:MapSquare = new MapSquare(4, 4);
-                return expect(()=>{mappy.fromTiles(6, MapsMocks.map_5x6)}).to.throw('Invalid arguments');                              
+                return expect(()=>{mappy.fromTiles(MapsMocks.map_5x6)}).to.throw('Invalid arguments');                              
             }) 
             it('size check #3', () => {    
                 let mappy:MapSquare = new MapSquare(4, 4);
-                return expect(()=>{mappy.fromTiles(4, MapsMocks.map_5x6)}).to.throw('Invalid arguments');                              
+                return expect(()=>{mappy.fromTiles(MapsMocks.map_5x6)}).to.throw('Invalid arguments');                              
             }) 
         })
         describe('neighbours', () => {   
@@ -176,7 +176,7 @@ describe('Gamengine', () => {
             
             beforeEach(() => {  
                 mappy = new MapSquare(height, width);
-                mappy.fromTiles(6, MapsMocks.map_6x5)
+                mappy.fromTiles(MapsMocks.map_6x5)
             });
             afterEach(() => {                  
             });
@@ -265,15 +265,15 @@ describe('Gamengine', () => {
 
             beforeEach(() => {  
                 mappy = new MapSquare(height, width);
-                mappy.fromTiles(6, MapsMocks.map_6x5)
+                mappy.fromTiles(MapsMocks.map_6x5)
                 calculator = new CostCalculatorConst(CONST_COST);
 
                 mappyTerrain = new MapSquare(height, width);                
-                mappyTerrain.fromTiles(6, MapsMocks.map_6x5_terrain);
+                mappyTerrain.fromTiles(MapsMocks.map_6x5_terrain);
                 calculatorTerrain = new CostCalculatorTerrain(TerrainMocks.terrain_1);
 
                 mappyTerrainHeavy = new MapSquare(height, width);                
-                mappyTerrainHeavy.fromTiles(6, MapsMocks.map_6x5_terrain_heavy);
+                mappyTerrainHeavy.fromTiles(MapsMocks.map_6x5_terrain_heavy);
                 calculatorTerrain = new CostCalculatorTerrain(TerrainMocks.terrain_1);
 
             });
@@ -406,7 +406,7 @@ describe('Gamengine', () => {
 
             beforeEach(() => {  
                 mappyTerrainHeavy = new MapSquare(height, width);                
-                mappyTerrainHeavy.fromTiles(6, MapsMocks.map_6x5_terrain_heavy);
+                mappyTerrainHeavy.fromTiles(MapsMocks.map_6x5_terrain_heavy);
                 calculatorTerrain = new CostCalculatorTerrain(TerrainMocks.terrain_1);    
             });
             afterEach(() => {                  
@@ -450,7 +450,7 @@ describe('Gamengine', () => {
 
             beforeEach(() => {  
                 mappyTerrainNoPath = new MapSquare(height, width);                
-                mappyTerrainNoPath.fromTiles(6, MapsMocks.map_6x5_terrain_no_path);
+                mappyTerrainNoPath.fromTiles(MapsMocks.map_6x5_terrain_no_path);
                 calculatorTerrain = new CostCalculatorTerrain(TerrainMocks.terrain_1);    
             });
             afterEach(() => {                  
@@ -481,7 +481,7 @@ describe('Gamengine', () => {
 
             beforeEach(() => {  
                 mappyTerrainNoPath = new MapSquare(height, width);                
-                mappyTerrainNoPath.fromTiles(6, MapsMocks.map_6x5_terrain_no_path);
+                mappyTerrainNoPath.fromTiles(MapsMocks.map_6x5_terrain_no_path);
             });
             afterEach(() => {                  
             });
@@ -611,7 +611,7 @@ describe('Gamengine', () => {
             
             beforeEach(() => {  
                 mappy = new MapHexOddQ(height, width);
-                mappy.fromTiles(6, MapsMocks.map_6x5)
+                mappy.fromTiles(MapsMocks.map_6x5)
             });
             afterEach(() => {                  
             });

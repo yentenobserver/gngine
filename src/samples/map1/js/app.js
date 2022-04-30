@@ -4,7 +4,7 @@ class AppDemo {
         this.emitter = emitter
         this.mapCanvas = mapCanvas
         this.assets3DLoader = new THREE.GLTFLoader();
-        this.map = new gngine.MapSquare(2,2)
+        this.map = new gngine.MapSquare(2,3)
     }
     static getInstance(emitter, mapCanvas){
         const a = new AppDemo(emitter, mapCanvas)
@@ -45,7 +45,7 @@ class AppDemo {
             }
             let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
 
-            mapRenderer = new gngine.MapQuadRendererThreeJs(2,2, this.emitter)
+            mapRenderer = new gngine.MapQuadRendererThreeJs(3,2, this.emitter)
             mapRenderer.setRenderablesFactory(mapTileFactory);
             // map renderer will render map tiles into main map view
             mapRenderer.setView(mainMapView);
@@ -59,8 +59,8 @@ class AppDemo {
             return this.loadAsset("./assets/map.json", "JSON");
         })        
         .then(mapjson=>{
-            that.map.fromTiles(2,mapjson);
-            that.map.tile("0,1");
+            that.map.fromTiles(mapjson);
+            
         })
         .then(()=>{
             // now let's download 3d assets for renderer

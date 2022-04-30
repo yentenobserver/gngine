@@ -62,11 +62,10 @@ export abstract class MapBase {
         return tile;
     }
 
-    fromTiles(height: number, tiles:TileBase[]):void{
-        if(height!=this.height)
-            throw new Error("Invalid arguments");
+    fromTiles(tiles:TileBase[]):void{
+        
 
-        if(height*this.width != tiles.length)
+        if(this.height*this.width != tiles.length)
             throw new Error("Invalid arguments");  
 
         tiles.forEach((item:TileBase)=>{
