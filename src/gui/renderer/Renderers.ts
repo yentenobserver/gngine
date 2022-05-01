@@ -52,7 +52,12 @@ export abstract class MapRenderer extends Renderer{
     constructor(width:number, height:number, emitter:EventEmitter){
         super(emitter);
         this.height = height;
-        this.width = width        
+        this.width = width       
+
+        this.emitter.on(Events.INTERACTIONS.TILE,this._onEvent.bind(this))
+        this.emitter.on(Events.INTERACTIONS.UNIT, this._onEvent.bind(this))
+        this.emitter.on(Events.INTERACTIONS.HUD, this._onEvent.bind(this))
+ 
     }
     abstract initialize():Promise<void>;
     abstract remove(tile: TileBase):void;
@@ -60,6 +65,48 @@ export abstract class MapRenderer extends Renderer{
     abstract put(tile: TileBase, direction:string):void;
     abstract onTileChanged(tile: TileBase, direction: string):void;
     abstract xyToScenePosition(y: number, x:number):ScenePosition;
+    abstract highlightTile(tile: TileBase):void;
+    abstract highlightTiles(tiles: TileBase[]):void;
+    abstract rotate(rotation: number):void;
+    /**
+     * Zoom levels are from 0 - farthest to 16 - closest
+     * @param level 
+     */
+    abstract zoom(level: number):void;
+
+    _onEvent(event:PlaygroundInteractionEvent):void{
+        
+
+        // check if this is a tile related event
+        if(event.type == Events.INTERACTIONS.TILE){
+
+            let tileData:TileBase|undefined = undefined;
+            for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                if(event.data.hierarchy[i].userData.tileData){                
+                    tileData = event.data.hierarchy[i].userData.tileData
+                }
+            } 
+            tileData && this.highlightTile(tileData);
+        }
+        if(event.type == Events.INTERACTIONS.HUD && event.originalEvent.type=="pointerdown"){
+            for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                if([                    
+                    HudComponentMapNavigationThreeJs.CONTROLS.LEFT,
+                    HudComponentMapNavigationThreeJs.CONTROLS.RIGHT
+                    ].includes(event.data.hierarchy[i].name)){
+                        event.data.hierarchy[i].name == HudComponentMapNavigationThreeJs.CONTROLS.LEFT?this.rotate(-1):this.rotate(1);
+                    }
+                if([                    
+                    HudComponentMapNavigationThreeJs.CONTROLS.DOWN,
+                    HudComponentMapNavigationThreeJs.CONTROLS.UP
+                    ].includes(event.data.hierarchy[i].name)){
+                        event.data.hierarchy[i].name == HudComponentMapNavigationThreeJs.CONTROLS.DOWN?this.zoom(-1):this.zoom(1);
+                    }
+                
+            }
+        }
+
+    }
 }
 
 /**
@@ -81,6 +128,7 @@ export class HudRendererThreeJs extends HudRenderer {
         component.setContainer(this.view!.container);
         this.view!.scene.add(component.object);
         this.components.push(component);
+        component.resize();
         this.repositionComponents();
     }
     /**
@@ -88,18 +136,24 @@ export class HudRendererThreeJs extends HudRenderer {
      * It assumes that objects pivot/origin is at the center of the object
      */
     repositionComponents(){
-        let x = -this.view!.container.clientWidth/2;
+        const FIX_CAMERA_HALF_SIZE = 20;
+        // let x = -this.view!.container.clientWidth/2;
+        let x = -FIX_CAMERA_HALF_SIZE;
         
+        console.log(this.view!.container.clientWidth, this.view!.container.clientHeight)
         
-        this.components.forEach((item:HudComponent)=>{
+        this.components.forEach((item:HudComponent)=>{               
             // component pivot is as its center so we need to position 
             // it center accordingly
             x+=(<HudComponentThreeJs>item).getSize().x!/2;
 
-            let y = -this.view!.container.clientHeight/2+(<HudComponentThreeJs>item).getSize().y!/2;
+            // let y = -this.view!.container.clientHeight/2+(<HudComponentThreeJs>item).getSize().y!/2;
+            let y = -FIX_CAMERA_HALF_SIZE+(<HudComponentThreeJs>item).getSize().y!/2;
         
+            // (<HudComponentThreeJs>item).object!.position.set(x,y,0);
             (<HudComponentThreeJs>item).object!.position.set(x,y,0);
             x += (<HudComponentThreeJs>item).getSize().x!/2;
+            
         })
     }
 }
@@ -111,6 +165,8 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     mapHolderObject: THREE.Object3D;
     renderablesFactory: RenderablesThreeJSFactory|undefined;
     view: PlaygroundViewThreeJS|undefined;
+
+    zoomLevel: number;
 
     static HELPERS_HIGHLIGHTER = "MAP_HLPR_HIGHLIGHT";
 
@@ -125,10 +181,11 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         this.mapHolderObject = new THREE.Object3D();
         this.mapHolderObject.name = MapRendererThreeJs.NAME,
         
-        this.tileSize = 1;                
+        this.tileSize = 1;  
+        this.zoomLevel = 13;              
 
-        this.emitter.on(Events.INTERACTIONS.TILE,this._onEvent.bind(this))
-        this.emitter.on(Events.INTERACTIONS.UNIT, this._onEvent.bind(this))
+        // this.emitter.on(Events.INTERACTIONS.TILE,this._onEvent.bind(this))
+        // this.emitter.on(Events.INTERACTIONS.UNIT, this._onEvent.bind(this))
 
     }   
 
@@ -152,29 +209,56 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         
         // todo texture?
     }
+  
     /**
-     * Default handling of mouse move and click events. Shows highligh indicator
+     * Shows highligh indicator
      * on tile that is the target of the event.
-     * @param event 
      */
-    _onEvent(event: PlaygroundInteractionEvent){
-        let tileData:TileBase|undefined = undefined;
-
-        for(let i=event.data.hierarchy.length-1; i>= 0; i--){
-            if(event.data.hierarchy[i].userData.tileData){                
-                tileData = event.data.hierarchy[i].userData.tileData
-            }
-        } 
+    highlightTile(tileData: TileBase): void {
         const pos = this.xyToScenePosition(tileData!.y, tileData!.x);
         if(this.HELPERS.Highlighter){
             if(this.HELPERS.Highlighter?.position.x !=pos.x || this.HELPERS.Highlighter?.position.y != pos.y){
                 this.HELPERS.Highlighter?.position.set(pos.x, pos.y, this.HELPERS.Highlighter.position.z);
             }
         }
-
-        
-        
     }
+    highlightTiles(_tiles: TileBase[]): void {
+        throw new Error('Method not implemented.');
+    }
+
+    rotate(rotation: number): void {
+        let map:THREE.Object3D;
+
+        // find the map object in scene
+        this.view!.scene.traverse((item:THREE.Object3D)=>{
+            if(item.name == MapRendererThreeJs.NAME){
+                map = item
+            }             
+        })
+
+        map!.rotateZ(Math.sign(rotation)*THREE.MathUtils.degToRad(360/60))
+    }
+
+    zoom(level: number): void {
+        // 12 - 5
+        // 13 - 4
+        // 14 - 3
+        // 15 - 2
+        // 16 - 1
+        // 0-16
+
+        // (16-level)+1
+        // // 4
+        level>=0?this.zoomLevel+=1:this.zoomLevel-=1;
+
+        this.zoomLevel = Math.max(Math.min(this.zoomLevel,16),0);
+
+
+        const positionZ = 16-this.zoomLevel +1;
+
+        this.view!.camera.position.z = positionZ;
+        this.view!.camera.lookAt(0,0,0);
+    }  
 }
 
 export interface Rotations {
@@ -188,7 +272,8 @@ export interface MapQuadRendererThreeJsHelpers {
 
 // unit changed(unitUpdated, location/path)
 // tile changed(tileUpdated)
-export class MapQuadRendererThreeJs extends MapRendererThreeJs{   
+export class MapQuadRendererThreeJs extends MapRendererThreeJs{
+     
     
 
     initialize(): Promise<void> {
@@ -360,6 +445,8 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         
         this.HELPERS.Highlighter = object3D;
     }
+
+    
     
 }
 
@@ -462,8 +549,13 @@ export abstract class HudComponentThreeJs extends HudComponent{
     
 
     resize(){
-        const newWidth = this.container.clientWidth;
-        const newHeight = this.container.clientHeight;
+        const FIX_CAMERA_HALF_SIZE = 20;
+        
+        // const newWidth = this.container.clientWidth;
+        // const newHeight = this.container.clientHeight;
+
+        const newWidth = 2*FIX_CAMERA_HALF_SIZE;
+        const newHeight = 2*FIX_CAMERA_HALF_SIZE;
         // const targetSize = new THREE.Vector3(1,1,1);
         const targetSize = new THREE.Vector3(newWidth*this.sizePercentage!, newHeight*this.sizePercentage!,Math.min(newWidth*this.sizePercentage!, newHeight*this.sizePercentage!));
         
@@ -515,6 +607,13 @@ export class HudComponentDefaultThreeJs extends HudComponentThreeJs{
     }
 }
 export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
+    static NAME = "COMP_HUD_NAV";
+    static CONTROLS = {
+        UP: "UP",
+        DOWN: "DOWN",
+        LEFT: "LEFT",
+        RIGHT: "RIGHT"
+    }
     buttonsFactory: SpriteFactory;
     constructor(buttonsSpriteUrl: string){
         super();
@@ -531,13 +630,13 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
      build(): Promise<HudComponentThreeJs> {
         const that = this;
         let hud = new Object3D();
-        hud.name = "COMP_HUD_NAV"
+        hud.name = HudComponentMapNavigationThreeJs.NAME;
         return this.buttonsFactory.initialize().then(()=>{            
             const up = this.buttonsFactory.getInstance(0);            
             hud.add(up);
             up.position.set(0, 1, 0);
             // up.scale.set(this._sizing.items, this._sizing.items, 1);            
-            up.name = 'UP'
+            up.name = HudComponentMapNavigationThreeJs.CONTROLS.UP
             
 
             const left = this.buttonsFactory.getInstance(1);            
@@ -545,21 +644,21 @@ export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
             left.position.set(-1, 0, 0);
             // left.scale.set(this._sizing.items, this._sizing.items, 1);
             // rotLeft.position.set( 0, 0, this._size );
-            left.name = 'LEFT'
+            left.name = HudComponentMapNavigationThreeJs.CONTROLS.LEFT;
             
 
             const right = this.buttonsFactory.getInstance(2);
             hud.add(right);
             right.position.set(1, 0, 0);
             // right.scale.set(this._sizing.items, this._sizing.items, 1);
-            right.name = 'RIGHT'
+            right.name = HudComponentMapNavigationThreeJs.CONTROLS.RIGHT;
 
             const down = this.buttonsFactory.getInstance(3);
             hud.add(down);
             down.position.set(0, -1, 0);
             // down.scale.set(this._sizing.items, this._sizing.items, 1);
             // backward.position.set( this._size-this._size/2, 0, 0 );
-            down.name = 'DOWN'
+            down.name = HudComponentMapNavigationThreeJs.CONTROLS.DOWN;
 
             // // now normalize hud origin so the origin is in 
             // // lower left corner of the hud element

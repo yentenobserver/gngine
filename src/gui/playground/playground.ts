@@ -477,6 +477,7 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
         const hudPickResult = this.pickObjectOfNames(pointerEvent,[])
         if(hudPickResult?.object){
             const interactionEvent: PlaygroundInteractionEvent = {
+                type: Events.INTERACTIONS.HUD,
                 viewName: this.name,
                 interactingObject: hudPickResult.object,
                 originalEvent: pointerEvent,
@@ -501,7 +502,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         
         let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
         // camera.position.set(0, -50, 20);
-        camera.position.set(0.2, -5, 4);
+        // camera.position.set(0.2, -5, 4);
+        camera.position.set(0, -5, 4);
         camera.lookAt(0,0,0);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
         
@@ -579,6 +581,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         const tilePickResult = this.pickObjectOfNames(pointerEvent,["_TILE"])
         if(tilePickResult?.object){
             const interactionEvent: PlaygroundInteractionEvent = {
+                type: Events.INTERACTIONS.TILE,
                 viewName: this.name,
                 interactingObject: tilePickResult.object,
                 originalEvent: pointerEvent,
@@ -592,10 +595,11 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         const unitPickResult = this.pickObjectOfNames(pointerEvent,["_UNIT"])
         if(unitPickResult?.object){
             const interactionEvent: PlaygroundInteractionEvent = {
+                type: Events.INTERACTIONS.UNIT,
                 viewName: this.name,
                 interactingObject: unitPickResult.object,
                 originalEvent: pointerEvent,
-                data: tilePickResult
+                data: unitPickResult
             }
             this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
             result = interactionEvent;
@@ -607,6 +611,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
 export class PlaygroundInteractions{}
 
 export interface PlaygroundInteractionEvent{
+    type: string, // event type, see events.notest.ts
     viewName: string, // name of the view that took part in the interaction
     originalEvent: any, // original event from UI that triggered the interaction
     interactingObject: any, // the object that took part in the interaction

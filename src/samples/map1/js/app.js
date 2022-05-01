@@ -16,7 +16,7 @@ class AppDemo {
 
         // this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
         // this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
-        this.emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
+        // this.emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
 
 
         
@@ -81,11 +81,7 @@ class AppDemo {
 
         const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
         await navComp.build();
-
         hudRenderer.addComponent(navComp);
-
-        console.log(hudRenderer)
-
     }
 
     loadAsset(url, type){
