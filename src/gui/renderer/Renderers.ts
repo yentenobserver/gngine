@@ -136,9 +136,11 @@ export class HudRendererThreeJs extends HudRenderer {
      * It assumes that objects pivot/origin is at the center of the object
      */
     repositionComponents(){
+        
         const FIX_CAMERA_HALF_SIZE = 20;
+        const MARGIN = FIX_CAMERA_HALF_SIZE/20;
         // let x = -this.view!.container.clientWidth/2;
-        let x = -FIX_CAMERA_HALF_SIZE;
+        let x = -FIX_CAMERA_HALF_SIZE+MARGIN/2;
         
         console.log(this.view!.container.clientWidth, this.view!.container.clientHeight)
         
@@ -148,11 +150,11 @@ export class HudRendererThreeJs extends HudRenderer {
             x+=(<HudComponentThreeJs>item).getSize().x!/2;
 
             // let y = -this.view!.container.clientHeight/2+(<HudComponentThreeJs>item).getSize().y!/2;
-            let y = -FIX_CAMERA_HALF_SIZE+(<HudComponentThreeJs>item).getSize().y!/2;
+            let y = -FIX_CAMERA_HALF_SIZE+(<HudComponentThreeJs>item).getSize().y!/2+MARGIN;
         
             // (<HudComponentThreeJs>item).object!.position.set(x,y,0);
             (<HudComponentThreeJs>item).object!.position.set(x,y,0);
-            x += (<HudComponentThreeJs>item).getSize().x!/2;
+            x += (<HudComponentThreeJs>item).getSize().x!/2+MARGIN/2;
             
         })
     }
@@ -590,7 +592,24 @@ export abstract class HudComponentThreeJs extends HudComponent{
 export abstract class HudComponentLargeThreeJs extends HudComponentThreeJs{
     constructor(){
         super(); 
-        this.sizePercentage = 0.25;       
+        this.sizePercentage = 0.2;       
+    }
+    abstract build():Promise<HudComponentThreeJs>;
+}
+/* istanbul ignore next */
+export abstract class HudComponentMediumThreeJs extends HudComponentThreeJs{
+    constructor(){
+        super(); 
+        this.sizePercentage = 0.1;       
+    }
+    abstract build():Promise<HudComponentThreeJs>;
+}
+
+/* istanbul ignore next */
+export abstract class HudComponentSmallThreeJs extends HudComponentThreeJs{
+    constructor(){
+        super(); 
+        this.sizePercentage = 0.05;       
     }
     abstract build():Promise<HudComponentThreeJs>;
 }
@@ -606,7 +625,7 @@ export class HudComponentDefaultThreeJs extends HudComponentThreeJs{
         throw new Error('Method not implemented.');
     }
 }
-export class HudComponentMapNavigationThreeJs extends HudComponentLargeThreeJs{
+export class HudComponentMapNavigationThreeJs extends HudComponentMediumThreeJs{
     static NAME = "COMP_HUD_NAV";
     static CONTROLS = {
         UP: "UP",
