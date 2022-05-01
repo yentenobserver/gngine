@@ -96,7 +96,7 @@ export abstract class MapRenderer extends Renderer{
                     HudComponentMapNavigationThreeJs.CONTROLS.LEFT,
                     HudComponentMapNavigationThreeJs.CONTROLS.RIGHT
                     ].includes(event.data.hierarchy[i].name)){
-                        event.data.hierarchy[i].name == HudComponentMapNavigationThreeJs.CONTROLS.LEFT?this.rotate(-1):this.rotate(1);
+                        event.data.hierarchy[i].name == HudComponentMapNavigationThreeJs.CONTROLS.LEFT?this.rotate(1):this.rotate(-1);
                     }
                 if([                    
                     HudComponentMapNavigationThreeJs.CONTROLS.DOWN,
