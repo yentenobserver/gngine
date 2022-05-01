@@ -68,6 +68,7 @@ export abstract class MapRenderer extends Renderer{
     abstract highlightTile(tile: TileBase):void;
     abstract highlightTiles(tiles: TileBase[]):void;
     abstract rotate(rotation: number):void;
+    abstract goToTile(tile: TileBase):void;
     /**
      * Zoom levels are from 0 - farthest to 16 - closest
      * @param level 
@@ -86,7 +87,8 @@ export abstract class MapRenderer extends Renderer{
                     tileData = event.data.hierarchy[i].userData.tileData
                 }
             } 
-            tileData && this.highlightTile(tileData);
+            tileData && event.originalEvent.type=="pointermove" && this.highlightTile(tileData);
+            tileData && event.originalEvent.type=="pointerdown" && this.goToTile(tileData);
         }
         if(event.type == Events.INTERACTIONS.HUD && event.originalEvent.type=="pointerdown"){
             for(let i=event.data.hierarchy.length-1; i>= 0; i--){
@@ -168,7 +170,12 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     renderablesFactory: RenderablesThreeJSFactory|undefined;
     view: PlaygroundViewThreeJS|undefined;
 
-    zoomLevel: number;
+    state: {
+        zoomLevel: number,  // current map zoom level
+        tile: TileBase|undefined  // that that has focus
+        lookAt: THREE.Vector3
+    }
+    
 
     static HELPERS_HIGHLIGHTER = "MAP_HLPR_HIGHLIGHT";
 
@@ -184,7 +191,12 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         this.mapHolderObject.name = MapRendererThreeJs.NAME,
         
         this.tileSize = 1;  
-        this.zoomLevel = 13;              
+        this.state = {
+            zoomLevel: 13 ,
+            tile: undefined,
+            lookAt: new THREE.Vector3(0,0,0)               
+        }
+                     
 
         // this.emitter.on(Events.INTERACTIONS.TILE,this._onEvent.bind(this))
         // this.emitter.on(Events.INTERACTIONS.UNIT, this._onEvent.bind(this))
@@ -251,16 +263,33 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
         // (16-level)+1
         // // 4
-        level>=0?this.zoomLevel+=1:this.zoomLevel-=1;
+        level>=0?this.state.zoomLevel+=1:this.state.zoomLevel-=1;
 
-        this.zoomLevel = Math.max(Math.min(this.zoomLevel,16),0);
+        this.state.zoomLevel = Math.max(Math.min(this.state.zoomLevel,16),0);
 
 
-        const positionZ = 16-this.zoomLevel +1;
+        const positionZ = 16-this.state.zoomLevel +1;
 
         this.view!.camera.position.z = positionZ;
-        this.view!.camera.lookAt(0,0,0);
-    }  
+        this.view!.camera.lookAt(this.state.lookAt);
+    }    
+    goToTile(tile: TileBase){
+        console.log(this.view!.camera.position.x);
+        const pos = this.xyToScenePosition(tile.y, tile.x);
+        const dx = (tile.x-(this.state.tile?this.state.tile.x:0))*this.tileSize - Math.floor(this.width/2);
+        // const dy = (tile.y-(this.state.tile?this.state.tile.y:0))*this.tileSize;
+        const dy = 0;
+
+        this.view!.camera.position.x = pos.x;
+        this.view!.camera.position.y = pos.y-5;
+
+        
+        this.state.lookAt = new THREE.Vector3(pos.x, pos.y, 0);
+        this.view!.camera.lookAt(this.state.lookAt);
+        console.log(dy,dx, pos, this.view!.camera.position.x);
+        this.state.tile = tile;
+        
+    }     
 }
 
 export interface Rotations {
