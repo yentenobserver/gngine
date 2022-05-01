@@ -483,7 +483,9 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
                 data: hudPickResult
             }
             this.emitter.emit(Events.INTERACTIONS.HUD,interactionEvent)
+            return interactionEvent;
         }
+        return;
     }
     
 }
@@ -571,7 +573,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
     _onInteraction(...event: any[]) {
         const pointerEvent:any =  event[0] as any;
         // const eventType:string = pointerEvent.type;
-        
+        let result = undefined;
+
         // first see what tile did we hit
         const tilePickResult = this.pickObjectOfNames(pointerEvent,["_TILE"])
         if(tilePickResult?.object){
@@ -582,6 +585,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
                 data: tilePickResult
             }
             this.emitter.emit(Events.INTERACTIONS.TILE,interactionEvent)
+            result = interactionEvent;
+            
         }
         // then also check what unit did we hit
         const unitPickResult = this.pickObjectOfNames(pointerEvent,["_UNIT"])
@@ -593,7 +598,9 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
                 data: tilePickResult
             }
             this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
+            result = interactionEvent;
         }                
+        return result;
     }
 }
 

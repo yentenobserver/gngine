@@ -399,9 +399,9 @@ export class SpriteFactoryx128x128x4xL extends SpriteFactory{
             });
         }).then((textureResult:any) => {
             this.texture = textureResult as THREE.Texture;
-            if(this.texture.width!=this.size*this.itemCnt)
+            if(this.texture.image.width!=this.size*this.itemCnt)
                 throw new Error(`Invalid texture width ${this.url}`)
-            if(this.texture.height!=this.size) 
+            if(this.texture.image.height!=this.size) 
                 throw new Error(`Invalid texture height ${this.url}`)            
         })
     }
