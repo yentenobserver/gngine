@@ -2481,6 +2481,36 @@ describe("Renderers",()=>{
                 return expect(s3.getCall(0).args[1]).eq("S");
             })
         })
+        describe("scenePositionToXY",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked); 
+            })
+            it("upper left scene corner",()=>{
+                const r = map.xyToScenePosition(0,0);  
+                const xy = map.scenePositionToXY(r.x, r.y);              
+                return expect(`${xy.y},${xy.x}`).eq("0,0");
+            })
+            it("upper right scene corner",()=>{
+                const r = map.xyToScenePosition(0,39);  
+                const xy = map.scenePositionToXY(r.x, r.y);              
+                return expect(`${xy.y},${xy.x}`).eq("0,39");
+            })
+            it("lower left scene corner",()=>{
+                const r = map.xyToScenePosition(19,0);  
+                const xy = map.scenePositionToXY(r.x, r.y);              
+                return expect(`${xy.y},${xy.x}`).eq("19,0");
+            })
+            it("lower right scene corner",()=>{
+                const r = map.xyToScenePosition(19,39);  
+                const xy = map.scenePositionToXY(r.x, r.y);              
+                return expect(`${xy.y},${xy.x}`).eq("19,39");
+            })
+            it("center of scene ",()=>{
+                const r = map.xyToScenePosition(9,19);  
+                const xy = map.scenePositionToXY(r.x, r.y);              
+                return expect(`${xy.y},${xy.x}`).eq("9,19");
+            })
+        })
         describe("xyToScenePosition",()=>{
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked); 

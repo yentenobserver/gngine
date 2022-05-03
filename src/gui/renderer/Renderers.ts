@@ -396,6 +396,78 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // 33,31 -> 0,-1,0
 
     }
+    scenePositionToXY(sceneX:number,sceneY:number){  
+        
+        // (-a, b)
+
+        // const tilesXFrom00 = Math.floor(sceneX/this.tileSize);
+        // const tilesYFrom00 = Math.floor(sceneY/this.tileSize);
+        
+        // const _tilesCountX = this.width/this.tileSize;
+        const _tilesCountY = this.height/this.tileSize
+        
+        const normSceneX = sceneX+this.width/2;
+        const normSceneY = sceneY+this.height/2;
+
+        const tileX = Math.floor(normSceneX);
+        const tileY =  Math.floor(_tilesCountY-normSceneY);
+
+        // console.log(sceneY, normSceneY, tileY, sceneX, normSceneX, tileX);
+        // console.log("Tiles from", tilesYFrom00, tilesXFrom00);
+
+        
+
+        // const _normalizedWidth = this.width/this.tileSize;
+        // const _normalizedHeight = this.height/this.tileSize
+
+        // const tilesNormY = tilesYFrom00 - _tilesCountY/2;
+        // const tilesNormX = tilesXFrom00 + _tilesCountX/2;
+
+        // console.log("Tiles from norm", tilesYFrom00, tilesNormY, tilesXFrom00, tilesNormX);
+        
+
+        
+        // console.log(_normalizedHeight, _normalizedWidth);
+
+        // const preX = normSceneX/this.width;
+        // const ratX = preX*_normalizedWidth;
+        // const indX = Math.floor(ratX/this.tileSize);
+
+        // const preY = normSceneY/this.width;
+        // const ratY = preY*_normalizedHeight;
+        // const indY = Math.floor(ratY/this.tileSize);
+
+        // console.log(preY, ratY, indY, preX, ratX, indX);
+
+        // // const x = -this.width/2+indX*this.tileSize+this.tileSize/2;
+        // // const y = -this.height/2+indY*this.tileSize+this.tileSize/2;
+
+        // console.log(indY,indX);
+
+    //    screenX = x-_normalizedWidth/2+this.tileSize/2
+    //    x = screenX + _normalizedWidth/2 - this.tileSize/2
+
+    //    screenY = (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2
+
+    //    a. (y-_normalizedHeight/2)<0
+    //    screenY = Math.abs(y-_normalizedHeight/2)-this.tileSize/2
+    //    screenY = y-_normalizedHeight/2 -this.tileSize/2
+    //    screenY = y-_normalizedHeight/2 -this.tileSize/2
+    //     y = screenY + _normalizedHeight/2 + this.tileSize/2
+
+    //    b.  (y-_normalizedHeight/2)>=0
+    //    screenY = -Math.abs(y-_normalizedHeight/2)-this.tileSize/2
+    //    screenY = -(y-_normalizedHeight/2)-this.tileSize/2
+    //    screenY = -y+_normalizedHeight/2-this.tileSize/2
+    //    screenY - _normalizedHeight/2 + this.tileSize/2 = -y
+    //    y = -screenY + _normalizedHeight/2 - this.tileSize/2
+
+        const position = {
+            y:tileY,
+            x: tileX
+        }
+        return position;
+    }
 
 
 
