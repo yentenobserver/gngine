@@ -370,6 +370,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     onTileChanged(tile: TileBase, direction: string): void {
         this.replace(tile, direction);
     }
+    
     /**
      * It is assumed that tile pivot point is at its base (x,y) center
      * @param y 
@@ -396,14 +397,14 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // 33,31 -> 0,-1,0
 
     }
+    /**
+     * Translates actual scene position (x,y) into map tile position (y,x)
+     * @param sceneX scene x position
+     * @param sceneY scene y position
+     * @returns (y,x) tile position
+     */
     scenePositionToXY(sceneX:number,sceneY:number){  
         
-        // (-a, b)
-
-        // const tilesXFrom00 = Math.floor(sceneX/this.tileSize);
-        // const tilesYFrom00 = Math.floor(sceneY/this.tileSize);
-        
-        // const _tilesCountX = this.width/this.tileSize;
         const _tilesCountY = this.height/this.tileSize
         
         const normSceneX = sceneX+this.width/2;
@@ -412,98 +413,13 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         const tileX = Math.floor(normSceneX);
         const tileY =  Math.floor(_tilesCountY-normSceneY);
 
-        // console.log(sceneY, normSceneY, tileY, sceneX, normSceneX, tileX);
-        // console.log("Tiles from", tilesYFrom00, tilesXFrom00);
-
-        
-
-        // const _normalizedWidth = this.width/this.tileSize;
-        // const _normalizedHeight = this.height/this.tileSize
-
-        // const tilesNormY = tilesYFrom00 - _tilesCountY/2;
-        // const tilesNormX = tilesXFrom00 + _tilesCountX/2;
-
-        // console.log("Tiles from norm", tilesYFrom00, tilesNormY, tilesXFrom00, tilesNormX);
-        
-
-        
-        // console.log(_normalizedHeight, _normalizedWidth);
-
-        // const preX = normSceneX/this.width;
-        // const ratX = preX*_normalizedWidth;
-        // const indX = Math.floor(ratX/this.tileSize);
-
-        // const preY = normSceneY/this.width;
-        // const ratY = preY*_normalizedHeight;
-        // const indY = Math.floor(ratY/this.tileSize);
-
-        // console.log(preY, ratY, indY, preX, ratX, indX);
-
-        // // const x = -this.width/2+indX*this.tileSize+this.tileSize/2;
-        // // const y = -this.height/2+indY*this.tileSize+this.tileSize/2;
-
-        // console.log(indY,indX);
-
-    //    screenX = x-_normalizedWidth/2+this.tileSize/2
-    //    x = screenX + _normalizedWidth/2 - this.tileSize/2
-
-    //    screenY = (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2
-
-    //    a. (y-_normalizedHeight/2)<0
-    //    screenY = Math.abs(y-_normalizedHeight/2)-this.tileSize/2
-    //    screenY = y-_normalizedHeight/2 -this.tileSize/2
-    //    screenY = y-_normalizedHeight/2 -this.tileSize/2
-    //     y = screenY + _normalizedHeight/2 + this.tileSize/2
-
-    //    b.  (y-_normalizedHeight/2)>=0
-    //    screenY = -Math.abs(y-_normalizedHeight/2)-this.tileSize/2
-    //    screenY = -(y-_normalizedHeight/2)-this.tileSize/2
-    //    screenY = -y+_normalizedHeight/2-this.tileSize/2
-    //    screenY - _normalizedHeight/2 + this.tileSize/2 = -y
-    //    y = -screenY + _normalizedHeight/2 - this.tileSize/2
-
         const position = {
             y:tileY,
             x: tileX
         }
         return position;
     }
-
-
-
-
-    /**
-     * Rotates 3d object that represents tile. It is assumed that the object must be
-     * in it's original/default (i.e. "South") position.
-     * It is also assumed that we are rotating along the Z-axis (i.e. we are rotating tile in
-     * the plane of the map).
-     * It is also assumed that object origin/pivot point is at lower left corner
-     * @param object3D 
-     * @param direction 
-     */
-    // _directionRotate(object3D:THREE.Object3D, direction:string){
-    //     const prevPosition = object3D.position;
-    //     switch (direction) {
-    //         case 'N':                
-    //           object3D.rotateZ(THREE.MathUtils.degToRad(180));
-    //           object3D.position.setX(prevPosition.x+this.tileSize)
-    //           object3D.position.setY(prevPosition.y+this.tileSize)
-    //           break;
-    //         case 'E':
-    //           object3D.rotateZ(THREE.MathUtils.degToRad(90));
-    //           // move back
-    //           object3D.position.setX(prevPosition.x+this.tileSize)
-    //           break;
-    //         case 'W':
-    //           object3D.rotateZ(THREE.MathUtils.degToRad(-90));
-    //           object3D.position.setY(prevPosition.y+this.tileSize)
-    //           break;
-    //         default:
-    //             // default is S south
-    //             //   object3D.rotateZ(THREE.Math.degToRad(90));
-    //           break;
-    //     }
-    // }
+    
     /**
      * It is assumed that object pivot point is at its base center.
      * It is also assumed that by default when loaded/spawned tile is S oriented.
