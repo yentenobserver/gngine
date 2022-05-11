@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Object3D } from 'three';
+import { Object3D, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -13,6 +13,12 @@ export interface ScenePosition {
     x: number,
     y: number,
     z: number
+}
+
+export interface TilePosition {
+    
+    y: number,    
+    x: number,
 }
 
 export abstract class Renderer {
@@ -65,10 +71,11 @@ export abstract class MapRenderer extends Renderer{
     abstract put(tile: TileBase, direction:string):void;
     abstract onTileChanged(tile: TileBase, direction: string):void;
     abstract xyToScenePosition(y: number, x:number):ScenePosition;
+    abstract scenePositionToXY(sceneX: number, sceneY: number):TilePosition;
     abstract highlightTile(tile: TileBase):void;
     abstract highlightTiles(tiles: TileBase[]):void;
     abstract rotate(rotation: number):void;
-    abstract goToTile(tile: TileBase):void;
+    abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
     /**
      * Zoom levels are from 0 - farthest to 16 - closest
      * @param level 
@@ -82,13 +89,15 @@ export abstract class MapRenderer extends Renderer{
         if(event.type == Events.INTERACTIONS.TILE){
 
             let tileData:TileBase|undefined = undefined;
+            let object:THREE.Object3D|undefined = undefined;
             for(let i=event.data.hierarchy.length-1; i>= 0; i--){
                 if(event.data.hierarchy[i].userData.tileData){                
                     tileData = event.data.hierarchy[i].userData.tileData
+                    object = event.data.hierarchy[i]
                 }
             } 
             tileData && event.originalEvent.type=="pointermove" && this.highlightTile(tileData);
-            tileData && event.originalEvent.type=="pointerdown" && this.goToTile(tileData);
+            tileData && event.originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
         }
         if(event.type == Events.INTERACTIONS.HUD && event.originalEvent.type=="pointerdown"){
             for(let i=event.data.hierarchy.length-1; i>= 0; i--){
@@ -162,6 +171,12 @@ export class HudRendererThreeJs extends HudRenderer {
     }
 }
 
+interface SpaceRangeSpecification {
+    a: number,
+    b: number,
+    spaceCode: string
+}
+
 export abstract class MapRendererThreeJs extends MapRenderer{
     static NAME: string = "THE_MAP";
     tileSize: number;
@@ -172,8 +187,14 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
     state: {
         zoomLevel: number,  // current map zoom level
-        tile: TileBase|undefined  // that that has focus
-        lookAt: THREE.Vector3
+        current: {
+            tile: TileBase|undefined,  // that that has focus
+            tileWorldPos: THREE.Vector3|undefined
+        }
+        
+        
+        lookAt: THREE.Vector3,
+        sceneRotation: number
     }
     
 
@@ -193,8 +214,13 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         this.tileSize = 1;  
         this.state = {
             zoomLevel: 13 ,
-            tile: undefined,
-            lookAt: new THREE.Vector3(0,0,0)               
+            current: {
+                tile: undefined,
+                tileWorldPos: undefined
+            },
+            
+            lookAt: new THREE.Vector3(0,0,0),
+            sceneRotation: 0               
         }
                      
 
@@ -250,8 +276,73 @@ export abstract class MapRendererThreeJs extends MapRenderer{
             }             
         })
 
-        map!.rotateZ(Math.sign(rotation)*THREE.MathUtils.degToRad(360/60))
+        const degree =  (this.state.sceneRotation + Math.sign(rotation)*360/60)%360;
+        this.state.sceneRotation = degree
+
+        const radians = Math.sign(rotation)*THREE.MathUtils.degToRad(360/60);
+
+        map!.rotateZ(radians)
+        // console.log(this.state.sceneRotation);
+        // const space = this._spaceIndicator(this.state.sceneRotation);
+        // console.log(`Space is ${space}`);
+
     }
+    _tileChange(space:string, target: TileBase, source?: TilePosition):TilePosition{
+        const dx = target.x - (source?source.x:target.x);
+        const dy = target.y - (source?source.y:target.y);
+
+        console.log(`Movement calc ${space}: [${dy},${dx}]`);
+
+        return {
+            x: "C,D,E,F".split(",").includes(space)?(source?source.x:target.x)-dx:(source?source.x:target.x)+dx,
+            y: "C,D,E,F".split(",").includes(space)?(source?source.y:target.y)-dy+5:(source?source.y:target.y)+dy+5
+        }
+
+
+        // H -> y zgodnie z delta, x godnie z delta
+        // A -> y zgodnie z delta, x godnie z delta
+        // G -> y zgodnie z delta, x zgodnie z delta
+        // G -> y zgodnie z delta, x zgodnie z delta
+    }
+
+    _spaceIndicator(rotation:number):string{
+        const q = (rotation/45)%8;
+        const qNormalized = q<0?q+8:q;
+        /*
+
+        |---| 
+        |D E|
+        |CxF|
+        |BxG|
+        |A H|
+        |---|
+        */
+
+        // <a,b) - range
+       const ranges:SpaceRangeSpecification[] = [            
+        {a: 0,b: 1,spaceCode: 'A'},
+        {a: 1,b: 2,spaceCode: 'B'},
+        {a: 2,b: 3,spaceCode: 'C'},
+        {a: 3,b: 4,spaceCode: 'D'},
+        {a: 4,b: 5,spaceCode: 'E'},
+        {a: 5,b: 6,spaceCode: 'F'},
+        {a: 6,b: 7,spaceCode: 'G'},
+        {a: 7,b: 8,spaceCode: 'H'},
+        ]
+
+        let spaceIdx = 'A';
+
+        ranges.forEach((item:SpaceRangeSpecification)=>{            
+            const match = ((item.a==qNormalized)&&(item.b==qNormalized))? true : (qNormalized-item.a)*(qNormalized-item.b)<=0;
+            // console.log(qNormalized, item.a, item.b, match);
+            if(match)
+                spaceIdx = item.spaceCode
+        })
+        // console.log(q, qNormalized, spaceIdx);
+        return spaceIdx;
+    }
+
+    
 
     zoom(level: number): void {
         // 12 - 5
@@ -272,22 +363,117 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
         this.view!.camera.position.z = positionZ;
         this.view!.camera.lookAt(this.state.lookAt);
-    }    
-    goToTile(tile: TileBase){
-        console.log(this.view!.camera.position.x);
-        const pos = this.xyToScenePosition(tile.y, tile.x);
-        const dx = (tile.x-(this.state.tile?this.state.tile.x:0))*this.tileSize - Math.floor(this.width/2);
-        // const dy = (tile.y-(this.state.tile?this.state.tile.y:0))*this.tileSize;
-        const dy = 0;
+    } 
 
-        this.view!.camera.position.x = pos.x;
-        this.view!.camera.position.y = pos.y-5;
+    goToTile(tile: TileBase, object: THREE.Object3D){
+        const objectWorldPosition = new THREE.Vector3();
+        object.getWorldPosition(objectWorldPosition);
+
+        if(this.state.current.tile){
+            const currentScenePos = {y: this.state.current.tileWorldPos!.y ,x: this.state.current.tileWorldPos!.x }
+            // console.log(JSON.stringify(currentScenePos));
+            
+            const targetScenePos = {x: objectWorldPosition.x, y: objectWorldPosition.y};            
+            // console.log(JSON.stringify(targetScenePos));
+
+            // console.log(`Camera pos before: ${JSON.stringify(this.view!.camera.position)}`);
+                        
+            
+            const deltaCurrent = new THREE.Vector2(this.view!.camera.position.x, this.view!.camera.position.y).sub(new THREE.Vector2(currentScenePos.x, currentScenePos.y));
+            const delta =  new THREE.Vector2(this.view!.camera.position.x, this.view!.camera.position.y).sub(new THREE.Vector2(targetScenePos.x, targetScenePos.y));
+            const deltadelta =  deltaCurrent.sub(delta);
+            const space = this._spaceIndicator(this.state.sceneRotation)
+            // console.log(`${JSON.stringify(delta)} ${JSON.stringify(deltaCurrent)} ${JSON.stringify(deltadelta)} ${space}`);
+
+            this.view!.camera.position.x += deltadelta.x;
+            this.view!.camera.position.y += deltadelta.y;
+            // console.log(`Delta: ${JSON.stringify(delta)}`);
+            // this.view!.camera.translateX(delta.x);
+            // this.view!.camera.translateY(delta.y);
+
+            // |---| 
+            // |D E|
+            // |CxF|
+            // |BxG|
+            // |A H|
+            // |---|
+
+            // A - 
+            // switch()
+            // switch(space){
+            //     case "A":
+            //         this.view!.camera.position.x += delta.x;
+            //         this.view!.camera.position.y -= delta.y;
+            //         break;
+            //     case "G":                    
+            //         this.view!.camera.position.x = this.view!.camera.position.x + delta.x - delta.y;
+            //         this.view!.camera.position.y -= delta.x;
+            //         break;    
+            //     default:
+            //         console.log(`Other`);
+            //         break
+            // }
+            
+
+            console.log(`Camera pos after: ${JSON.stringify(this.view!.camera.position)}`);
+
+        }
+        else{
+            const sceneXY = this.xyToScenePosition(tile.y, tile.x);
+            this.view!.camera.position.x = sceneXY.x;
+            this.view!.camera.position.y = sceneXY.y-5;
+            this.view!.camera.lookAt(sceneXY.x, sceneXY.y, 0);
+            this.state.current.tile = tile;
+            this.state.lookAt = new Vector3(sceneXY.x, sceneXY.y, 0);
+            
+        }
+        // 48;-48
+        
+        // // find tile above which the camera hoovers
+        // const cameraTilePosition = this.scenePositionToXY(this.view!.camera.position.x, this.view!.camera.position.y)
+
+        // const cameraNewTile = this._tileChange(this._spaceIndicator(this.state.sceneRotation), tile, this.state.tile!);
+        // const cameraNewPosition = this.xyToScenePosition(cameraNewTile.y, cameraNewTile.x);
 
         
-        this.state.lookAt = new THREE.Vector3(pos.x, pos.y, 0);
-        this.view!.camera.lookAt(this.state.lookAt);
-        console.log(dy,dx, pos, this.view!.camera.position.x);
-        this.state.tile = tile;
+
+        // console.log(`Camera prevTile: ${JSON.stringify(cameraTilePosition)} currTile: ${JSON.stringify(cameraNewTile)} prevPos: ${JSON.stringify(this.view!.camera.position.clone())}`);
+
+        // this.view!.camera.position.x = cameraNewPosition.x;
+        // this.view!.camera.position.y = cameraNewPosition.y;
+        
+        // console.log(`Camera currPos: ${JSON.stringify(this.view!.camera.position)}`);
+
+        // const targetTilePosition:TilePosition = {
+        //     x: tile.x,
+        //     y: tile.y
+        // }
+
+
+
+        // console.log('Target tile', tile);
+        // console.log('Target tile pos', this.xyToScenePosition(tile.y, tile.x));
+        // console.log('Camera pos', this.view!.camera.position);
+        // console.log('Camera tile', tilePosition);
+        // const pos = this.xyToScenePosition(tile.y, tile.x);
+        // const dx = (tile.x-(this.state.tile?this.state.tile.x:0))*this.tileSize - Math.floor(this.width/2);
+        // const dy = (tile.y-(this.state.tile?this.state.tile.y:0))*this.tileSize;
+        // const dy = 0;
+
+        // this.view!.camera.position.x = pos.x;
+        // this.view!.camera.position.y = pos.y-5;
+
+        
+        // this.state.lookAt = new THREE.Vector3(pos.x, pos.y, 0);
+        // this.view!.camera.lookAt(this.state.lookAt);
+
+        // const tilePositionPost = this.scenePositionToXY(this.view!.camera.position.x, this.view!.camera.position.y)
+        // console.log('Post camera tile', tilePositionPost);
+        // console.log(dy,dx, pos, this.view!.camera.position.x);
+        this.state.current.tile = tile;
+        this.state.current.tileWorldPos = objectWorldPosition;
+
+        
         
     }     
 }
@@ -370,7 +556,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     onTileChanged(tile: TileBase, direction: string): void {
         this.replace(tile, direction);
     }
-    
+
     /**
      * It is assumed that tile pivot point is at its base (x,y) center
      * @param y 
