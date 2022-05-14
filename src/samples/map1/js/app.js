@@ -23,7 +23,7 @@ class AppDemo {
 
 
         let that = this;
-        let p = new gngine.PlaygroundThreeJs(mapCanvas,this.emitter);
+        let p = new gngine.PlaygroundThreeJs(this.mapCanvas,this.emitter);
         p.initialize();
         
         let mapRenderer;
@@ -82,6 +82,7 @@ class AppDemo {
         const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
         await navComp.build();
         hudRenderer.addComponent(navComp);
+        console.log(p);
     }
 
     loadAsset(url, type){

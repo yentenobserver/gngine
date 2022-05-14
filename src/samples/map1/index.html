@@ -96,6 +96,14 @@
                     </div>
                     <canvas id="map" class="v3d"></canvas>
                 </div>
+                <div class="container-canvas">
+                    <div class="lds-facebook" rv-class-is-hidden="model.loading.done">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <canvas id="map2" class="v3d"></canvas>
+                </div>
 
                 <!-- <p class="is-size-6 is-hidden-mobile"><a target="_blank"
                         rv-href="model.city.d.w">{model.city.d.l}<br />Learn more on
@@ -709,7 +717,11 @@
         const emitter = EventEmitter.getInstance();
         const mapCanvas = document.getElementById("map");
 
+        const emitter2 = EventEmitter.getInstance();
+        const mapCanvas2 = document.getElementById("map2");
+
         const demo = AppDemo.getInstance(emitter, mapCanvas);
+        const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);
 
 
 
