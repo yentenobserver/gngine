@@ -416,8 +416,6 @@ export abstract class AreaMapIndicator extends MapIndicator{
         
     }
     hide(): void {
-        console.log(this.tiles.length)
-        console.log(JSON.stringify(this.renderables));
         for(let i=0;i<this.tiles.length;i++){
             this.renderables[i].hide&&this.renderables[i].hide!();
         }
