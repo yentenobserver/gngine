@@ -7,7 +7,7 @@ import { TileBase } from "../../logic/map/common.notest";
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 import { PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
-import { RenderablesFactory, RenderablesThreeJSFactory } from './renderables-factory';
+import { Renderable, RenderablesFactory, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';
 
 export interface ScenePosition {
     x: number,
@@ -19,6 +19,15 @@ export interface TilePosition {
     
     y: number,    
     x: number,
+}
+
+export interface MapPositionProvider{
+    xyToScenePosition(y: number, x:number):ScenePosition,
+    scenePositionToXY(sceneX:number,sceneY:number):TilePosition,    
+}
+
+export interface MapWritable{
+    add(object: any):void;
 }
 
 export abstract class Renderer {
@@ -51,9 +60,11 @@ export abstract class HudRenderer extends Renderer{
     abstract repositionComponents():void;
 } 
 
-export abstract class MapRenderer extends Renderer{
+export abstract class MapRenderer extends Renderer implements MapPositionProvider, MapWritable{
     width: number;
     height: number;
+    indicatorForTile: MapIndicator|undefined;
+
     // tiles = Map<string,  // "x,y"->{o: object3D, d: direction N|S|E|W, p: scene position origin relative{x: , y: , z:}}
     constructor(width:number, height:number, emitter:EventEmitter){
         super(emitter);
@@ -65,17 +76,18 @@ export abstract class MapRenderer extends Renderer{
         this.emitter.on(Events.INTERACTIONS.HUD, this._onEvent.bind(this))
  
     }
+    abstract add(renderable: Renderable): void;
     abstract initialize():Promise<void>;
     abstract remove(tile: TileBase):void;
     abstract replace(tile: TileBase, direction:string):void;
     abstract put(tile: TileBase, direction:string):void;
     abstract onTileChanged(tile: TileBase, direction: string):void;
     abstract xyToScenePosition(y: number, x:number):ScenePosition;
-    abstract scenePositionToXY(sceneX: number, sceneY: number):TilePosition;
-    abstract highlightTile(tile: TileBase):void;
+    abstract scenePositionToXY(sceneX: number, sceneY: number):TilePosition;    
     abstract highlightTiles(tiles: TileBase[]):void;
     abstract rotate(rotation: number):void;
     abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
+
     /**
      * Zoom levels are from 0 - farthest to 16 - closest
      * @param level 
@@ -96,7 +108,7 @@ export abstract class MapRenderer extends Renderer{
                     object = event.data.hierarchy[i]
                 }
             } 
-            tileData && event.originalEvent.type=="pointermove" && this.highlightTile(tileData);
+            tileData && event.originalEvent.type=="pointermove" && this.highlightTiles([tileData]);
             tileData && event.originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
         }
         if(event.type == Events.INTERACTIONS.HUD && event.originalEvent.type=="pointerdown"){
@@ -249,21 +261,15 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         
         // todo texture?
     }
-  
+      
     /**
      * Shows highligh indicator
      * on tile that is the target of the event.
      */
-    highlightTile(tileData: TileBase): void {
-        const pos = this.xyToScenePosition(tileData!.y, tileData!.x);
-        if(this.HELPERS.Highlighter){
-            if(this.HELPERS.Highlighter?.position.x !=pos.x || this.HELPERS.Highlighter?.position.y != pos.y){
-                this.HELPERS.Highlighter?.position.set(pos.x, pos.y, this.HELPERS.Highlighter.position.z);
-            }
+    highlightTiles(tiles: TileBase[]): void {
+        if(this.indicatorForTile){
+            this.indicatorForTile.forTiles(tiles);
         }
-    }
-    highlightTiles(_tiles: TileBase[]): void {
-        throw new Error('Method not implemented.');
     }
 
     rotate(rotation: number): void {
@@ -382,7 +388,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
             const deltaCurrent = new THREE.Vector2(this.view!.camera.position.x, this.view!.camera.position.y).sub(new THREE.Vector2(currentScenePos.x, currentScenePos.y));
             const delta =  new THREE.Vector2(this.view!.camera.position.x, this.view!.camera.position.y).sub(new THREE.Vector2(targetScenePos.x, targetScenePos.y));
             const deltadelta =  deltaCurrent.sub(delta);
-            const space = this._spaceIndicator(this.state.sceneRotation)
+            // const space = this._spaceIndicator(this.state.sceneRotation)
             // console.log(`${JSON.stringify(delta)} ${JSON.stringify(deltaCurrent)} ${JSON.stringify(deltadelta)} ${space}`);
 
             this.view!.camera.position.x += deltadelta.x;
@@ -484,15 +490,106 @@ export interface Rotations {
 }
 
 export interface MapQuadRendererThreeJsHelpers {
-    Highlighter: THREE.Object3D|undefined
+    Highlighter: AreaMapIndicatorThreeJs|undefined
 }
+
+/**
+ * Annotates map tiles with some additional information/visualization
+ */
+export abstract class MapIndicator{
+
+    // this factory should provide indicators objects that can be spawned by 
+    // the Indicator
+    renderablesFactory: RenderablesFactory;
+
+    // provides position mapping from tile/map and scene coordinates
+    mapProvider: MapPositionProvider&MapWritable;
+
+    constructor(mapProvider: MapPositionProvider&MapWritable, renderablesFactory: RenderablesFactory){
+        this.renderablesFactory = renderablesFactory;
+        this.mapProvider = mapProvider
+    };
+
+    abstract forTile(tile: TileBase):void;
+    abstract forTiles(tiles: TileBase[]):void;
+    abstract hide():void;
+    abstract show():void;
+}
+
+export abstract class AreaMapIndicator extends MapIndicator{
+    // renderables used for indicators
+    renderables: Renderable[];
+    tiles: TileBase[];
+    renderableKey: string;
+    colorHex?: string;
+
+    constructor(mapProvider: MapPositionProvider&MapWritable, renderablesFactory: RenderablesFactory, renderableKey: string, colorHex?: string){
+        super(mapProvider, renderablesFactory); 
+        this.renderables = [];   
+        this.tiles = [];   
+        this.renderableKey = renderableKey;
+        this.colorHex = colorHex;
+    }
+    forTile(tile: TileBase): void {
+        this.hide();
+        if(this.renderables.length<=0){
+            const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey);
+            this.renderables.push(renderable);
+            this.mapProvider.add(renderable);
+        }        
+        this.tiles = [tile];
+        this.render(this.renderables.slice(0,1),[tile],this.colorHex);        
+        this.show();
+    }
+    forTiles(tiles: TileBase[]): void {
+        this.hide();
+        if(this.renderables.length<tiles.length){
+            const delta = tiles.length-this.renderables.length;
+            for(let i=0; i<delta;i++){
+                const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey);                
+                this.renderables.push(renderable);
+                this.mapProvider.add(renderable);
+            }
+        }
+        this.tiles = tiles;
+        this.render(this.renderables.slice(0,tiles.length),tiles,this.colorHex);        
+        this.show();
+        
+    }
+    hide(): void {
+        for(let i=0;i<this.tiles.length;i++){
+            this.renderables[i].hide&&this.renderables[i].hide!();
+        }
+    }
+    show(): void {
+        for(let i=0;i<this.tiles.length;i++){
+            this.renderables[i].show&&this.renderables[i].show!();
+        }
+    } 
+
+    abstract render(renderables: Renderable[], tiles: TileBase[], colorHex?: string):void;        
+}
+
+export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
+
+    render(renderables: Renderable[], tiles: TileBase[], _colorHex?: string): void {
+        for(let i=0; i<tiles.length; i++){
+            const pos = this.mapProvider.xyToScenePosition(tiles[i].y, tiles[i].x);
+            const renderable = <RenderableThreeJS>renderables[i];            
+            if(renderable.data.position.x !=pos.x || renderable.data.position.y !=pos.y){
+                console.log(`Cache size ${this.tiles.length} ${this.renderables.length}`)
+                renderable.data.position.set(pos.x, pos.y, renderable.data.position.z);
+            }
+        }        
+    }
+
+}
+
+
 
 // unit changed(unitUpdated, location/path)
 // tile changed(tileUpdated)
-export class MapQuadRendererThreeJs extends MapRendererThreeJs{
-     
-    
-
+export class MapQuadRendererThreeJs extends MapRendererThreeJs{        
     initialize(): Promise<void> {
         
         // const that = this;
@@ -605,6 +702,14 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         }
         return position;
     }
+    /**
+     * adds any 3d object into map (map holder)
+     * @param object THREEJS object 3d to be added
+     */
+    add(renderable: Renderable): void {
+        const renderableThreeJs = <RenderableThreeJS>renderable;
+        this.mapHolderObject.add(renderableThreeJs.data);
+    }
     
     /**
      * It is assumed that object pivot point is at its base center.
@@ -639,16 +744,19 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     }
 
     _createMapHelpers(){
-        const renderable = this.renderablesFactory!.spawnRenderableObject("MAP_HLPR_HIGHLIGHT");
-        const object3D = renderable.data as THREE.Object3D;
+        const mapIndicator = new AreaMapIndicatorThreeJs(this, this.renderablesFactory!,"MAP_HLPR_HIGHLIGHT");
 
-        const scenePosition = this.xyToScenePosition(0,0);
+        this.indicatorForTile = mapIndicator;
+        // const renderable = this.renderablesFactory!.spawnRenderableObject("MAP_HLPR_HIGHLIGHT");
+        // const object3D = renderable.data as THREE.Object3D;
+
+        // const scenePosition = this.xyToScenePosition(0,0);
         
 
-        this.mapHolderObject.add(object3D);
-        object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)   
+        //this.mapHolderObject.add(object3D);
+        // object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)   
         
-        this.HELPERS.Highlighter = object3D;
+        // this.HELPERS.Highlighter = object3D;
     }
 
     

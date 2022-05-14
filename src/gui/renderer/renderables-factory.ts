@@ -3,7 +3,9 @@ import { Material, Object3D } from 'three';
 
 export interface Renderable{
     name: string,
-    data: any
+    data: any,
+    show?: ()=>void;
+    hide?: ()=>void;
 }
 
 export interface RenderableSpecificationItem {
