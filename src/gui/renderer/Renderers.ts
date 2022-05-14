@@ -27,7 +27,7 @@ export interface MapPositionProvider{
 }
 
 export interface MapWritable{
-    add(object: any):void;
+    add(object: Renderable):void;
 }
 
 export abstract class Renderer {

@@ -4,7 +4,8 @@ class AppDemo {
         this.emitter = emitter
         this.mapCanvas = mapCanvas
         this.assets3DLoader = new THREE.GLTFLoader();
-        this.map = new gngine.MapSquare(2,3)
+        this.map = new gngine.MapSquare(2,3);
+        this.mapRenderer = {};
     }
     static getInstance(emitter, mapCanvas){
         const a = new AppDemo(emitter, mapCanvas)
@@ -81,8 +82,9 @@ class AppDemo {
 
         const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
         await navComp.build();
-        hudRenderer.addComponent(navComp);
-        console.log(p);
+        hudRenderer.addComponent(navComp); 
+        
+        this.mapRenderer = mapRenderer;
     }
 
     loadAsset(url, type){

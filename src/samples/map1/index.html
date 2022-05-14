@@ -721,7 +721,26 @@
         const mapCanvas2 = document.getElementById("map2");
 
         const demo = AppDemo.getInstance(emitter, mapCanvas);
-        const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);
+        // const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);
+
+        window.mgr_tiles = [];
+        window.emitter = emitter;
+        window.demo = demo;
+
+        emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
+            if(event.originalEvent.type=="pointerdown") {
+                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                if(event.data.hierarchy[i].userData.tileData){                
+                    tileData = event.data.hierarchy[i].userData.tileData                    
+                    window.mgr_tiles.push(tileData);
+                }
+            }
+            };
+            
+            
+            console.log('TILE',event.originalEvent.type)});
+        emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
+        emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
 
 
 
