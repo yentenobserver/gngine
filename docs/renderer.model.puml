@@ -83,6 +83,8 @@ abstract class MapIndicator {
   {method} forTiles(tiles: TileBase[]):void;
   {method} hide():void;
   {method} show():void;
+
+  {method} render(renderables: Renderable[], tiles: TileBase[], colorHex?: string):void;    
 }
 
 abstract class AreaMapIndicator{
@@ -93,7 +95,6 @@ abstract class AreaMapIndicator{
   
   constructor(mapProvider: MapPositionProvider&MapWritable, renderablesFactory: RenderablesFactory, renderableKey: string, colorHex?: string)
 
-  {method} render(renderables: Renderable[], tiles: TileBase[], colorHex?: string):void;    
 }
 
 class AreaMapIndicatorThreeJs{

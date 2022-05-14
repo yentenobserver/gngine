@@ -17,17 +17,17 @@ import sinon, { SinonSpy, SinonStub } from 'sinon';
 import * as THREE from 'three'
 import {TileBase} from '../src/logic/map/common.notest'
 import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'
-import {MapsMocks, TerrainMocks} from './data.mock'
+import {MapsMocks, TerrainMocks, AppEventsMocks} from './data.mock'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
-import {MatchingThreeJs, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
-import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs, MapQuadRendererThreeJs} from '../src/gui/renderer/renderers'
+import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
+import {AreaMapIndicator, AreaMapIndicatorThreeJs, HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapWritable, ScenePosition, TilePosition} from '../src/gui/renderer/renderers'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Vector3 } from 'three';
-import { RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
+import { Renderable, RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
 
 
 
@@ -1972,7 +1972,7 @@ describe('Playground', () => {
             })
             it("sets proper camera position",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.position.x).eq(0.2)
+                return expect(playgroundView.camera!.position.x).eq(0)
             })
             it("sets proper camera position",()=>{
                 playgroundView._setupScene();
@@ -2137,35 +2137,35 @@ describe("Renderers",()=>{
             it("sets position of all components",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
-                const position = -view.container.clientWidth/2 + (<HudComponentThreeJs>renderer.components[0]).getSize().x!/2;
+                // const position = -view.container.clientWidth/2 + (<HudComponentThreeJs>renderer.components[0]).getSize().x!/2;
                 
-                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(position)
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(0.5)
 
             })
             it("sets position of all components",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
-                const position = -view.container.clientWidth/2 + c.getSize().x! + c2.getSize().x!/2 ;
-                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(position)
+                // const position = -view.container.clientWidth/2 + c.getSize().x! + c2.getSize().x!/2 ;
+                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(41)
 
             })
             it("moves components along x axis according to the component position on the list",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
-                const position = -view.container.clientWidth/2 + c.getSize().x! + c2.getSize().x!/2 ;
-                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(position)
+                // const position = -view.container.clientWidth/2 + c.getSize().x! + c2.getSize().x!/2 ;
+                return expect((<HudComponentThreeJs>renderer.components[1]).object!.position.x).eq(41)
             })
             it("starts placing components in the lower, left corner of the view",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
                 
-                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(-view.container.clientWidth/2+c.getSize().x!/2)
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.x).eq(0.5)
             })
             it("starts placing components in the lower, left corner of the view",()=>{
                 renderer.components = [c,c2];                
                 renderer.repositionComponents();
                 
-                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.y).eq(-view.container.clientHeight/2+c.getSize().y!/2)
+                return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.y).eq(1)
             })
         })
             
@@ -2208,28 +2208,28 @@ describe("Renderers",()=>{
                     const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
                     const size = new THREE.Vector3();
                     updatedBBox.getSize(size);
-                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(4,4,4)));
                 })
                 it("resizes object accordingly to size percentage - size is updated",()=>{
                     c1.resize();                
                     const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
                     const size = new THREE.Vector3();
                     updatedBBox.getSize(size);
-                    return expect(c1.getSize().x).eq(50);
+                    return expect(c1.getSize().x).eq(4);
                 })
                 it("resizes object accordingly to size percentage - size is updated",()=>{
                     c1.resize();                
                     const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
                     const size = new THREE.Vector3();
                     updatedBBox.getSize(size);
-                    return expect(c1.getSize().y).eq(50);
+                    return expect(c1.getSize().y).eq(4);
                 })
                 it("resizes object accordingly to size percentage - making smaller",()=>{
                     c2.resize();                
                     const updatedBBox = new THREE.Box3().setFromObject(c2.object!);
                     const size = new THREE.Vector3();
                     updatedBBox.getSize(size);
-                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(50,50,50)));
+                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(4,4,4)));
                 })
             })
         })
@@ -2276,6 +2276,128 @@ describe("Renderers",()=>{
                 map.setView(view);
                 return expect(s1.getCall(0).args[0]).eq(map.mapHolderObject)
             })            
+        })
+        describe("zoom",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                view = new PlaygroundViewDefault("name", messageBusMocked);
+                view.camera = new THREE.Camera();
+                view.scene = new THREE.Scene;
+                map.setView(view); 
+                s1 = sinon.stub(view.camera,"lookAt");
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("increases zoom",()=>{
+                map.zoom(1);
+                return expect(map.state.zoomLevel).eq(14);
+            })
+            it("decreases zoom",()=>{
+                map.zoom(-1);
+                return expect(map.state.zoomLevel).eq(12);
+            })
+            it("preserves max zoom",()=>{
+                map.state.zoomLevel = 16
+                map.zoom(1);
+                return expect(map.state.zoomLevel).eq(16);
+            })
+            it("preserves min zoom",()=>{
+                map.state.zoomLevel = 0
+                map.zoom(-1);
+                return expect(map.state.zoomLevel).eq(0);
+            })
+            it("preserves where camera looks",()=>{
+                map.zoom(1);
+                return expect(s1.callCount).eq(1);
+            })
+        })
+        describe("rotate",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                view = new PlaygroundViewDefault("name", messageBusMocked);
+                view.scene = new THREE.Scene;
+                map.setView(view);  
+                s1 = sinon.stub(map.mapHolderObject,"rotateZ")                                              
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("throws error when there is no map in scene",()=>{                
+                map.mapHolderObject.name = "some other"
+                return expect(()=>{map.rotate.bind(map)(1)}).to.throw("Can't rotate. No map object in scene.");  
+            });
+
+            it("updates rotation state",()=>{
+                map.rotate(1);
+                return expect(map.state.sceneRotation).not.eq(0);
+            })
+            it("rotates map along z-axis",()=>{
+                map.rotate(1);
+                return expect(s1.callCount).eq(1);
+            })
+        })
+        describe("highlightTiles",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                const indicator:any = {
+                    forTiles: ()=>{}
+                }
+                map.indicatorForTile = <MapIndicator>indicator;
+
+                s1 = sinon.stub(indicator, "forTiles")
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("calls tile indicator",()=>{
+                map.highlightTiles([]);
+                return expect(s1.callCount).eq(1);                
+            })
+            it("does nothing when there is no indicator",()=>{
+                map.indicatorForTile = undefined;
+                map.highlightTiles([]);
+                return expect(s1.callCount).eq(0);                
+            })
+        })
+        describe("_onEvent",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                s1 = sinon.stub(map, "highlightTiles")
+                s2 = sinon.stub(map, "goToTile")
+                s3 = sinon.stub(map, "rotate")
+                s4 = sinon.stub(map, "zoom")
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+                s4.restore();
+            })
+            it("highlights tile on pointer move",()=>{                            
+                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_tile_1_move);
+                return expect(s1.callCount).eq(1);
+            })
+            it("goes to clicked tile on pointer down",()=>{
+                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_tile_2_click);
+                return expect(s2.callCount).eq(1);
+            })
+            it("rotates left on hud click",()=>{
+                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_1_click_left);
+                return expect(s3.getCall(0).args[0]).eq(1);
+            })
+            it("rotates right on hud click",()=>{
+                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_2_click_right);
+                return expect(s3.getCall(0).args[0]).eq(-1);
+            })
+            it("zooms in on hud click",()=>{
+                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_4_click_up);
+                return expect(s4.getCall(0).args[0]).eq(1);
+            })
+            it("zooms out on hud click",()=>{
+                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_5_click_down);
+                return expect(s4.getCall(0).args[0]).eq(-1);
+            })
         })
         describe("_dispose",()=>{
             let m1: THREE.Mesh;
@@ -3061,6 +3183,131 @@ describe("Renderers",()=>{
             it("throws error when none found",()=>{
                 return expect(()=>{(<RenderablesThreeJSFactory>rf)._findSpecificationItem("otherName")}).to.throw("Can't find renderable specification item for");      
             });
+        })
+    })
+    describe("MapIndicator",()=>{
+        let s1:SinonSpy;
+        let s2:SinonStub;
+        let s3:SinonSpy;
+        let s4:SinonSpy;
+        let s5:SinonStub;
+        let s6:SinonStub;
+        // let s10:SinonSpy;
+        let indicator: MapIndicator;
+        let tile: TileBase;
+        let rf: RenderablesDefaultFactory;
+        let mapProvider: MapPositionProvider & MapWritable;
+
+        describe("AreaMapIndicatorThreeJs",()=>{
+            beforeEach(()=>{
+                tile = {id: "", t: "", x:0, y: 0};
+                mapProvider = {
+                    add: ()=>{},
+                    scenePositionToXY: (_sceneX: number, _sceneY: number) => <TilePosition>{},
+                    xyToScenePosition: (_y: number, _x: number)=><ScenePosition>{}                        
+                }
+                rf = new RenderablesDefaultFactory(<RenderablesSpecification>{});
+                indicator = new AreaMapIndicatorThreeJs(mapProvider, rf, "key");
+                s1 = sinon.spy(indicator,"hide");
+                s2 = sinon.stub(indicator,"render");
+                s3 = sinon.spy(indicator,"show");
+                s4 = sinon.spy((<AreaMapIndicator>indicator).renderables,"push");
+                s5 = sinon.stub(indicator.renderablesFactory, "spawnRenderableObject").returns({
+                    data: {},
+                    name: "",
+                    hide: ()=>{},
+                    show: ()=>{}
+                });
+                s6 = sinon.stub(indicator.mapProvider, "add");
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+                s4.restore();
+                s5.restore();
+                s6.restore();
+            })
+            describe("forTile",()=>{
+                
+                it("hides previous tiles",()=>{
+                    (<AreaMapIndicator>indicator).tiles.push(tile);
+                    (<AreaMapIndicator>indicator).renderables.push(<Renderable>{
+                        data: {},
+                        name: "",
+                        hide: ()=>{},
+                        show: ()=>{}
+                    });
+                    indicator.forTile(tile);
+                    
+                    return expect(s1.callCount).eq(1);
+                })
+                it("spawns additional renderables when necessary",()=>{
+                    indicator.forTile(tile);
+                    return expect(s5.callCount).eq(1);
+                })
+                it("populates renderables with spawned one",()=>{
+                    indicator.forTile(tile);
+                    return expect(s4.callCount).eq(1);
+                })
+                it("adds spawned renderable to map",()=>{
+                    indicator.forTile(tile);
+                    return expect(s6.callCount).eq(1);
+                })
+                it("renders the indicator",()=>{
+                    indicator.forTile(tile);
+                    return expect(s2.callCount).eq(1);
+                })
+                it("makes sure the indicator is shown",()=>{
+                    indicator.forTile(tile);
+                    return expect(s3.callCount).eq(1);
+                })
+                it("adds tile to tiles array",()=>{
+                    indicator.forTile(tile);
+                    return expect((<AreaMapIndicator>indicator).tiles.length).eq(1);
+                })
+            })
+            describe("forTiles",()=>{
+
+                
+                it("hides previous tiles",()=>{
+                    
+                    (<AreaMapIndicator>indicator).renderables.push(<Renderable>{
+                        data: {},
+                        name: "",
+                        hide: ()=>{},
+                        show: ()=>{}
+                    });
+                    indicator.forTiles([tile]);
+                    
+                    return expect(s1.callCount).eq(1);
+                })
+                it("spawns additional renderables when necessary",()=>{
+                    indicator.forTiles([tile]);
+                    return expect(s5.callCount).eq(1);
+                })
+                it("populates renderables with spawned one",()=>{
+                    indicator.forTiles([tile]);
+                    return expect(s4.callCount).eq(1);
+                })
+                it("adds spawned renderable to map",()=>{
+                    indicator.forTiles([tile]);
+                    return expect(s6.callCount).eq(1);
+                })
+                it("renders the indicator",()=>{
+                    indicator.forTiles([tile]);
+                    return expect(s2.callCount).eq(1);
+                })
+                it("makes sure the indicator is shown",()=>{
+                    indicator.forTiles([tile]);
+                    return expect(s3.callCount).eq(1);
+                })
+                it("adds tile to tiles array",()=>{
+                    indicator.forTiles([tile]);
+                    return expect((<AreaMapIndicator>indicator).tiles.length).eq(1);
+                })
+            })
+            
         })
     })
 })

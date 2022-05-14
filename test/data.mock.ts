@@ -201,3 +201,141 @@ export const MapsMocks = {
     ]  
     
 }
+
+export const AppEventsMocks = {
+    interaction_tile_1_move: {
+        type: "interaction:tile",
+        data: {
+            hierarchy: [
+                {
+                    userData: {                                               
+                    }
+                },
+                {
+                    userData: {
+                        tileData: {
+                            "id": "0,2",
+                            "x": 2,
+                            "y": 0,
+                            "d": "S",
+                            "t": "C_T_GRASS_1_TILE",
+                            "loc": {
+                                "n": "Grassland",
+                                "g": "43.74650403587078,7.421766928360976"
+                            },
+                            "ext": {},
+                            "nft": {
+                                "v": 100,
+                                "b": "ETHEREUM",
+                                "i": "123",
+                                "t": "0x123",
+                                "o": "0x0022"
+                            }
+                        }                        
+                    }
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointermove"
+        }
+    },
+    interaction_tile_2_click: {
+        type: "interaction:tile",
+        data: {
+            hierarchy: [
+                {
+                    userData: {
+                        tileData: {
+                            "id": "0,2",
+                            "x": 2,
+                            "y": 0,
+                            "d": "S",
+                            "t": "C_T_GRASS_1_TILE",
+                            "loc": {
+                                "n": "Grassland",
+                                "g": "43.74650403587078,7.421766928360976"
+                            },
+                            "ext": {},
+                            "nft": {
+                                "v": 100,
+                                "b": "ETHEREUM",
+                                "i": "123",
+                                "t": "0x123",
+                                "o": "0x0022"
+                            }
+                        }                        
+                    }
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointerdown"
+        }
+    },
+    interaction_hud_1_click_left: {
+        type: "interaction:hud",
+        data: {
+            hierarchy: [
+                {
+                    name: "LEFT"
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointerdown"
+        }
+    },
+    interaction_hud_2_click_right: {
+        type: "interaction:hud",
+        data: {
+            hierarchy: [
+                {
+                    name: "RIGHT"
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointerdown"
+        }
+    },
+    interaction_hud_3_move: {
+        type: "interaction:hud",
+        data: {
+            hierarchy: [
+                {
+                    name: "LEFT"
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointermove"
+        }
+    },
+    interaction_hud_4_click_up: {
+        type: "interaction:hud",
+        data: {
+            hierarchy: [
+                {
+                    name: "UP"
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointerdown"
+        }
+    },
+    interaction_hud_5_click_down: {
+        type: "interaction:hud",
+        data: {
+            hierarchy: [
+                {
+                    name: "DOWN"
+                }
+            ]
+        },
+        originalEvent: {
+            type: "pointerdown"
+        }
+    },
+}
