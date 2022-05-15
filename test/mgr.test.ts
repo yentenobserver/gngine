@@ -2350,6 +2350,43 @@ describe("Renderers",()=>{
             
 
         })
+        describe("add",()=>{
+            let r: Renderable;
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                view = new PlaygroundViewDefault("name", messageBusMocked);
+                view.camera = new THREE.Camera();
+                view.scene = new THREE.Scene;
+                map.setView(view); 
+                s1 = sinon.stub(map.mapHolderObject,"add");
+                r = {
+                    data: {},
+                    name: "",
+                    hide: ()=>{},
+                    show: ()=>{}                    
+                }
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("adds renderable to map holder",()=>{
+                map.add(r);
+                return expect(s1.callCount).eq(1);
+            })  
+        })
+        describe("_createMapHelpers",()=>{
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                view = new PlaygroundViewDefault("name", messageBusMocked);
+                view.camera = new THREE.Camera();
+                view.scene = new THREE.Scene;
+                map.setView(view);               
+            })
+            it("populates indicator for tiles",()=>{
+                map._createMapHelpers();
+                return expect(map.indicatorForTile).is.not.undefined;
+            })
+        })
         describe("zoom",()=>{
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
