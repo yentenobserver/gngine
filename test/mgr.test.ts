@@ -2277,6 +2277,79 @@ describe("Renderers",()=>{
                 return expect(s1.getCall(0).args[0]).eq(map.mapHolderObject)
             })            
         })
+        describe("goToTile",()=>{
+            let tile: TileBase;
+            let tile2: TileBase;
+            let object3D: THREE.Object3D;
+            beforeEach(()=>{
+                tile = {id: "", t: "", x:0, y: 0};
+                tile2 = {id: "", t: "", x:50, y: 50};
+                object3D = new THREE.Object3D();
+
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
+                view = new PlaygroundViewDefault("name", messageBusMocked);
+                view.camera = new THREE.Camera();
+                view.scene = new THREE.Scene;
+                map.setView(view); 
+                s1 = sinon.stub(view.camera,"lookAt");
+                s2 = sinon.stub(map,"xyToScenePosition").returns({x: 10, y:10, z: 0});
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+            })
+            describe("no tile yet selected",()=>{
+                it("sets camera position",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(JSON.stringify(view.camera.position)).eq(JSON.stringify({"x":10,"y":5,"z":0}));
+                });
+                it("sets camera look at",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(s1.callCount).eq(1);
+                });
+                it("stores clicked tile as current tile",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(map.state.current.tile).eq(tile);
+                })
+                it("stores look at tile as current look at",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(map.state.lookAt).not.undefined;
+                })
+                it("stores clicked tile world position",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(map.state.current.tileWorldPos).not.undefined;
+                })
+            })
+            
+            describe("previous tile already selected",()=>{
+                let prevLookAt: THREE.Vector3;
+
+                beforeEach(()=>{
+                    map.state.current.tile = tile2;
+                    prevLookAt = new THREE.Vector3(3,3,3);
+                    map.state.lookAt = prevLookAt;
+                    map.state.current.tileWorldPos = new THREE.Vector3(20,20,0);
+                })
+                it("sets camera position",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(JSON.stringify(view.camera.position)).eq(JSON.stringify({"x":-20,"y":-20,"z":0}));
+                });
+                it("should not set camera look at",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(s1.callCount).eq(0);
+                });
+                it("stores clicked tile as current tile",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(map.state.current.tile).eq(tile);
+                })                
+                it("stores clicked tile world position",()=>{
+                    map.goToTile(tile, object3D);
+                    return expect(map.state.current.tileWorldPos).not.undefined;
+                })
+            })
+            
+
+        })
         describe("zoom",()=>{
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
@@ -3192,15 +3265,59 @@ describe("Renderers",()=>{
         let s4:SinonSpy;
         let s5:SinonStub;
         let s6:SinonStub;
+        let s7:SinonStub;
         // let s10:SinonSpy;
         let indicator: MapIndicator;
         let tile: TileBase;
+        let tile2: TileBase;
+        let tile3: TileBase;
         let rf: RenderablesDefaultFactory;
         let mapProvider: MapPositionProvider & MapWritable;
+        let r1: Renderable;
+        let r2: Renderable;
+        let r3: Renderable;
 
         describe("AreaMapIndicatorThreeJs",()=>{
             beforeEach(()=>{
+                r1 = {
+                    data: {                        
+                        position: {
+                            x: 0,
+                            y: 0,
+                            set: ()=>{}
+                        }                        
+                    },
+                    name: "r1",
+                    hide: ()=>{},
+                    show: ()=>{},                    
+                }
+                r2 = {
+                    data: {                        
+                        position: {
+                            x: 10,
+                            y: 10,
+                            set: ()=>{}
+                        }                        
+                    },
+                    name: "r2",
+                    hide: ()=>{},
+                    show: ()=>{}
+                }
+                r3 = {
+                    data: {                        
+                        position: {
+                            x: 20,
+                            y: 20,
+                            set: ()=>{}
+                        }                        
+                    },
+                    name: "r3",
+                    hide: ()=>{},
+                    show: ()=>{}
+                }
                 tile = {id: "", t: "", x:0, y: 0};
+                tile2 = {id: "", t: "", x:10, y: 10};
+                tile3 = {id: "", t: "", x:20, y: 20};
                 mapProvider = {
                     add: ()=>{},
                     scenePositionToXY: (_sceneX: number, _sceneY: number) => <TilePosition>{},
@@ -3305,6 +3422,24 @@ describe("Renderers",()=>{
                 it("adds tile to tiles array",()=>{
                     indicator.forTiles([tile]);
                     return expect((<AreaMapIndicator>indicator).tiles.length).eq(1);
+                })
+            })
+            describe("render",()=>{
+                beforeEach(()=>{
+                    s2.restore();
+                    s7 = sinon.stub(mapProvider,"xyToScenePosition");
+                    s7.withArgs(0,0).returns({x: 0, y:1})
+                    s7.withArgs(10,10).returns({x: 11, y:10})
+                    s7.withArgs(20,20).returns({x: 20, y:20})
+                })
+                it("detects mismatch between renderables and tiles",()=>{                    
+                    return expect(()=>{indicator.render.bind(indicator)([r1,r2], [tile])}).to.throw("Renderables and tiles count mismatch");                    
+                })
+                it("updates position only on change",()=>{
+                    indicator.render([r1,r2],[tile, tile2]);
+                })
+                it("updates position only on change",()=>{
+                    indicator.render([r3],[tile3]);
                 })
             })
             

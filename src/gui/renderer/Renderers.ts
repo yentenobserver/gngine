@@ -326,14 +326,15 @@ export abstract class MapRendererThreeJs extends MapRenderer{
             this.view!.camera.position.x += deltadelta.x;
             this.view!.camera.position.y += deltadelta.y;
             console.log(`Camera pos after: ${JSON.stringify(this.view!.camera.position)}`);
+            // this.view!.camera.lookAt(object.position.x, object.position.y, 0);
+            // this.state.lookAt = new Vector3(object.position.x, object.position.y, 0);
 
         }
         else{
             const sceneXY = this.xyToScenePosition(tile.y, tile.x);
             this.view!.camera.position.x = sceneXY.x;
             this.view!.camera.position.y = sceneXY.y-5;
-            this.view!.camera.lookAt(sceneXY.x, sceneXY.y, 0);
-            this.state.current.tile = tile;
+            this.view!.camera.lookAt(sceneXY.x, sceneXY.y, 0);            
             this.state.lookAt = new Vector3(sceneXY.x, sceneXY.y, 0);
             
         }
@@ -431,12 +432,14 @@ export abstract class AreaMapIndicator extends MapIndicator{
 
 export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
 
-    render(renderables: Renderable[], tiles: TileBase[], _colorHex?: string): void {
+    render(renderables: Renderable[], tiles: TileBase[], _colorHex?: string): void {        
+        if(renderables.length != tiles.length)
+            throw new Error(`Renderables and tiles count mismatch. ${renderables.length} vs ${tiles.length}`);
         for(let i=0; i<tiles.length; i++){
             const pos = this.mapProvider.xyToScenePosition(tiles[i].y, tiles[i].x);
             const renderable = <RenderableThreeJS>renderables[i];            
             if(renderable.data.position.x !=pos.x || renderable.data.position.y !=pos.y){
-                console.log(`Cache size ${this.tiles.length} ${this.renderables.length}`)
+                // console.log(`Cache size ${this.tiles.length} ${this.renderables.length}`)
                 renderable.data.position.set(pos.x, pos.y, renderable.data.position.z);
             }
         }        
