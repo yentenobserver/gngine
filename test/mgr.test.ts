@@ -31,6 +31,7 @@ import { Renderable, RenderablesDefaultFactory, RenderablesSpecification, Render
 
 
 
+
 describe('Gamengine', () => {
     describe('MapSquare', () => {   
         describe('_direction', () => {   
@@ -2989,7 +2990,18 @@ describe("Renderers",()=>{
             it("throws error on invalid pivot specification",()=>{
                 specification.main.pivotCorrection = "abc"
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply pivot correction for specification");                    
-            })            
+            })  
+            it("spawns renderable that can be hidden",()=>{
+                const spawned = rf.spawnRenderableObject(T1);
+                spawned.hide!();
+                return expect(spawned.data.visible).is.not.true;
+            })          
+            it("spawns renderable that can be shown",()=>{
+                const spawned = rf.spawnRenderableObject(T1);
+                spawned.hide!();
+                spawned.show!();
+                return expect(spawned.data.visible).is.true;
+            })          
         })
         describe("loadTemplates",()=>{
             beforeEach(()=>{

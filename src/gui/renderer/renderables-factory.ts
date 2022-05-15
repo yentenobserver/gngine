@@ -155,10 +155,10 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             
             return {
                 name: objectName,
-                data: result,
+                data: result,                
                 hide: ()=>{
                     result!.visible = false;
-                },
+                },                
                 show: ()=>{
                     result!.visible = true;
                 }
