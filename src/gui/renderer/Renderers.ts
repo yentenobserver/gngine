@@ -165,7 +165,7 @@ export class HudRendererThreeJs extends HudRenderer {
         // let x = -this.view!.container.clientWidth/2;
         let x = -FIX_CAMERA_HALF_SIZE+MARGIN/2;
         
-        console.log(this.view!.container.clientWidth, this.view!.container.clientHeight)
+        // console.log(this.view!.container.clientWidth, this.view!.container.clientHeight)
         
         this.components.forEach((item:HudComponent)=>{               
             // component pivot is as its center so we need to position 
@@ -325,7 +325,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
             this.view!.camera.position.x += deltadelta.x;
             this.view!.camera.position.y += deltadelta.y;
-            console.log(`Camera pos after: ${JSON.stringify(this.view!.camera.position)}`);
+            // console.log(`Camera pos after: ${JSON.stringify(this.view!.camera.position)}`);
             // this.view!.camera.lookAt(object.position.x, object.position.y, 0);
             // this.state.lookAt = new Vector3(object.position.x, object.position.y, 0);
 
@@ -653,7 +653,7 @@ export class SpriteFactoryx128x128x4xL extends SpriteFactory{
         return new Promise((resolve, reject) => {
             
             const loader = new THREE.TextureLoader();
-            console.log(this.url)
+            // console.log(this.url)
             loader.load(this.url, (texture:THREE.Texture) => {
                 resolve(texture);
             }, undefined, (error) => {
