@@ -3,6 +3,12 @@ import { Object3D } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 
+/**
+ * Playground is a separated display context
+ * that can be embedded in external container (like a part of a web page).
+ * Playground holds and draws views that are attached to it. 
+ * It is also an interation interface between actions in playground and external container.
+ */
 export abstract class Playground{
     container: any;
     interactions: PlaygroundInteractions;
@@ -28,7 +34,10 @@ export abstract class Playground{
 
     
 }
-
+/**
+ * Playground implementation using ThreeJS 3D javascript library.
+ * It uses WebGLRenderer for drawing elements that were put into the view by renderers.
+ */
 export class PlaygroundThreeJs extends Playground{
     
     _renderer: THREE.WebGLRenderer|any;
@@ -167,7 +176,10 @@ export class PlaygroundThreeJs extends Playground{
       }
     
 }
-
+/**
+ * Playground view is responsible for storing objects that will be rendered onto the view.
+ * It also translates user interactions into the space of the objects that are within the view.
+ */
 export abstract class PlaygroundView{
     name:string;
     emitter: EventEmitter;
@@ -610,8 +622,11 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
 
 export class PlaygroundInteractions{}
 
-export interface PlaygroundInteractionEvent{
+export interface EngineEvent {
     type: string, // event type, see events.notest.ts
+}
+
+export interface PlaygroundInteractionEvent extends EngineEvent{
     viewName: string, // name of the view that took part in the interaction
     originalEvent: any, // original event from UI that triggered the interaction
     interactingObject: any, // the object that took part in the interaction

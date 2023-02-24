@@ -23,8 +23,8 @@ export abstract class UnitActionable implements Actionable {
 }
 
 export class UnitSpecs {
-    tuid: string;
-    name: string;
+    tuid: string; // unit type id
+    name: string; // unit type name
 
     constructor(){
         this.tuid = ""

@@ -339,3 +339,23 @@ export const AppEventsMocks = {
         }
     },
 }
+
+export const MapEventMocks = {
+    
+    rotate_left: {
+        type: "map:rotate",
+        direction: "LEFT"
+    },
+    rotate_right: {
+        type: "map:rotate",
+        direction: "RIGHT"
+    },
+    zoom_in: {
+        type: "map:zoom",
+        direction: "IN"
+    },
+    zoom_out: {
+        type: "map:zoom",
+        direction: "OUT"
+    }
+}

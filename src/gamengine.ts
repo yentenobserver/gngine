@@ -14,8 +14,10 @@ export {Playground, PlaygroundInteractions, PlaygroundThreeJs, PlaygroundView, P
 export {RenderablesFactory, RenderablesThreeJSFactory} from './gui/renderer/renderables-factory';
 export type {Renderable, RenderableThreeJS, RenderablesSpecification, RenderablesSpecificationMap, RenderableSpecificationItem} from './gui/renderer/renderables-factory';
 
-export {HudComponent, HudComponentLargeThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRenderer, HudRendererThreeJs, MapRenderer, MapRendererThreeJs, Renderer, SpriteFactory, SpriteFactoryx128x128x4xL,MapQuadRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator} from './gui/renderer/renderers'
-export type {Rotations, ScenePosition, MapPositionProvider, MapWritable, TilePosition} from './gui/renderer/renderers'
+export {  Renderer } from './gui/renderer/renderers'
+export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator} from './gui/renderer/map-renderers'
+export {HudComponent, HudComponentLargeThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRenderer, HudRendererThreeJs, SpriteFactory, SpriteFactoryx128x128x4xL} from './gui/renderer/hud-renderers'
+export type {Rotations, ScenePosition, MapPositionProvider, MapWritable, TilePosition} from './gui/renderer/map-renderers'
 
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"
 

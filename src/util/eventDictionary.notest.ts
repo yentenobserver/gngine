@@ -7,6 +7,8 @@ export const Events = {
     },
     MAP: {
         FOV: "map:fov", //(fovTiles: TileBase[])
+        ROTATE: "map:rotate", //(event: MapRotateEvent)
+        ZOOM: "map:zoom", //(event: MapZoomEvent)
     },
     ENGINE: {
         BATTLE_OUTCOME: "battle:outcome", // (result: BattleOutcome)

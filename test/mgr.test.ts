@@ -17,12 +17,14 @@ import sinon, { SinonSpy, SinonStub } from 'sinon';
 import * as THREE from 'three'
 import {TileBase} from '../src/logic/map/common.notest'
 import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'
-import {MapsMocks, TerrainMocks, AppEventsMocks} from './data.mock'
+import {MapsMocks, TerrainMocks, AppEventsMocks, MapEventMocks} from './data.mock'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
-import {AreaMapIndicator, AreaMapIndicatorThreeJs, HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapWritable, ScenePosition, TilePosition} from '../src/gui/renderer/renderers'
+import { } from '../src/gui/renderer/renderers'
+import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TilePosition} from '../src/gui/renderer/map-renderers'
+import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
@@ -2066,6 +2068,7 @@ describe("Renderers",()=>{
         
         let s1:SinonStub;
         let s2:SinonStub;
+        let s3:SinonStub;
         let view:PlaygroundViewHudThreeJsDefault;
         let renderer: HudRendererThreeJs;
         let c: HudComponentDefaultThreeJs;
@@ -2106,6 +2109,10 @@ describe("Renderers",()=>{
                 renderer.addComponent(c);
                 return expect(c.container).eq(view.container);
             });
+            it("shares emitter with component",()=>{
+                renderer.addComponent(c);
+                return expect(c.emitter).eq(messageBusMocked);
+            })
         })
 
         describe("repositionComponents",()=>{
@@ -2168,6 +2175,33 @@ describe("Renderers",()=>{
                 
                 return expect((<HudComponentThreeJs>renderer.components[0]).object!.position.y).eq(1)
             })
+        })
+
+        describe("_onEvent",()=>{
+            
+            beforeEach(()=>{
+                view = new PlaygroundViewHudThreeJsDefault(messageBusMocked); 
+                view.container = {
+                    clientWidth: 100
+                }      
+                renderer = new HudRendererThreeJs(messageBusMocked);       
+                renderer.setView(view);
+
+                s1 = sinon.stub(renderer,"repositionComponents");
+                c = new HudComponentDefaultThreeJs();
+                s2 = sinon.stub(view.scene,"add");
+                s3 = sinon.stub(c,"_onEvent");
+                renderer.addComponent(c);
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+            })
+            it("shares events with components",()=>{    
+                renderer._onEvent({type: "SomeEvent"});            
+                return expect(s3.callCount).eq(1);
+            });
         })
             
         
@@ -2494,19 +2528,19 @@ describe("Renderers",()=>{
                 return expect(s2.callCount).eq(1);
             })
             it("rotates left on hud click",()=>{
-                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_1_click_left);
+                map._onEvent(<MapRotateEvent>MapEventMocks.rotate_left);
                 return expect(s3.getCall(0).args[0]).eq(1);
             })
             it("rotates right on hud click",()=>{
-                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_2_click_right);
+                map._onEvent(<MapRotateEvent>MapEventMocks.rotate_right);
                 return expect(s3.getCall(0).args[0]).eq(-1);
             })
             it("zooms in on hud click",()=>{
-                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_4_click_up);
+                map._onEvent(<MapZoomEvent>MapEventMocks.zoom_in);
                 return expect(s4.getCall(0).args[0]).eq(1);
             })
             it("zooms out on hud click",()=>{
-                map._onEvent(<PlaygroundInteractionEvent>AppEventsMocks.interaction_hud_5_click_down);
+                map._onEvent(<MapZoomEvent>MapEventMocks.zoom_out);
                 return expect(s4.getCall(0).args[0]).eq(-1);
             })
         })
@@ -2808,11 +2842,13 @@ describe("Renderers",()=>{
     describe("HudComponentMapNavigationThreeJs",()=>{
         let s1: SinonStub;
         let s2: SinonStub;
+        let s3: SinonStub;
         // let s3: SinonStub;
         // let s4: SinonStub;
 
         // let s10: SinonSpy;
         let c: HudComponentMapNavigationThreeJs;
+        let messageBusMocked = new EventEmitter();
 
         describe("build",()=>{
             beforeEach(()=>{
@@ -2872,6 +2908,154 @@ describe("Renderers",()=>{
                 return c.build().then(()=>{
                     return expect(c.object!.name).eq("COMP_HUD_NAV");
                 })
+            })
+        })
+
+        describe("_onEvent",()=>{
+            beforeEach(()=>{
+                c = new HudComponentMapNavigationThreeJs("https://some.url");
+                c.emitter = messageBusMocked;
+
+                s1 = sinon.stub(c.buttonsFactory,"initialize").resolves();
+                s2 = sinon.stub(c.buttonsFactory,"getInstance");
+                s2.onCall(0).returns(new THREE.Sprite());
+                s2.onCall(1).returns(new THREE.Sprite());
+                s2.onCall(2).returns(new THREE.Sprite());
+                s2.onCall(3).returns(new THREE.Sprite());
+                s3 = sinon.stub(c.emitter!, "emit" );
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+            })
+            it("emits map rotate left event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.LEFT}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[0];
+                return expect(arg).eq(Events.MAP.ROTATE);
+            })
+            it("emits map rotate left event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.LEFT}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[1];
+                return expect(arg.direction).eq("LEFT");
+            })
+            it("emits map rotate right event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.RIGHT}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[0];
+                return expect(arg).eq(Events.MAP.ROTATE);
+            })
+            it("emits map rotate right event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.RIGHT}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[1];
+                return expect(arg.direction).eq("RIGHT");
+            })
+            it("emits map zoom out event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.UP}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[0];
+                return expect(arg).eq(Events.MAP.ZOOM);
+            })
+            it("emits map zoom out event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.UP}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[1];
+                return expect(arg.direction).eq("IN");
+            })
+            it("emits map zoom in event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.DOWN}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[0];
+                return expect(arg).eq(Events.MAP.ZOOM);
+            })
+            it("emits map zoom in event",()=>{
+                const event: PlaygroundInteractionEvent = {
+                    data: {
+                        hierarchy: [{name: HudComponentMapNavigationThreeJs.CONTROLS.DOWN}]
+                    },
+                    interactingObject: {},
+                    originalEvent: {
+                        type: "pointerdown"
+                    },
+                    type: Events.INTERACTIONS.HUD,
+                    viewName: ""
+                }
+                c._onEvent(event);
+                const arg = s3.getCall(0).args[1];
+                return expect(arg.direction).eq("OUT");
             })
         })
     })
