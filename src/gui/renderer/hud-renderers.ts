@@ -289,7 +289,7 @@ export class HudComponentMapNavigationThreeJs extends HudComponentMediumThreeJs{
     _onEvent(event: EngineEvent|PlaygroundInteractionEvent): void {
         
         if(event.type == Events.INTERACTIONS.HUD && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown"){
-            console.log("Got event", event);
+            // console.log("Got event", event);
             for(let i=(<PlaygroundInteractionEvent>event).data.hierarchy.length-1; i>= 0; i--){
                 if([                    
                     HudComponentMapNavigationThreeJs.CONTROLS.LEFT,

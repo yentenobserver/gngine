@@ -93,7 +93,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
 
     _onEvent(event:PlaygroundInteractionEvent|MapEvent|MapRotateEvent):void{
         
-        console.log("Got map event", event);
+        // console.log("Got map event", event);
         // check if this is a tile related event
         if(event.type == Events.INTERACTIONS.TILE){
 
