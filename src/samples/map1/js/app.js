@@ -87,8 +87,8 @@ class AppDemo {
         const unitsRenderablesSpecification = {
             main: {
                 name: "unitsAssets",
-                url: "./assets/models-prod.gltf",
-                pivotCorrection: "-0.5,-0.5,0"
+                url: "./assets/units.gltf"
+                // pivotCorrection: "-0.5,-0.5,0"
             }
             // helpers: {
             //     name: "mapHelpers",
@@ -100,7 +100,47 @@ class AppDemo {
         const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer);
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
-        
+        await unitRenderer.initialize();
+        const tile = {
+            "id": "0,1",
+            "x": 1,
+            "y": 0,
+            "d": "S",
+            "t": "C_T_GRASS_1_TILE",
+            "loc": {
+              "n": "Grassland",
+              "g": "43.74650403587078,7.421766928360976"
+            },
+            "ext": {},
+            "nft": {
+              "v": 100,
+              "b": "ETHEREUM",
+              "i": "123",
+              "t": "0x123",
+              "o": "0x0022"
+            }
+        }
+        const unit = {
+            actionPoints: 1,
+            actionRunner: undefined,
+            actionsAllowed: [],
+            actionsQueue: [],
+            attackStrength: (_unit)=>{ return 1},
+            defendStrength: (_unit)=>{ return 1},
+            gainBattleExperience: ()=>{},
+            hitPoints: 1,
+            rangeStrength: 10,
+            strength: 10,
+            sight: 2,
+            uid: "",
+            unitSpecification: {
+                hitPoints: 10,
+                name: "Type",
+                tuid: "T34"
+            }
+        }
+        unitRenderer.put(unit, tile,"S");
+
         this.mapRenderer = mapRenderer;
     }
 

@@ -15,7 +15,7 @@ export class UnitPositions {
   
     get(unitId:string):UnitPosition{
       const unitPosition = this._positions.find((item:UnitPosition)=>{
-        return item.unit.i == unitId
+        return item.unit.uid == unitId
       })
       if(!unitPosition)
         throw new Error(`Can't get unit ${unitId}`);

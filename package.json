@@ -25,7 +25,8 @@
     "build": "npm run build:js -s && npm run build:minjs -s && npm run build:types -s",
     "test": "env TS_NODE_PROJECT=\"tsconfig-test.json\" mocha -r ts-node/register **/test/**/*.test.ts",
     "coverage": "nyc --reporter html --reporter text npm test",
-    "gltfit": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i src/assets/models-prod.dae src/assets/models-prod.gltf"
+    "gltfit": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i src/assets/models-prod.dae src/assets/models-prod.gltf",
+    "gltfunits": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i src/samples/map1/assets/units-prod.dae src/samples/map1/assets/units.gltf"
   },
   "files": [
     "src",

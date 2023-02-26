@@ -426,5 +426,24 @@ export const UnitsMocks = {
             name: "Type",
             tuid: "T_1"
         }
+    },
+    unit4: {
+        actionPoints: 1,
+        actionRunner: ActionsMock.action1,
+        actionsAllowed: [],
+        actionsQueue: [],
+        attackStrength: (_unit:any)=>{ return 1},
+        defendStrength: (_unit:any)=>{ return 1},
+        gainBattleExperience: ()=>{},
+        hitPoints: 1,
+        rangeStrength: 10,
+        strength: 10,
+        sight: 2,
+        uid: "",
+        unitSpecification: {
+            hitPoints: 10,
+            name: "Type",
+            tuid: "T34"
+        }
     }
 }

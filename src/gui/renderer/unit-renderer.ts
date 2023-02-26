@@ -286,6 +286,9 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         this.holderObject = new Object3D();
         this.holderObject.name = UnitsRendererThreeJS.NAME;
     }
+    initialize(): Promise<void> {
+        return this.renderablesFactory!.loadTemplates(["_UNIT"]);
+    }
 
     /**
      * Provides renderer with a view to which renderer will render;
