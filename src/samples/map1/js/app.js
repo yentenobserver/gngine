@@ -87,8 +87,8 @@ class AppDemo {
         const unitsRenderablesSpecification = {
             main: {
                 name: "unitsAssets",
-                url: "./assets/units.gltf"
-                // pivotCorrection: "-0.5,-0.5,0"
+                url: "./assets/units.gltf",
+                pivotCorrection: "-0.3,-0.15,0.1"
             }
             // helpers: {
             //     name: "mapHelpers",
@@ -120,6 +120,25 @@ class AppDemo {
               "o": "0x0022"
             }
         }
+        const tile2 = {
+            "id": "1,0",
+            "x": 0,
+            "y": 1,
+            "d": "S",
+            "t": "C_T_DIRT_1_TILE",
+            "loc": {
+              "n": "Bushland",
+              "g": "43.74650403587078,7.421766928360976"
+            },
+            "ext": {},
+            "nft": {
+              "v": 100,
+              "b": "ETHEREUM",
+              "i": "123",
+              "t": "0x123",
+              "o": "0x0022"
+            }
+          }
         const unit = {
             actionPoints: 1,
             actionRunner: undefined,
@@ -139,7 +158,27 @@ class AppDemo {
                 tuid: "T34"
             }
         }
+        const unit2 = {
+            actionPoints: 1,
+            actionRunner: undefined,
+            actionsAllowed: [],
+            actionsQueue: [],
+            attackStrength: (_unit)=>{ return 1},
+            defendStrength: (_unit)=>{ return 1},
+            gainBattleExperience: ()=>{},
+            hitPoints: 1,
+            rangeStrength: 10,
+            strength: 10,
+            sight: 2,
+            uid: "u2",
+            unitSpecification: {
+                hitPoints: 10,
+                name: "Type",
+                tuid: "T34"
+            }
+        }
         unitRenderer.put(unit, tile,"S");
+        unitRenderer.put(unit2, tile2,"E");
 
         this.mapRenderer = mapRenderer;
     }
