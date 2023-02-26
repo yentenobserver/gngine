@@ -359,3 +359,72 @@ export const MapEventMocks = {
         direction: "OUT"
     }
 }
+
+export const ActionsMock = {
+    action1: {
+        emitter: <any>{},
+        code: "ActionMove",
+        rangeAndCosts(){return <any>{}},
+        perform(_context:any){}
+    }
+}
+
+export const UnitsMocks = {
+    unit1: {
+        actionPoints: 10,
+        actionRunner: undefined,
+        actionsAllowed: [],
+        actionsQueue: [],
+        attackStrength: (_unit:any)=>{ return 1},
+        defendStrength: (_unit:any)=>{ return 1},
+        gainBattleExperience: ()=>{},
+        hitPoints: 10,
+        rangeStrength: 10,
+        strength: 10,
+        sight: 2,
+        uid: "",
+        unitSpecification: {
+            hitPoints: 10,
+            name: "Type",
+            tuid: "T_1"
+        }
+    },
+    unit2: {
+        actionPoints: 10,
+        actionRunner: undefined,
+        actionsAllowed: [],
+        actionsQueue: [],
+        attackStrength: (_unit:any)=>{ return 1},
+        defendStrength: (_unit:any)=>{ return 1},
+        gainBattleExperience: ()=>{},
+        hitPoints: 1,
+        rangeStrength: 10,
+        strength: 10,
+        sight: 2,
+        uid: "",
+        unitSpecification: {
+            hitPoints: 10,
+            name: "Type",
+            tuid: "T_1"
+        }
+    },
+    unit3: {
+        actionPoints: 1,
+        actionRunner: ActionsMock.action1,
+        actionsAllowed: [],
+        actionsQueue: [],
+        attackStrength: (_unit:any)=>{ return 1},
+        defendStrength: (_unit:any)=>{ return 1},
+        gainBattleExperience: ()=>{},
+        hitPoints: 1,
+        rangeStrength: 10,
+        strength: 10,
+        sight: 2,
+        uid: "",
+        unitSpecification: {
+            hitPoints: 10,
+            name: "Type",
+            tuid: "T_1"
+        }
+    }
+}

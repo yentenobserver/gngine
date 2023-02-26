@@ -18,9 +18,11 @@ export interface ActionContextUnitAttack extends ActionContext {
 
 export abstract class ActionBase implements EventProducer{
     emitter: EventEmitter;  
+    code: string; // unique action code
 
-    constructor(emitter: EventEmitter){
+    constructor(emitter: EventEmitter, code: string){
         this.emitter = emitter;
+        this.code = code;
     }
 
     abstract rangeAndCosts():Paths;        
@@ -39,8 +41,8 @@ export abstract class ActionUnit extends ActionBase{
     location: SpecsLocation;
     calculator: CostCalculator|undefined;
 
-    constructor(specs: SpecsBase, location: SpecsLocation, calculator: CostCalculator|undefined, mapEngine: MapBase|undefined, emitter:EventEmitter){
-        super(emitter);
+    constructor(specs: SpecsBase, location: SpecsLocation, calculator: CostCalculator|undefined, mapEngine: MapBase|undefined, emitter:EventEmitter, code: string){
+        super(emitter, code);
         this.specs = specs;
         this.mapEngine = mapEngine;
         this.location = location;
@@ -54,7 +56,7 @@ export class ActionUnitMove extends ActionUnit{
     
     constructor(specs: SpecsBase, location: SpecsLocation, terrainCost: TerrainCost, mapEngine: MapBase, emitter: EventEmitter){
         let calculator:CostCalculator = new CostCalculatorTerrain(terrainCost);
-        super(specs, location, calculator, mapEngine,emitter);
+        super(specs, location, calculator, mapEngine,emitter, "ActionUnitMove");
     }
 
     rangeAndCosts(): Paths {
@@ -75,7 +77,7 @@ export class ActionUnitAttack extends ActionUnit{
     
     constructor(specs: SpecsBase, location: SpecsLocation, terrainCost: TerrainCost, mapEngine: MapBase, emitter: EventEmitter){
         let calculator:CostCalculator = new CostCalculatorTerrain(terrainCost);
-        super(specs, location, calculator, mapEngine, emitter);
+        super(specs, location, calculator, mapEngine, emitter, "ActionUnitAttack");
     }
 
     rangeAndCosts(): Paths {
@@ -100,7 +102,7 @@ export class ActionUnitFortify extends ActionUnit{
     
 
     constructor(specs:SpecsBase, location: SpecsLocation, emitter: EventEmitter){
-        super(specs, location, undefined, undefined, emitter);
+        super(specs, location, undefined, undefined, emitter, "ActionUnitFortify");
     }
 
     _actionCost(){
@@ -138,7 +140,7 @@ export class ActionUnitFieldOfView extends ActionUnit implements Autonomous{
     isAutonomous: boolean;
 
     constructor(specs: SpecsBase, location: SpecsLocation, calculator: CostCalculator, mapEngine: MapBase, emitter: EventEmitter){
-        super(specs, location, calculator, mapEngine, emitter)
+        super(specs, location, calculator, mapEngine, emitter, "ActionUnitFieldOfView")
         this.isAutonomous = true;        
     }
     
@@ -166,6 +168,7 @@ export class ActionUnitLandFieldOfView extends ActionUnitFieldOfView implements 
     constructor(specs: SpecsBase, location: SpecsLocation, terrainCost: TerrainCost, mapEngine: MapBase, emitter: EventEmitter){
         let calculator:CostCalculator = new CostCalculatorTerrain(terrainCost);
         super(specs, location, calculator, mapEngine, emitter);
+        this.code = "ActionUnitLandFieldOfView"
     }  
 } 
 // 1. when action is selected - draw range

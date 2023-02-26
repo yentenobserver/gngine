@@ -178,6 +178,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
      */
     loadTemplates(filterNames: string[]):Promise<void>{
         const templatesToLoad:Promise<void>[] = [];
+        // here we get all specification items from specification object
         Object.keys(this.specification).forEach((propName:string)=>{
             const specification:RenderableSpecificationItem = <RenderableSpecificationItem>(<any>this.specification)[propName];
             if(specification.json){                

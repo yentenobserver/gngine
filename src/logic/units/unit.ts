@@ -8,13 +8,13 @@ export class ActionRunner {
 export interface Actionable {
     actionsAllowed: ActionBase[];
     actionsQueue: ActionBase[];
-    actionRunner: ActionRunner|undefined
+    actionRunner: ActionBase|undefined
 }
 
 export abstract class UnitActionable implements Actionable {
     actionsAllowed: ActionBase[];
     actionsQueue: ActionBase[];
-    actionRunner: ActionRunner | undefined;
+    actionRunner: ActionBase | undefined;
     
     constructor(){
         this.actionsAllowed = [];
@@ -25,34 +25,35 @@ export abstract class UnitActionable implements Actionable {
 export class UnitSpecs {
     tuid: string; // unit type id
     name: string; // unit type name
+    hitPoints: number; // unit type initial hitPoints
 
     constructor(){
         this.tuid = ""
         this.name = ""
+        this.hitPoints = 10;
     }
 }
 
-export abstract class UnitBase extends UnitActionable implements SpecsBase {
+export abstract class UnitBase extends UnitActionable implements SpecsBase, SpecsType {
     uid: string;
     actionPoints: number;
     hitPoints: number;
-    unitSpecification: UnitSpecs|undefined;
+    unitSpecification: UnitSpecs;
 
     sight: number;
     strength: number;
     rangeStrength: number;
-
-    i: string; // unit unique id
-    ap: number;
-    
+          
     constructor(){
-        super();
-        this.ap = 0;
-        this.i = "";
+        super();                
         this.actionPoints = 0;
         this.hitPoints = 0;
         this.uid = ""
-        this.unitSpecification = undefined;
+        this.unitSpecification = {
+            hitPoints: 10,
+            name: "DEFAULT",
+            tuid: "T_DEFAULT"
+        };
         this.sight = 0;
         this.strength = 0;
         this.rangeStrength = 0;
@@ -62,9 +63,13 @@ export abstract class UnitBase extends UnitActionable implements SpecsBase {
     abstract defendStrength(unit: UnitBase):number;
     abstract gainBattleExperience(enemyStrength: number,damageInflicted: number,damageTaken: number):void;
 }
-
+/**
+ * View to a unit instance data
+ */
 export interface Specs {}
-
+/**
+ * Unit instance base data
+ */
 export interface SpecsBase extends Specs {
     uid: string;
     actionPoints: number;
@@ -73,7 +78,15 @@ export interface SpecsBase extends Specs {
     strength: number;
     rangeStrength: number;    
 }
-
+/**
+ * Unit instance location data
+ */
 export interface SpecsLocation extends Specs {
     tile: TileBase    
+}
+/**
+ * Unit instance type data
+ */
+export interface SpecsType extends Specs {
+    unitSpecification: UnitSpecs;  
 }

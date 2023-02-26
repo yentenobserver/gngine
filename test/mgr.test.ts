@@ -17,7 +17,8 @@ import sinon, { SinonSpy, SinonStub } from 'sinon';
 import * as THREE from 'three'
 import {TileBase} from '../src/logic/map/common.notest'
 import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'
-import {MapsMocks, TerrainMocks, AppEventsMocks, MapEventMocks} from './data.mock'
+import {MapsMocks, TerrainMocks, AppEventsMocks, MapEventMocks, UnitsMocks} from './data.mock'
+import { UNIT_RENDERABLES } from './data/units-test.notest'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
@@ -25,11 +26,13 @@ import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, Playgrou
 import { } from '../src/gui/renderer/renderers'
 import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TilePosition} from '../src/gui/renderer/map-renderers'
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
+import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Vector3 } from 'three';
 import { Renderable, RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
+
 
 
 
@@ -866,6 +869,10 @@ describe('Gamengine', () => {
                 const call = s2.getCall(0);
                 return expect(call.args[1][1]).eq(tile);                
             })
+            it('has code set', () => {                                  
+                const a = new ActionUnitLandFieldOfView(unit,unit,terrainCost, map, messageBusMocked);                 
+                return expect(a.code).eq("ActionUnitLandFieldOfView");                
+            })
 
                 
             
@@ -990,6 +997,10 @@ describe('Gamengine', () => {
                 const call = s2.getCall(1);
 
                 return expect(call.args[0]).eq(Events.UNIT.CONSUME_AP)                
+            })
+            it('has code set', () => {                                                 
+                const a = new ActionUnitFortify(unit2,unit2,messageBusMocked); 
+                return expect(a.code).eq("ActionUnitFortify")                
             })
                 
             
@@ -1154,6 +1165,10 @@ describe('Gamengine', () => {
                 return expect(()=>{a.perform(actionContext1)}).to.throw('Path not found');                                      
                 
                 
+            })
+            it('has action code set', () => {                                                 
+                const a = new ActionUnitAttack(unit,unit,terrainCost, mapNoPath, messageBusMocked);                 
+                return expect(a.code).eq("ActionUnitAttack")                                      
             })
 
            
@@ -1337,6 +1352,10 @@ describe('Gamengine', () => {
                 const call = s2.getCall(1);
                 return expect(call.args[2]).eq(path!.cost)
                 
+            })
+            it('has action code set', () => {                                                 
+                const a = new ActionUnitMove(unit,unit,terrainCost, map, messageBusMocked); 
+                return expect(a.code).eq("ActionUnitMove")                
             })
 
            
@@ -3676,6 +3695,120 @@ describe("Renderers",()=>{
                 })
             })
             
+        })
+    })
+
+    describe("UnitRenderablesThreeJSFactory", ()=>{
+        describe("_generateNames",()=>{
+            let l:any;
+            let unitsRenderablesSpecification:any;
+            
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                unitsRenderablesSpecification = {
+                    // main: {
+                    //     name: "unitsAssets",
+                    //     url: "./assets/models-prod.gltf",
+                    //     pivotCorrection: "-0.5,-0.5,0"
+                    // }
+                    main: {
+                        name: "units",
+                        json: JSON.stringify(UNIT_RENDERABLES)                    
+                        // pivotCorrection: "0,0,0.12"
+                    }
+                }                
+            })
+            afterEach(()=>{
+
+            })
+            it("prefers type with proper state and hitpoints",()=>{
+                
+                
+                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                const names = factory._generateNames(UnitsMocks.unit3);                
+                return expect(names[0]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_${UnitsMocks.unit3.actionRunner.code}_${UnitsMocks.unit3.hitPoints}_UNIT`);
+                
+            })
+            it("prefers type with proper state and closest hitpoints when no matching hitpoints",()=>{
+                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                const names = factory._generateNames(UnitsMocks.unit3);                
+                return expect(names[1]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_${UnitsMocks.unit3.actionRunner.code}_${UnitsMocks.unit3.hitPoints+1}_UNIT`);
+            })
+            it("prefers type with DEFAULT and hitpoints when no matching state",()=>{
+                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                const names = factory._generateNames(UnitsMocks.unit3);                
+                return expect(names[10]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_DEFAULT_${UnitsMocks.unit3.hitPoints}_UNIT`);
+            })
+            it("prefers type with DEFAULT and closes hitpoints when no matching state and no matching hitpoints",()=>{
+                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                const names = factory._generateNames(UnitsMocks.unit3);                
+                return expect(names[11]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_DEFAULT_${UnitsMocks.unit3.hitPoints+1}_UNIT`);
+            })
+            it("throws an error when no match at all is found",()=>{})
+        })
+        describe("spawn",()=>{
+            let l:any;
+            let unitsRenderablesSpecification:any;
+            let factory1:UnitRenderablesThreeJSFactory;
+            let s1:SinonStub;
+            let s2:SinonStub;
+            let names:string[];
+            let factory2:UnitRenderablesThreeJSFactory;
+            let s3:SinonStub;
+            let s4:SinonStub;
+            
+            beforeEach(()=>{
+                l = {
+                    load(){}
+                }
+                unitsRenderablesSpecification = {
+                    // main: {
+                    //     name: "unitsAssets",
+                    //     url: "./assets/models-prod.gltf",
+                    //     pivotCorrection: "-0.5,-0.5,0"
+                    // }
+                    main: {
+                        name: "units",
+                        json: JSON.stringify(UNIT_RENDERABLES)                    
+                        // pivotCorrection: "0,0,0.12"
+                    }
+                }  
+                names = ["somename","othername"];
+                factory1 = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                s1 = sinon.stub(factory1, "spawnRenderableObject");
+                s1.onFirstCall().throws("Some error");
+                s1.onSecondCall().returns(<any>{});
+                s2 = sinon.stub(factory1, "_generateNames").returns(names);
+                
+
+                factory2 = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                s3 = sinon.stub(factory2, "spawnRenderableObject").throws("Some error");                
+                s4 = sinon.stub(factory2, "_generateNames").returns(names);
+            })
+            afterEach(()=>{
+                s1.restore();
+                s2.restore();
+                s3.restore();
+                s4.restore();                
+            })
+
+            it("generates names to try",()=>{
+                factory1.spawn(UnitsMocks.unit1);
+                return expect(s2.callCount).eq(1);
+            })
+            it("tries to spawn with name",()=>{
+                factory1.spawn(UnitsMocks.unit1);
+                return expect(s1.callCount).eq(names.length);
+            })
+            it("handles spawning error gracefully",()=>{
+                factory1.spawn(UnitsMocks.unit1);
+                return expect(s1.callCount).eq(2);
+            })
+            it("throws an error when no match at all is found",()=>{
+                return expect(()=>{factory2.spawn.bind(factory2)(UnitsMocks.unit1)}).to.throw("No template found for unit type"); 
+            })
         })
     })
 })

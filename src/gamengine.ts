@@ -18,7 +18,8 @@ export {  Renderer } from './gui/renderer/renderers'
 export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator} from './gui/renderer/map-renderers'
 export {HudComponent, HudComponentLargeThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRenderer, HudRendererThreeJs, SpriteFactory, SpriteFactoryx128x128x4xL} from './gui/renderer/hud-renderers'
 export type {Rotations, ScenePosition, MapPositionProvider, MapWritable, TilePosition} from './gui/renderer/map-renderers'
-
+export { UnitRenderablesThreeJSFactory, UnitsRenderer, UnitsRendererThreeJS } from './gui/renderer/unit-renderer';
+export type { UnitRenderablesFactory as UnitRenderableFactory } from './gui/renderer/unit-renderer';
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"
 
 export {RENDERABLES} from "./gui/renderer/assets/threejs3d.notest"

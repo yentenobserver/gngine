@@ -83,6 +83,23 @@ class AppDemo {
         const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
         await navComp.build();
         hudRenderer.addComponent(navComp); 
+
+        const unitsRenderablesSpecification = {
+            main: {
+                name: "unitsAssets",
+                url: "./assets/models-prod.gltf",
+                pivotCorrection: "-0.5,-0.5,0"
+            }
+            // helpers: {
+            //     name: "mapHelpers",
+            //     json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
+            //     pivotCorrection: "0,0,0.12"
+            // }
+        }
+        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
+        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer);
+        unitRenderer.setRenderablesFactory(unitFactory);
+        unitRenderer.setView(mainMapView);
         
         this.mapRenderer = mapRenderer;
     }
