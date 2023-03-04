@@ -297,6 +297,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
      */
     setView(view: PlaygroundView):void{
         this.view = view as PlaygroundViewThreeJS;
+        // all units must be added as child objects in map so map controlls work correctly
         const mapObject = this.view.scene.getObjectByName( UnitsRendererThreeJS.MAP_NAME, true );
         mapObject.add(this.holderObject);
         // this.view.scene.add(this.holderObject);
