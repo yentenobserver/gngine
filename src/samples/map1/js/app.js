@@ -147,7 +147,7 @@ class AppDemo {
             attackStrength: (_unit)=>{ return 1},
             defendStrength: (_unit)=>{ return 1},
             gainBattleExperience: ()=>{},
-            hitPoints: 1,
+            hitPoints: 5,
             rangeStrength: 10,
             strength: 10,
             sight: 2,

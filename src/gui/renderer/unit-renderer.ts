@@ -1,4 +1,4 @@
-import { Object3D } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation } from "three";
 import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
@@ -44,6 +44,8 @@ export interface UnitRenderablesFactory extends RenderablesFactory{
      * @returns {Renderable} renderable or error is thrown when none can be spawned
      */
     spawn(unit: SpecsBase&SpecsType&Actionable):Renderable;
+
+    _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType&Actionable):void;
 }
 
 /**
@@ -129,7 +131,32 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
         if(!renderable)
             throw new Error(`No template found for unit type ${unit.unitSpecification.name} ${unit.unitSpecification.tuid}`);
 
+        this._addHPBar(renderable, unit);
+        console.log(JSON.stringify(renderable.data.toJSON()));
         return renderable;
+    }
+
+    _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType&Actionable){
+        const object3D = <Object3D>renderable.data;
+        const hitPoints = Math.round(10*unit.hitPoints/unit.unitSpecification.hitPoints);
+        const colors:ColorRepresentation[] = [
+            0xff0a0a, 0xff0a0a, 0xff0a0a,  // 0-2 hp
+            0xfbf300, 0xfbf300, 0xfbf300,  // 3-5 hp
+            0xf2c006, 0xf2c006, 0xf2c006,  // 6-8 hp
+            0x3adb1a, 0x3adb1a              // 9-10 hp
+        ]
+        const lengths:number[] = [
+            0.2, 0.2, 0.2,  // 0-2 hp
+            0.5, 0.5, 0.5,  // 3-5 hp
+            0.75, 0.75, 0.75,  // 6-8 hp
+            1, 1              // 9-10 hp
+        ]
+        const material = new SpriteMaterial( { color: colors[hitPoints] } );
+        const sprite = new Sprite( material );
+        sprite.name = "UI_HP_BAR"
+        sprite.scale.set(1, lengths[hitPoints],0);
+        sprite.position.set(0, 0, lengths[hitPoints]-1);
+        object3D.add(sprite);
     }
 }
 
@@ -303,6 +330,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         // this.view.scene.add(this.holderObject);
     }
     
+
     /**
      * Creates unit for rendering and optionally puts it at given position
      * @param unit unit to be created and rendered
