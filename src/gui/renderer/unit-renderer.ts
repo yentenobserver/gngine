@@ -278,6 +278,7 @@ export abstract class UnitsRenderer extends Renderer {
 }
 export class UnitsRendererThreeJS extends UnitsRenderer {
     static NAME: string = "THE_UNITS";
+    static MAP_NAME: string = "THE_MAP";
     view: PlaygroundViewThreeJS|undefined;
     holderObject: Object3D;
 
@@ -296,7 +297,9 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
      */
     setView(view: PlaygroundView):void{
         this.view = view as PlaygroundViewThreeJS;
-        this.view.scene.add(this.holderObject);
+        const mapObject = this.view.scene.getObjectByName( UnitsRendererThreeJS.MAP_NAME, true );
+        mapObject.add(this.holderObject);
+        // this.view.scene.add(this.holderObject);
     }
     
     /**
