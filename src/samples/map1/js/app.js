@@ -149,6 +149,25 @@ class AppDemo {
               "o": "0x0022"
             }
           }
+          const tile3 = {
+            "id": "0,2",
+            "x": 2,
+            "y": 0,
+            "d": "S",
+            "t": "C_T_DIRT_1_TILE",
+            "loc": {
+              "n": "Bushland",
+              "g": "43.74650403587078,7.421766928360976"
+            },
+            "ext": {},
+            "nft": {
+              "v": 100,
+              "b": "ETHEREUM",
+              "i": "123",
+              "t": "0x123",
+              "o": "0x0022"
+            }
+          }
         const unit = {
             actionPoints: 1,
             actionRunner: undefined,
@@ -187,13 +206,33 @@ class AppDemo {
                 tuid: "T34"
             }
         }
+        const unit3 = {
+            actionPoints: 1,
+            actionRunner: undefined,
+            actionsAllowed: [],
+            actionsQueue: [],
+            attackStrength: (_unit)=>{ return 1},
+            defendStrength: (_unit)=>{ return 1},
+            gainBattleExperience: ()=>{},
+            hitPoints: 10,
+            rangeStrength: 10,
+            strength: 10,
+            sight: 2,
+            uid: "u3",
+            unitSpecification: {
+                hitPoints: 10,
+                name: "Type",
+                tuid: "T34"
+            }
+        }
         unitRenderer.put(unit, tile,"S");
         unitRenderer.put(unit2, tile2,"E");
+        unitRenderer.put(unit3, tile3,"E");
 
         this.mapRenderer = mapRenderer;
         this.emitter.on("interaction.*",(event)=>{
             if(event.originalEvent.type=="pointerdown") {
-                console.log("Got both", event);
+                // console.log("Got both", event);
                 // that.model.selected = {
                 //     unit: {},
                 //     unitData: {},
@@ -209,7 +248,7 @@ class AppDemo {
             if(event.originalEvent.type=="pointerdown") {
                 
 
-                console.log('UNIT', event)
+                // console.log('UNIT', event)
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){
                     if(event.data.hierarchy[i].userData.unitData){                
                         const unitData = event.data.hierarchy[i].userData.unitData                                            
@@ -229,7 +268,7 @@ class AppDemo {
 
         this.emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
             if(event.originalEvent.type=="pointerdown") {
-                console.log('TILE', event)
+                // console.log('TILE', event)
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){
                     if(event.data.hierarchy[i].userData.tileData){                
                         const tileData = event.data.hierarchy[i].userData.tileData                    
@@ -260,8 +299,9 @@ class AppDemo {
         })
     }
 
-    handleDebugDump(e, that){
-        that.emitter.emit("debug:dump:view",{});
+    handleDebugDumpTile(e, that){
+        const result = JSON.stringify(that.model.selected.tile.toJSON());
+        console.log(result);
     }
 
     handleDebugDumpUnit(e, that){

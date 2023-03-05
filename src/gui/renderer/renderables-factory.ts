@@ -119,6 +119,10 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             const specification = template.specification;
 
 
+            const wrap = new THREE.Object3D();
+            wrap.castShadow = true;
+            wrap.receiveShadow = true;
+
             if(specification.pivotCorrection){
                 // it is assumed that pivot point of spawned objects must be at
                 // (center, center, 0)
@@ -139,19 +143,19 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                     const correction:THREE.Vector3 = new THREE.Vector3(vectorXYZ[0], vectorXYZ[1], vectorXYZ[2])  
                                     
                     // cloned.position.set(-0.5,-0.5,0);
-                    cloned.position.set(correction.x, correction.y, correction.z);
-                    const wrap = new THREE.Object3D();
-                    wrap.castShadow = true;
-                    wrap.receiveShadow = true;
-                    wrap.add(cloned);
-                    result = wrap;
+                    cloned.position.set(correction.x, correction.y, correction.z);                    
+                    
                 }
                 catch(error:any){
                     throw new Error(`Can't apply pivot correction for specification ${objectName}`);
                 }                
-            }else{
-                result = cloned
             }
+            // else{
+            //     result = cloned
+            // }
+
+            wrap.add(cloned);
+            result = wrap;
             
             return {
                 name: objectName,

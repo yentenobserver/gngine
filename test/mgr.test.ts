@@ -1954,13 +1954,19 @@ describe('Playground', () => {
                 playgroundView2._preAttach(playground);
                 s1 = sinon.stub(playgroundView1,"pickObjectOfNames");
                 s1.onCall(0).returns({
-                    object: {a:1}
+                    object: {
+                        a:1,
+                        getWorldPosition: ()=>{}
+                    }
                 })
                 s1.onCall(1).returns(undefined);
 
                 s2 = sinon.stub(playgroundView2,"pickObjectOfNames");
                 s2.onCall(1).returns({
-                    object: {a:1}
+                    object: {
+                        a:1,
+                        getWorldPosition: ()=>{}
+                    }
                 })
                 s2.onCall(0).returns(undefined);
 
@@ -2958,7 +2964,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -2974,7 +2981,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -2990,7 +2998,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3006,7 +3015,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -3022,7 +3032,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3038,7 +3049,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -3054,7 +3066,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3070,7 +3083,8 @@ describe("Renderers",()=>{
                         type: "pointerdown"
                     },
                     type: Events.INTERACTIONS.HUD,
-                    viewName: ""
+                    viewName: "",
+                    worldPosition: {}
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -3758,6 +3772,9 @@ describe("Renderers",()=>{
             let factory2:UnitRenderablesThreeJSFactory;
             let s3:SinonStub;
             let s4:SinonStub;
+
+            let s5:SinonStub;
+            let s6:SinonStub;
             
             beforeEach(()=>{
                 l = {
@@ -3786,12 +3803,17 @@ describe("Renderers",()=>{
                 factory2 = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
                 s3 = sinon.stub(factory2, "spawnRenderableObject").throws("Some error");                
                 s4 = sinon.stub(factory2, "_generateNames").returns(names);
+
+                s5 = sinon.stub(factory1, "_addHPBar").returns();
+                s6 = sinon.stub(factory2, "_addHPBar").returns();
             })
             afterEach(()=>{
                 s1.restore();
                 s2.restore();
                 s3.restore();
-                s4.restore();                
+                s4.restore();  
+                s5.restore();   
+                s6.restore();              
             })
 
             it("generates names to try",()=>{
@@ -3805,6 +3827,10 @@ describe("Renderers",()=>{
             it("handles spawning error gracefully",()=>{
                 factory1.spawn(UnitsMocks.unit1);
                 return expect(s1.callCount).eq(2);
+            })
+            it("add hit points bar",()=>{
+                factory1.spawn(UnitsMocks.unit1);
+                return expect(s5.callCount).eq(1);
             })
             it("throws an error when no match at all is found",()=>{
                 return expect(()=>{factory2.spawn.bind(factory2)(UnitsMocks.unit1)}).to.throw("No template found for unit type"); 
