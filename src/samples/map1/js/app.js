@@ -192,19 +192,22 @@ class AppDemo {
 
         this.mapRenderer = mapRenderer;
         this.emitter.on("interaction.*",(event)=>{
-            console.log("Got both", event);
+            if(event.originalEvent.type=="pointerdown") {
+                console.log("Got both", event);
+                // that.model.selected = {
+                //     unit: {},
+                //     unitData: {},
+                //     unitDataStr: {},
+                //     tile: {},
+                //     tileData: {},
+                //     tileDataStr: {},
+                // }
+            }            
         })
 
         this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
             if(event.originalEvent.type=="pointerdown") {
-                that.model.selected = {
-                    unit: {},
-                    unitData: {},
-                    unitDataStr: {},
-                    tile: {},
-                    tileData: {},
-                    tileDataStr: {},
-                }
+                
 
                 console.log('UNIT', event)
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){
