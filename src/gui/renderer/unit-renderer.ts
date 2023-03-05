@@ -139,7 +139,7 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
     _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType&Actionable){
         const object3D = <Object3D>renderable.data;
         var bbox = new Box3().setFromObject(object3D);
-        console.log("BBOX", bbox);
+        // console.log("BBOX", bbox);
         const hitPoints = Math.round(10*unit.hitPoints/unit.unitSpecification.hitPoints);
         const colors:ColorRepresentation[] = [
             0xff0a0a, 0xff0a0a, 0xff0a0a,  // 0-2 hp
@@ -162,7 +162,7 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
         // sprite.position.set((0.5*lengths[hitPoints]-0.5)/2 , 0, bbox.max.z+(0.5*bbox.max.z));
         sprite.position.set(0 , 0, bbox.max.z+(0.5*bbox.max.z));
         object3D.add(sprite);
-        console.log(object3D);
+        // console.log(object3D);
         
     }
 }
