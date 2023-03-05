@@ -31,6 +31,7 @@ export abstract class Playground{
 
     abstract _attachInteractionListeners():void;
     abstract _onInteraction(...event:any[]):void;
+    abstract _onEvent(...event:any[]):void;
 
     
 }
@@ -125,6 +126,7 @@ export class PlaygroundThreeJs extends Playground{
     _attachInteractionListeners(): void {        
         this.container.addEventListener( 'pointermove', this._onInteraction.bind(this) );
         this.container.addEventListener( 'pointerdown', this._onInteraction.bind(this) );
+        this.emitter.on(Events.DEBUG.DUMP_VIEW, (data:any)=>{this._onEvent(Events.DEBUG.DUMP_VIEW, data)} );
     }
     _onInteraction(...event:any[]): void {        
         for (let index = 0; this.views&&index < this.views.length; index++) {
@@ -132,6 +134,13 @@ export class PlaygroundThreeJs extends Playground{
             const interactionResult = view._onInteraction(...event);
             if(interactionResult)
                 break;
+        }
+        
+    }
+    _onEvent(...event:any[]): void {        
+        for (let index = 0; this.views&&index < this.views.length; index++) {
+            const view = this.views[index];
+            view._onEvent(...event);            
         }
         
     }
@@ -190,6 +199,7 @@ export abstract class PlaygroundView{
 
     abstract _preAttach(parentPlayground: Playground):void;
     abstract _onInteraction(...event:any[]):any; // should return interaction result or undefined
+    abstract _onEvent(...event:any[]):any; // handles other than interaction event
 }
 
 export class PlaygroundViewDefault extends PlaygroundView implements PlaygroundViewHud, PlaygroundViewMain, PlaygroundView3D{
@@ -203,6 +213,10 @@ export class PlaygroundViewDefault extends PlaygroundView implements PlaygroundV
     }
     /* istanbul ignore next */
     _onInteraction(..._event: any[]):any {
+        return;
+    }
+    /* istanbul ignore next */
+    _onEvent(..._event: any[]):any {
         return;
     }
 }
@@ -486,20 +500,27 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
         // const eventType:string = pointerEvent.type;
         
         // check if any hud element is hit
-        const hudPickResult = this.pickObjectOfNames(pointerEvent,[])
+        const hudPickResult = this.pickObjectOfNames(pointerEvent,[]);
+
+        
         if(hudPickResult?.object){
+            const worldPosition = new THREE.Vector3();
+            hudPickResult.object.getWorldPosition(worldPosition);
+
             const interactionEvent: PlaygroundInteractionEvent = {
                 type: Events.INTERACTIONS.HUD,
                 viewName: this.name,
                 interactingObject: hudPickResult.object,
                 originalEvent: pointerEvent,
-                data: hudPickResult
+                data: hudPickResult,
+                worldPosition: worldPosition
             }
             this.emitter.emit(Events.INTERACTIONS.HUD,interactionEvent)
             return interactionEvent;
         }
         return;
     }
+    _onEvent(..._event: any[]) {}
     
 }
 
@@ -592,12 +613,16 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // first see what tile did we hit
         const tilePickResult = this.pickObjectOfNames(pointerEvent,["_TILE"])
         if(tilePickResult?.object){
+            const worldPosition = new THREE.Vector3();
+            tilePickResult.object.getWorldPosition(worldPosition);
+
             const interactionEvent: PlaygroundInteractionEvent = {
                 type: Events.INTERACTIONS.TILE,
                 viewName: this.name,
                 interactingObject: tilePickResult.object,
                 originalEvent: pointerEvent,
-                data: tilePickResult
+                data: tilePickResult,
+                worldPosition: worldPosition
             }
             this.emitter.emit(Events.INTERACTIONS.TILE,interactionEvent)
             result = interactionEvent;
@@ -606,17 +631,31 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // then also check what unit did we hit
         const unitPickResult = this.pickObjectOfNames(pointerEvent,["_UNIT"])
         if(unitPickResult?.object){
+            const worldPosition = new THREE.Vector3();
+            unitPickResult.object.getWorldPosition(worldPosition);
+
             const interactionEvent: PlaygroundInteractionEvent = {
                 type: Events.INTERACTIONS.UNIT,
                 viewName: this.name,
                 interactingObject: unitPickResult.object,
                 originalEvent: pointerEvent,
-                data: unitPickResult
+                data: unitPickResult,
+                worldPosition: worldPosition
             }
             this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
             result = interactionEvent;
         }                
+        
         return result;
+    }
+    _onEvent(name:string, _data:any) {
+        // handle debug events
+        if(name.toUpperCase() == Events.DEBUG.DUMP_VIEW.toUpperCase()){
+            const sceneJson = this.scene.toJSON();
+            const objectJsonString = JSON.stringify(sceneJson);
+            console.log(sceneJson)
+            console.log(objectJsonString)
+        }
     }
 }
 
@@ -631,4 +670,5 @@ export interface PlaygroundInteractionEvent extends EngineEvent{
     originalEvent: any, // original event from UI that triggered the interaction
     interactingObject: any, // the object that took part in the interaction
     data: any // additional interaction data
+    worldPosition: any // interacting object world position
 }

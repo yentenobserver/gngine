@@ -113,200 +113,54 @@
 
             </div>
             <div class="column">
-                <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
-                    <div class="notification is-warning" rv-class-is-hidden="model.currentTile.tileData.i | notEmpty">
-                        &#8678&nbsp;To begin please select place on map
-                        <span class="is-hidden-mobile"><br><br>Use mouse to navigate (rotate, zoom, pan)</span>
-                    </div>
+                <div class="field is-grouped">
+                    <p class="control">
+                      <button class="button is-link" rv-on-click="handleDebugDump">
+                        Debug Dump Scene
+                      </button>
+                    </p>                    
                 </div>
-
-                <div class="is-hidden" rv-class-is-hidden="model.currentTile.tileData.i | empty">
-
-                    <p class="subtitle">Place info <span class="is-size-7"><a rv-on-click="_handleCopyPlaceLink"
-                                rv-href="model.currentTile.tileData.d.l.x | hrefBuilder '?city=@1&p=@value,@0' model.currentTile.tileData.d.l.y model.city.i">(place
-                                link)</a></span></p>
-                    <table class="table is-fullwidth is-borderless">
-                        <tbody>
-                            <tr>
-                                <th>Name: </th>
-                                <td class="is-borderless"><a
-                                        rv-on-click="_handleTileVisit">{model.currentTile.tileData.d.n} (see place)</a>
-                                </td>
-                            </tr>
-                            <tr rv-class-is-hidden="model.mode | neq 'STATS'">
-                                <th>Address: </th>
-                                <td class="is-borderless">{model.currentTile.address} <span
-                                        class="is-hidden">{model.currentTile.tileData.d.l.g}</span></td>
-                            </tr>
-                            <tr>
-                                <th>Plot Type: </th>
-                                <td class="is-borderless">{model.currentTile.tileData.t.n}</td>
-                            </tr>
-                            <tr rv-class-is-hidden="model.mode | neq 'STATS'">
-                                <th class="is-borderless">Net Worth: </th>
-                                <td class="is-borderless">{model.currentTile.tileData.d.f.n | GWEItoETH} ETH&nbsp;
-                                    <!-- <span
-                                        class="tag is-success">+28%</span> 
-                                        
-                                        (<a
-                                        rv-href="model.currentTile.tileData.d.f.t | hrefBuilder 'https://etherscan.io/tx/@value'">latest
-                                        transaction)</a> -->
-                                </td>
-                            </tr>
-                            <tr rv-class-is-hidden="model.mode | neq 'STATS'">
-                                <th rv-class-is-hidden="model.currentTile.tileData.d.f.o | empty">Owner: </th>
-                                <td rv-class-is-hidden="model.currentTile.tileData.d.f.o | empty" class="is-borderless">
-
-                                    <p class="is-size-7"><a
-                                            rv-href="model.currentTile.tileData.d.f.o | hrefBuilder 'https://etherscan.io/address/@value'">{model.currentTile.tileData.d.f.o}</a>
-                                    </p>
-                                </td>
-                                <!-- <th rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty"></th> -->
-                                <td colspan="2" rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty">
-                                    <button class="button is-success mx-3"
-                                        rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty"
-                                        rv-on-click="_handleTileClaim">
-                                        <ion-icon name="golf"></ion-icon>&nbsp;Claim Plot
-                                    </button>
-                                    <p rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty">Plot is
-                                        claimable <a rv-href="model.city.i | hrefBuilder 'c/claimlist/?city=@value'">(See current claim list)</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <!-- <th></th> -->
-                                <td colspan="2" class="is-borderless" rv-class-is-hidden="model.mode | neq 'STATS'">
-
-
-                                    <div rv-class-is-hidden="model.dapp.isLoggedIn | neq true">
-                                        <div
-                                        class="p-3 is-flex is-flex-direction-row is-flex-wrap-wrap is-justify-content-start is-align-items-center is-align-content-center" rv-class-is-hidden="model.currentTile.tileData.d.f.o | empty">
-                                            <div
-                                                class="is-flex is-align-self-auto is-flex-grow-0 is-flex-shrink-1 is-hidden-touch">
-                                                <button class="button is-light mx-3"
-                                                    
-                                                    rv-on-click="_handleConstruction" rv-disabled="model.currentTile.tileData.d.f.o | neqCI model.dapp.account">
-                                                    <ion-icon name="business"></ion-icon>&nbsp;Build
-                                                </button>
-                                            </div>
-                                            <div class="is-flex is-align-self-auto is-flex-grow-0 is-flex-shrink-1">
-                                                <button class="button is-light mx-3"                                                    
-                                                    rv-on-click="_handlePersonalize" rv-disabled="model.currentTile.tileData.d.f.o | neqCI model.dapp.account">
-                                                    <ion-icon name="videocam"></ion-icon>&nbsp;Personalize
-                                                </button>
-                                            </div>
-                                            <p class="help is-danger" rv-class-is-hidden="model.currentTile.tileData.d.f.o | eqCI model.dapp.account">You must be the owner of the land to build or personalize. You are logged in as {model.dapp.account}. Either switch your Metamask account or buy this plot on the NFT market.</p>
-                                            <p class="help is-primary" rv-class-is-hidden="model.currentTile.tileData.d.f.o | neqCI model.dapp.account">You are managing this plot as {model.dapp.account}.</p>
-                                            <!-- <div class="is-flex is-align-self-auto is-flex-grow-0 is-flex-shrink-1 is-hidden-touch" rv-class-is-hidden="model.currentTile.tileData.d.f.o | notEmpty">
-                                                <button class="button is-light mx-3"
-                                                    rv-class-is-hidden="model.currentTile.tileData.d.f.o | eq model.dapp.account"
-                                                    rv-on-click="_handleConstruction">
-                                                    <ion-icon name="business-outline"></ion-icon>Buy Plot
-                                                </button>
-                                            </div> -->
-
-                                        </div>
-                                    </div>
-                                    
-
-                                    <!-- <div rv-class-is-hidden="model.dapp.isLoggedIn | neq true"> -->
-
-
-
-
-
-                                    <!-- </div> -->
-                                    <div rv-class-is-hidden="model.dapp.isLoggedIn">
-
-                                        <div class="notification is-warning">
-                                            <p class="is-size-7">In order to buy or manage the plot please log in into
-                                                Your
-                                                Metamask wallet</p>
-                                        </div>
-                                        <button class="button is-light mx-3" rv-on-click="_handleLogIn">
-                                            <ion-icon name="log-in-outline"></ion-icon>Log in using Metamask
-                                        </button>
-                                        <p class="is-size-7">Not having Metamask wallet already? <span> <a
-                                                    href="https://metamask.io/" target="_blank">Get
-                                                    one for free.</a></span></p>
-
-                                    </div>
-
-                                    <!-- <button class="button is-light mx-3" >
-                                        <ion-icon name="pricetags-outline"></ion-icon>Put up for sale
-                                    </button></td> -->
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div rv-class-is-hidden="model.mode | neq 'STATS'">
-                        <p class="subtitle">Real World View</p>
-                        <div id="gmap"></div>
-                        <p class="subtitle">Place data</p>
-                        <table class="table is-fullwidth is-borderless">
-                            <tbody>
-                                <tr>
-                                    <th>Happiness: <p class="is-size-7">
-                                        <!-- <a target="_blank" href="#">See top 10
-                                                places</a> -->
-                                            </p>
-                                    </th>
-                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.h}pts</span></td>
-                                    <th>Commerce: <p class="is-size-7">
-                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
-                                        </p>
-                                    </th>
-                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.w}pts</span></td>
-                                </tr>
-                                <tr>
-
-                                    <th>Science: <p class="is-size-7">
-                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
-                                        </p>
-                                    </th>
-                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.s}pts</span></td>
-                                    <th>Culture: <p class="is-size-7">
-                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
-                                        </p>
-                                    </th>
-                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.c}pts</span></td>
-                                </tr>
-                                <tr>
-                                    <th>Military: <p class="is-size-7">
-                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
-                                        </p>
-                                    </th>
-                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.m}pts</span></td>
-                                    <th>Religion: <p class="is-size-7">
-                                        <!-- <a target="_blank" href="#">See top 10 places</a> -->
-                                        </p>
-                                    </th>
-                                    <td><span class="tag is-light">{model.currentTile.tileData.d.c.r}pts</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                    </div>
-
-
-                    <!-- <div rv-class-is-hidden="model.mode | neq 'CONSTRUCTION'">
-                        <p class="subtitle">Construction</p>                        
-                        <button class="button is-light mx-3" rv-on-click="_handleConstruction">
-                            <ion-icon name="swap-horizontal-outline"></ion-icon>&nbsp;Build
-                        </button>
-                        
-                    </div> -->
-                    <!-- <p class="subtitle mt-3">Developmet mode</p> -->
-                    <!-- development mode -->
-                    <!-- <button class="button is-light mx-3" rv-on-click="triggerExportMap">
-                        <ion-icon name="cloud-download-outline"></ion-icon>Export map
-                    </button>
-                    <button class="button is-light mx-3" rv-on-click="triggerOwnerFix">
-                        <ion-icon name="cloud-download-outline"></ion-icon>Fix ownership
-                    </button> -->
+                <div class="is-hidden" rv-class-is-hidden="model.selected.unit | emptyObject">
+                    <p class="title">Selected unit</p>
                     
-                    <button class="button is-light mx-3" rv-class-is-hidden="model.user | lacksRole 'ADMIN'" rv-on-click="_handleOwnerChange">
-                        <ion-icon name="cloud-download-outline"></ion-icon>Change ownership
-                    </button>
+                    <div class="block">
+                        <strong>Name:</strong> {model.selected.unit.name}<br>
+                        <strong>Id:</strong> {model.selected.unit.uuid}<br>
+                        <strong>Position:</strong> ({model.selected.unit.worldPosition.x}, {model.selected.unit.worldPosition.y}, {model.selected.unit.worldPosition.z}) ({model.selected.unit.position.x}, {model.selected.unit.position.y}, {model.selected.unit.position.z})
+                    </div>
+                    <div class="block">
+                        <strong>Unit Data:</strong> {model.selected.unit.unitDataStr}<br>                        
+                    </div>
+                    <div class="field is-grouped">
+                        <p class="control">
+                          <button class="button is-link" rv-on-click="handleDebugDumpUnit">
+                            Debug Unit
+                          </button>
+                        </p>                    
+                    </div>
                 </div>
+                <div class="is-hidden" rv-class-is-hidden="model.selected.tile | emptyObject">
+                    <p class="title">Selected Tile</p>
+                    
+                    <div class="block">
+                        <strong>Name:</strong> {model.selected.tile.name}<br>
+                        <strong>Id:</strong> {model.selected.tile.uuid}<br>
+                        <strong>Position:</strong> ({model.selected.tile.worldPosition.x}, {model.selected.tile.worldPosition.y}, {model.selected.tile.worldPosition.z}) ({model.selected.tile.position.x}, {model.selected.tile.position.y}, {model.selected.tile.position.z})
+                    </div>
+                    <div class="block">
+                        <strong>Tile Data:</strong> {model.selected.tileDataStr}<br>                        
+                    </div>
+                    <div class="field is-grouped">
+                        <p class="control">
+                          <button class="button is-link" rv-on-click="handleDebugDumpTile">
+                            Debug Tile
+                          </button>
+                        </p>                    
+                    </div>
+                </div>
+                
+                
+                
             </div>
         </div>
 
@@ -703,15 +557,30 @@
             }
 
             emit(event, ...data) {
-                if (!this.listeners.hasOwnProperty(event)) {
-                    return null;
-                }
+                // if (!this.listeners.hasOwnProperty(event)) {
+                //     return null;
+                // }
 
-                for (let i = 0; i < this.listeners[event].length; i++) {
-                    const callback = this.listeners[event][i];
+                // for (let i = 0; i < this.listeners[event].length; i++) {
+                //     const callback = this.listeners[event][i];
 
-                    callback.call(this, ...data);
-                }
+                //     callback.call(this, ...data);
+                // }
+
+                const that = this;
+
+                // handle wildcards
+                Object.keys(this.listeners).forEach(function(key,index) {
+                    // key: the name of the object key
+                    // index: the ordinal position of the key within the object 
+                    const regex = new RegExp(key,"g");
+                    if(regex.test(event)){
+                        for (let i = 0; i < that.listeners[key].length; i++) {
+                            const callback = that.listeners[key][i];
+                            callback.call(that, ...data);
+                        }
+                    }
+                });                
             }
         }
         const emitter = EventEmitter.getInstance();
@@ -719,30 +588,39 @@
 
         const emitter2 = EventEmitter.getInstance();
         const mapCanvas2 = document.getElementById("map2");
+        initializeRivetFormatters()
 
-        const demo = AppDemo.getInstance(emitter, mapCanvas);
-        // const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);
+        AppDemo.getInstance(emitter, mapCanvas).then((demo)=>{
+            rivets.bind(document.getElementById('app'), demo);
+            // const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);
 
-        window.mgr_tiles = [];
-        window.emitter = emitter;
-        window.demo = demo;
+            window.mgr_tiles = [];
+            window.emitter = emitter;
+            window.demo = demo;
 
-        emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
-            if(event.originalEvent.type=="pointerdown") {
-                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
-                if(event.data.hierarchy[i].userData.tileData){                
-                    tileData = event.data.hierarchy[i].userData.tileData                    
-                    window.mgr_tiles.push(tileData);
-                }
-            }
-            };
-            
-            
-            // console.log('TILE',event.originalEvent.type)
+            // emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
+            //     if(event.originalEvent.type=="pointerdown") {
+            //         for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+            //         if(event.data.hierarchy[i].userData.tileData){                
+            //             tileData = event.data.hierarchy[i].userData.tileData                    
+            //             window.mgr_tiles.push(tileData);
+            //         }
+            //     }
+            //     };
+                
+                
+            //     // console.log('TILE',event.originalEvent.type)
+            // });
+            // emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
+            //     if(event.originalEvent.type=="pointerdown") {
+            //         console.log('UNIT', event)
+            //     }
+                
+            // });
+            // emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
+
+
         });
-        // emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
-        // emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
-
 
 
 

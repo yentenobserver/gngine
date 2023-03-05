@@ -132,7 +132,7 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
             throw new Error(`No template found for unit type ${unit.unitSpecification.name} ${unit.unitSpecification.tuid}`);
 
         this._addHPBar(renderable, unit);
-        console.log(JSON.stringify(renderable.data.toJSON()));
+        // console.log(JSON.stringify(renderable.data.toJSON()));
         return renderable;
     }
 

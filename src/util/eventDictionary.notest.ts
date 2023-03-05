@@ -17,6 +17,9 @@ export const Events = {
         UNIT: "interaction:unit", // (event: PlaygroundInteractionEvent)
         TILE: "interaction:tile", // (event: PlaygroundInteractionEvent)
         HUD: "interaction:hud" // (event: PlaygroundInteractionEvent)
+    },
+    DEBUG: {
+        DUMP_VIEW: "debug:dump:view",        
     }
     
 }

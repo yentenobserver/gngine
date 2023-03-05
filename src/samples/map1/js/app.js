@@ -6,10 +6,20 @@ class AppDemo {
         this.assets3DLoader = new THREE.GLTFLoader();
         this.map = new gngine.MapSquare(2,3);
         this.mapRenderer = {};
+        this.model = {
+            selected: {
+                unit: {},
+                unitData: {},
+                unitDataStr: {},
+                tile: {},
+                tileData: {},
+                tileDataStr: {},
+            }
+        }
     }
-    static getInstance(emitter, mapCanvas){
+    static async getInstance(emitter, mapCanvas){
         const a = new AppDemo(emitter, mapCanvas)
-        a._start();
+        await a._start();
         return a;
     }
 
@@ -181,6 +191,60 @@ class AppDemo {
         unitRenderer.put(unit2, tile2,"E");
 
         this.mapRenderer = mapRenderer;
+        this.emitter.on("interaction.*",(event)=>{
+            console.log("Got both", event);
+        })
+
+        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
+            if(event.originalEvent.type=="pointerdown") {
+                that.model.selected = {
+                    unit: {},
+                    unitData: {},
+                    unitDataStr: {},
+                    tile: {},
+                    tileData: {},
+                    tileDataStr: {},
+                }
+
+                console.log('UNIT', event)
+                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                    if(event.data.hierarchy[i].userData.unitData){                
+                        const unitData = event.data.hierarchy[i].userData.unitData                                            
+                        that.model.selected.unitData = unitData
+                        that.model.selected.unitDataStr = JSON.stringify(unitData, null, "\t");
+                        that.model.selected.unitDataStr = that.model.selected.unitDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+                    //     output = JSON.stringify( output, null, '\t' );
+			        // output = output
+                    }
+                }
+                that.model.selected.unit = event.interactingObject;
+                that.model.selected.unit.worldPosition = event.worldPosition;
+                // console.log(that.model.selected.unit);
+            }
+            
+        });
+
+        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
+            if(event.originalEvent.type=="pointerdown") {
+                console.log('TILE', event)
+                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                    if(event.data.hierarchy[i].userData.tileData){                
+                        const tileData = event.data.hierarchy[i].userData.tileData                    
+                        window.mgr_tiles.push(tileData);
+                        that.model.selected.tileData = tileData
+                        that.model.selected.tileDataStr = JSON.stringify(tileData, null, "\t");
+                        that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+                    //     output = JSON.stringify( output, null, '\t' );
+			        // output = output
+                    }
+                }
+                that.model.selected.tile = event.interactingObject
+                that.model.selected.tile.worldPosition = event.worldPosition
+            };
+            
+            
+            // console.log('TILE',event.originalEvent.type)
+        });
     }
 
     loadAsset(url, type){
@@ -191,6 +255,15 @@ class AppDemo {
                 return response.text();
             else return response.blob();
         })
+    }
+
+    handleDebugDump(e, that){
+        that.emitter.emit("debug:dump:view",{});
+    }
+
+    handleDebugDumpUnit(e, that){
+        const result = JSON.stringify(that.model.selected.unit.toJSON());
+        console.log(result);
     }
 }
 
