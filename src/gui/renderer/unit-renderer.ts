@@ -3,7 +3,7 @@ import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
-import { MapPositionProvider } from "./map-renderers";
+import { MapPositionProvider, OrientationProvider } from "./map-renderers";
 import { Renderable, RenderablesFactory, RenderablesSpecification, RenderablesThreeJSFactory } from "./renderables-factory";
 
 import { Renderer } from "./renderers";
@@ -283,10 +283,13 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
 export abstract class UnitsRenderer extends Renderer {
     units: UnitHolder[];
     mapProvider: MapPositionProvider;
-    constructor(emitter: EventEmitter, mapProvider: MapPositionProvider){
+    orientationProvider: OrientationProvider;
+
+    constructor(emitter: EventEmitter, mapProvider: MapPositionProvider, orientationProvider: OrientationProvider){
         super(emitter);
         this.units = [];
         this.mapProvider = mapProvider
+        this.orientationProvider = orientationProvider;
     }
 
     
@@ -316,8 +319,8 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
     view: PlaygroundViewThreeJS|undefined;
     holderObject: Object3D;
 
-    constructor(emitter: EventEmitter, mapProvider: MapPositionProvider){
-        super(emitter, mapProvider);
+    constructor(emitter: EventEmitter, mapProvider: MapPositionProvider, orientationProvider: OrientationProvider){
+        super(emitter, mapProvider, orientationProvider);
         this.holderObject = new Object3D();
         this.holderObject.name = UnitsRendererThreeJS.NAME;
     }
@@ -347,9 +350,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
     put(unit: UnitBase, _at?: TileBase, direction?: string):void{
         const renderable = (<UnitRenderablesFactory>this.renderablesFactory!).spawn(unit);
         const object3D = renderable.data as Object3D;
-        const scenePosition = this.mapProvider.xyToScenePosition(_at!.y,_at!.x);
-        // todo add hitpoints bar
-        // todo add unit icon sprite
+        const scenePosition = this.mapProvider.xyToScenePosition(_at!.y,_at!.x);                
 
         const unitDirection = direction || "S";
         this.units.push({
@@ -362,7 +363,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)
         
         // this._directionRotate(object3D, cDirection)
-
+        this.orientationProvider.orientate(object3D, unitDirection);
         
         object3D.userData.unitData = unit
 

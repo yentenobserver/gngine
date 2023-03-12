@@ -2732,7 +2732,7 @@ describe("Renderers",()=>{
                     x: 100, y: 100, z: 100
                 })
                 s10 = sinon.spy(map.mapHolderObject,"add");
-                s3 = sinon.stub(map,"_directionRotate");
+                s3 = sinon.stub(map,"orientate");
                 s4 = sinon.stub(rf,"spawnRenderableObject").returns({
                     data: new THREE.Object3D(),
                     name:"name"
@@ -2838,7 +2838,7 @@ describe("Renderers",()=>{
                 }))
             })
         })
-        describe("_directionRotate",()=>{
+        describe("orientate",()=>{
             const o = new THREE.Object3D();
             beforeEach(()=>{
                 s1 = sinon.stub(o,"rotateZ");
@@ -2847,19 +2847,19 @@ describe("Renderers",()=>{
                 s1.restore();
             })
             it("rotates 180 degree along z-axis for N-north",()=>{                
-                map._directionRotate(o,"N");
+                map.orientate(o,"N");
                 return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(180));
             })
             it("rotates -90 degree along z-axis for W-west",()=>{                
-                map._directionRotate(o,"W");
+                map.orientate(o,"W");
                 return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(-90));
             })
             it("rotates 90 degree along z-axis for E-east",()=>{                
-                map._directionRotate(o,"E");
+                map.orientate(o,"E");
                 return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(90));
             })
             it("does nothing for S-south as this is default orientation for tile",()=>{                
-                map._directionRotate(o,"S");
+                map.orientate(o,"S");
                 return expect(s1.callCount).eq(0);
             })
         })

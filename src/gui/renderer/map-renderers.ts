@@ -27,6 +27,18 @@ export interface MapPositionProvider{
     scenePositionToXY(sceneX:number,sceneY:number):TilePosition,    
 }
 
+export interface OrientationProvider {
+    /**
+     * It is assumed that object pivot point is at its base center.
+     * It is also assumed that by default when loaded/spawned tile is S oriented.
+     * Do not use it for rotation - only once when one wants to
+     * put tile in proper orientation/direction.
+     * @param object 
+     * @param direction 
+     */
+    orientate(object:any, direction:string):void;
+}
+
 export interface MapWritable{
     add(object: Renderable):void;
 }
@@ -54,7 +66,7 @@ export interface MapZoomEvent extends MapEvent {
  * - when mouse pointer is moved then map highligh element is also moving
  * - when mouse is clicked, then view is centered on the clicked tile (alternatively)
  */
-export abstract class MapRenderer extends Renderer implements MapPositionProvider, MapWritable{
+export abstract class MapRenderer extends Renderer implements MapPositionProvider, MapWritable, OrientationProvider{
     width: number;
     height: number;
     indicatorForTile: MapIndicator|undefined;
@@ -73,6 +85,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
         this.emitter.on(Events.MAP.ZOOM, this._onEvent.bind(this))
  
     }
+    abstract orientate(object:any, direction:string):void;
     abstract add(renderable: Renderable): void;
     abstract initialize():Promise<void>;
     abstract remove(tile: TileBase):void;
@@ -469,7 +482,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
 
         this.mapHolderObject.add(object3D);
         object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)
-        this._directionRotate(object3D, cDirection)
+        this.orientate(object3D, cDirection)
 
         
         object3D.userData.tileData = tile
@@ -541,10 +554,11 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
      * It is also assumed that by default when loaded/spawned tile is S oriented.
      * Do not use it for rotation - only once when one wants to
      * put tile in proper orientation/direction.
-     * @param object3D 
-     * @param direction 
+     * @param object {THREE.Object3D} Renderable object to be oriented in direction
+     * @param direction {string} target direction
      */
-    _directionRotate(object3D:THREE.Object3D, direction:string){
+    orientate(object:THREE.Object3D, direction:string){
+        const object3D = <THREE.Object3D>object;
         // const prevPosition = object3D.position;
         switch (direction) {
             case 'N':                

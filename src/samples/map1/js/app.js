@@ -107,7 +107,7 @@ class AppDemo {
             // }
         }
         const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
-        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer);
+        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, mapRenderer);
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
         await unitRenderer.initialize();
