@@ -540,7 +540,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         camera.lookAt(0,0,0);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
         
-        camera.up.set( 0, 0, 1 );
+        // camera.up.set( 0, 0, 1 );
     
         // initialize scene
         let scene = new THREE.Scene();
@@ -559,8 +559,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // hemiLight.position.set( 0, 0, 1600 );
         // scene.add( hemiLight );
         
-        // const light = new THREE.AmbientLight( 0x404040 ,0.3); // soft white light
-        // scene.add(light);
+        const light = new THREE.AmbientLight( 0x404040 ,0.3); // soft white light
+        scene.add(light);
 
         var dirLight = new THREE.DirectionalLight( 0xffffff,1.2);
         dirLight.position.set( 45, -45, 130 );

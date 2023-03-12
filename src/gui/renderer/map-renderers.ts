@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Vector3 } from 'three';
+import { Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -423,6 +423,73 @@ export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
 
 }
 
+export class PlaneHexFlatTopOddGeometryHelper {
+    _cols: number;
+    _rows: number;
+    _width: number;
+    _height: number;
+    _geometry: ShapeGeometry;
+
+    constructor(cols:number, rows:number, width: number){
+        this._cols = cols;
+        this._rows = rows;
+        this._width = width;
+        const size = this._width/2;
+        this._height = Math.sqrt(3)*size;
+        
+        const shapes: Shape[]=[];
+
+        for(let q=0; q<cols; q++){
+            for(let r=0; r<rows; r++){
+                const xCenter = q*this._width*3/4;
+                const yCenter = q%2==1?r*this._height+this._height/2:r*this._height;
+                
+
+                console.log(q,r, xCenter, yCenter, this._width, this._height, size);
+
+                const hexShape = new Shape();
+                const points = this._flat_hex_points(new Vector2(xCenter,yCenter),size);
+                hexShape.moveTo(points[0].x, points[0].y);
+                for(let i=1; i<6; i++){
+                    hexShape.lineTo(points[i].x, points[i].y);
+                }
+                hexShape.lineTo(points[0].x, points[0].y);
+                shapes.push(hexShape);
+                console.log(q,r,points);
+            }
+        }
+
+        this._geometry = new ShapeGeometry(shapes);                        
+        
+    }
+
+    getGeometry():ShapeGeometry{
+        return this._geometry;
+    }
+
+    _flat_hex_points(center:Vector2, size:number):Vector2[]{
+        const points:Vector2[] = [];
+
+        for(let i=0; i<6; i++){
+            points.push(this._flat_hex_corner_point(center, size, i));
+        }
+        return points;
+    }
+    /**
+     * 
+     * @param center 
+     * @param size 
+     * @param i hex cornerfrom 0 to 5
+     * @returns 
+     */
+    _flat_hex_corner_point(center:Vector2, size:number, i: number):Vector2{
+        var angle_deg = 60 * i;
+        var angle_rad = Math.PI / 180 * angle_deg;
+        return new Vector2(center.x + size * Math.cos(angle_rad), center.y + size * Math.sin(angle_rad));
+    }
+    
+}
+
 
 
 // unit changed(unitUpdated, location/path)
@@ -432,14 +499,20 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         
         // const that = this;
         this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
-            // grid
-            var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+
+            const helper = new PlaneHexFlatTopOddGeometryHelper(3,3,1);
+            var geometry = helper.getGeometry();
             var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
             var grid = new THREE.Mesh( geometry, material );
-            // grid.rotation.order = 'YXZ';
-            // grid.rotation.y = - Math.PI / 2;
-            // grid.rotation.x = - Math.PI / 2;
-            grid.position.z=-0.01
+            
+            // // grid
+            // var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+            // var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            // var grid = new THREE.Mesh( geometry, material );
+            // // grid.rotation.order = 'YXZ';
+            // // grid.rotation.y = - Math.PI / 2;
+            // // grid.rotation.x = - Math.PI / 2;
+            // grid.position.z=-0.01
             this.mapHolderObject.add( grid );
         return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
