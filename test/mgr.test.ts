@@ -24,7 +24,7 @@ import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, Action
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
 import { } from '../src/gui/renderer/renderers'
-import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TilePosition} from '../src/gui/renderer/map-renderers'
+import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TileHexPosition, TilePosition} from '../src/gui/renderer/map-renderers'
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
@@ -3587,7 +3587,9 @@ describe("Renderers",()=>{
                 mapProvider = {
                     add: ()=>{},
                     scenePositionToXY: (_sceneX: number, _sceneY: number) => <TilePosition>{},
-                    xyToScenePosition: (_y: number, _x: number)=><ScenePosition>{}                        
+                    xyToScenePosition: (_y: number, _x: number)=><ScenePosition>{},  
+                    qrToScenePosition: (_q: number, _r: number)=><ScenePosition>{},
+                    scenePositionToQR: (_sceneX: number, _sceneY: number)=><TileHexPosition>{}                          
                 }
                 rf = new RenderablesDefaultFactory(<RenderablesSpecification>{});
                 indicator = new AreaMapIndicatorThreeJs(mapProvider, rf, "key");

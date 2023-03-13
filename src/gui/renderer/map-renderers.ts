@@ -22,10 +22,25 @@ export interface TilePosition {
     x: number,
 }
 
+export interface TileHexPosition {
+    
+    q: number,    
+    r: number,
+}
+
+/**
+ * Provides translation between scene/world coordinates (pixel on screen/scene) vs map coordinates
+ * (either x,y for quad maps or q,r for hex maps)
+ */
 export interface MapPositionProvider{
+    // quadratic map support
     xyToScenePosition(y: number, x:number):ScenePosition,
     scenePositionToXY(sceneX:number,sceneY:number):TilePosition,    
+    // hex map support
+    qrToScenePosition(q: number, r:number):ScenePosition,
+    scenePositionToQR(sceneX:number,sceneY:number):TileHexPosition,    
 }
+
 
 export interface OrientationProvider {
     /**
@@ -85,18 +100,23 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
         this.emitter.on(Events.MAP.ZOOM, this._onEvent.bind(this))
  
     }
+    
+    
     abstract orientate(object:any, direction:string):void;
     abstract add(renderable: Renderable): void;
     abstract initialize():Promise<void>;
     abstract remove(tile: TileBase):void;
     abstract replace(tile: TileBase, direction:string):void;
     abstract put(tile: TileBase, direction:string):void;
-    abstract onTileChanged(tile: TileBase, direction: string):void;
-    abstract xyToScenePosition(y: number, x:number):ScenePosition;
-    abstract scenePositionToXY(sceneX: number, sceneY: number):TilePosition;    
+    abstract onTileChanged(tile: TileBase, direction: string):void;    
     abstract highlightTiles(tiles: TileBase[]):void;
     abstract rotate(rotation: number):void;
     abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
+
+    abstract qrToScenePosition(_q: number, _r: number): ScenePosition;
+    abstract scenePositionToQR(sceneX: number, sceneY: number): TileHexPosition;    
+    abstract xyToScenePosition(y: number, x:number):ScenePosition;
+    abstract scenePositionToXY(sceneX: number, sceneY: number):TilePosition;    
 
     /**
      * Zoom levels are from 0 - farthest to 16 - closest
@@ -423,48 +443,113 @@ export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
 
 }
 
-export class PlaneHexFlatTopOddGeometryHelper {
+/**
+ * Provides set of position convertion between pixel world and map 
+ * world (this instance is for hexagonal flat top maps)
+ */
+export class HexFlatTopPositionHelper implements MapPositionProvider {
+    _width: number;
+    _size: number;
+    _height: number;
+
+    constructor(hexWidth: number){
+        this._width = hexWidth;
+        this._size = this._width/2;
+        this._height = Math.sqrt(3)*this._size;
+    }
+    xyToScenePosition(_y: number, _x: number): ScenePosition {
+        throw new Error('Quad map not supported.');
+    }
+    scenePositionToXY(_sceneX: number, _sceneY: number): TilePosition {
+        throw new Error('Quad map not supported.');
+    }
+
+    qrToScenePosition(q: number, r: number): ScenePosition {
+        const vector = this._qrToXY(q,r);
+        return {
+            x: vector.x,
+            y: vector.y,
+            z: 0
+        }
+    }
+
+    scenePositionToQR(sceneX: number, sceneY: number): TileHexPosition {
+        const qr = this._xyToQR(new Vector2(sceneX, sceneY));
+        return qr;
+    }
+
+    _xyToQR(point: Vector2):{q: number, r:number}{
+        var q = ( 2./3 * point.x                        ) / this._size
+        var r = (-1./3 * point.x  +  Math.sqrt(3)/3 * point.y) / this._size
+        // return axial_round(Hex(q, r))    
+        return {
+            q: Math.round(q),
+            r: Math.round(r)
+        }
+    }        
+
+    _qrToXY(q:number, r:number):Vector2{
+        const xCenter = q*this._width*3/4;
+        const yCenter = q%2==1?r*this._height+this._height/2:r*this._height;
+        return new Vector2(xCenter, yCenter);
+    }
+    
+}
+
+/**
+ * Helper that can generate threejs plane of hex shapes. It uses flat top odd approach
+ * for putting hexes into rows and columns
+ */
+export class PlaneHexFlatTopOddGeometryThreeJsHelper {
+    
     _cols: number;
     _rows: number;
     _width: number;
-    _height: number;
-    _geometry: ShapeGeometry;
+    _height: number;    
+    _size: number;
+    _helper: HexFlatTopPositionHelper;
 
     constructor(cols:number, rows:number, width: number){
         this._cols = cols;
         this._rows = rows;
         this._width = width;
-        const size = this._width/2;
-        this._height = Math.sqrt(3)*size;
+        this._size = this._width/2;
+        this._height = Math.sqrt(3)*this._size;
         
+        this._helper = new HexFlatTopPositionHelper(this._width);
+        
+    }
+    /**
+     * Creates shape of hexes map with given columns and rows. It uses flat top odd approach for 
+     * positioning hexes on the plance
+     * @returns {ShapeGeometry} threejs geometry of the plane with hexes generated
+     */
+    getGeometry():ShapeGeometry{
         const shapes: Shape[]=[];
 
-        for(let q=0; q<cols; q++){
-            for(let r=0; r<rows; r++){
-                const xCenter = q*this._width*3/4;
-                const yCenter = q%2==1?r*this._height+this._height/2:r*this._height;
+        for(let q=0; q<this._cols; q++){
+            for(let r=0; r<this._rows; r++){
+                const center = this._helper.qrToScenePosition(q,r);
+                const xCenter = center.x;
+                const yCenter = center.y;
                 
 
-                console.log(q,r, xCenter, yCenter, this._width, this._height, size);
+                // console.log(q,r, xCenter, yCenter, this._width, this._height, size);
 
                 const hexShape = new Shape();
-                const points = this._flat_hex_points(new Vector2(xCenter,yCenter),size);
+                const points = this._flat_hex_points(new Vector2(xCenter,yCenter),this._size);
                 hexShape.moveTo(points[0].x, points[0].y);
                 for(let i=1; i<6; i++){
                     hexShape.lineTo(points[i].x, points[i].y);
                 }
                 hexShape.lineTo(points[0].x, points[0].y);
                 shapes.push(hexShape);
-                console.log(q,r,points);
+                // console.log(q,r,points);
             }
         }
 
-        this._geometry = new ShapeGeometry(shapes);                        
-        
-    }
-
-    getGeometry():ShapeGeometry{
-        return this._geometry;
+        const geometry = new ShapeGeometry(shapes);  
+        return geometry;
     }
 
     _flat_hex_points(center:Vector2, size:number):Vector2[]{
@@ -494,13 +579,14 @@ export class PlaneHexFlatTopOddGeometryHelper {
 
 // unit changed(unitUpdated, location/path)
 // tile changed(tileUpdated)
-export class MapQuadRendererThreeJs extends MapRendererThreeJs{        
+export class MapQuadRendererThreeJs extends MapRendererThreeJs{
+        
     initialize(): Promise<void> {
         
         // const that = this;
         this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
-            const helper = new PlaneHexFlatTopOddGeometryHelper(3,3,1);
+            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
             var geometry = helper.getGeometry();
             var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
             var grid = new THREE.Mesh( geometry, material );
@@ -613,6 +699,14 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         }
         return position;
     }
+
+    qrToScenePosition(_q: number, _r: number): ScenePosition {
+        throw new Error('QR coords to Scene not supported for quadratic map.');
+    }
+    scenePositionToQR(_sceneX: number, _sceneY: number): TileHexPosition {
+        throw new Error('Scene to QR coords not supported for quadratic map.');
+    }    
+
     /**
      * adds any 3d object into map (map holder)
      * @param object THREEJS object 3d to be added
