@@ -350,7 +350,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
     put(unit: UnitBase, _at?: TileBase, direction?: string):void{
         const renderable = (<UnitRenderablesFactory>this.renderablesFactory!).spawn(unit);
         const object3D = renderable.data as Object3D;
-        const scenePosition = this.mapProvider.xyToScenePosition(_at!.y,_at!.x);                
+        const scenePosition = this.mapProvider.yxToScenePosition(_at!.y,_at!.x);                
 
         const unitDirection = direction || "S";
         this.units.push({

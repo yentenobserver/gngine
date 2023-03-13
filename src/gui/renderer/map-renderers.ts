@@ -33,12 +33,22 @@ export interface TileHexPosition {
  * (either x,y for quad maps or q,r for hex maps)
  */
 export interface MapPositionProvider{
-    // quadratic map support
-    xyToScenePosition(y: number, x:number):ScenePosition,
-    scenePositionToXY(sceneX:number,sceneY:number):TilePosition,    
-    // hex map support
-    qrToScenePosition(q: number, r:number):ScenePosition,
-    scenePositionToQR(sceneX:number,sceneY:number):TileHexPosition,    
+    /**
+     * Converts TileBase tile position (row, column) into scene coordinates (x,y,z).
+     * @see TileBase for more details
+     * @param y tile row (aka r for hex tile)
+     * @param x tile column (aka q for hex tile)
+     */
+    yxToScenePosition(y: number, x:number):ScenePosition,
+    /**
+     * Converts scene coordinates (x,y) into tile position (row, column)
+     * @param {number} sceneX scene position.x
+     * @param {number} sceneY scene position.y
+     */
+    scenePositionToYX(sceneX:number,sceneY:number):TilePosition,    
+    // // hex map support
+    // qrToScenePosition(q: number, r:number):ScenePosition,
+    // scenePositionToQR(sceneX:number,sceneY:number):TileHexPosition,    
 }
 
 
@@ -113,10 +123,9 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     abstract rotate(rotation: number):void;
     abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
 
-    abstract qrToScenePosition(_q: number, _r: number): ScenePosition;
-    abstract scenePositionToQR(sceneX: number, sceneY: number): TileHexPosition;    
-    abstract xyToScenePosition(y: number, x:number):ScenePosition;
-    abstract scenePositionToXY(sceneX: number, sceneY: number):TilePosition;    
+    
+    abstract yxToScenePosition(y: number, x:number):ScenePosition;
+    abstract scenePositionToYX(sceneX: number, sceneY: number):TilePosition;    
 
     /**
      * Zoom levels are from 0 - farthest to 16 - closest
@@ -327,7 +336,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
         }
         else{
-            const sceneXY = this.xyToScenePosition(tile.y, tile.x);
+            const sceneXY = this.yxToScenePosition(tile.y, tile.x);
             this.view!.camera.position.x = sceneXY.x;
             this.view!.camera.position.y = sceneXY.y-5;
             this.view!.camera.lookAt(sceneXY.x, sceneXY.y, 0);            
@@ -432,7 +441,7 @@ export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
         if(renderables.length != tiles.length)
             throw new Error(`Renderables and tiles count mismatch. ${renderables.length} vs ${tiles.length}`);
         for(let i=0; i<tiles.length; i++){
-            const pos = this.mapProvider.xyToScenePosition(tiles[i].y, tiles[i].x);
+            const pos = this.mapProvider.yxToScenePosition(tiles[i].y, tiles[i].x);
             const renderable = <RenderableThreeJS>renderables[i];            
             if(renderable.data.position.x !=pos.x || renderable.data.position.y !=pos.y){
                 // console.log(`Cache size ${this.tiles.length} ${this.renderables.length}`)
@@ -457,26 +466,23 @@ export class HexFlatTopPositionHelper implements MapPositionProvider {
         this._size = this._width/2;
         this._height = Math.sqrt(3)*this._size;
     }
-    xyToScenePosition(_y: number, _x: number): ScenePosition {
-        throw new Error('Quad map not supported.');
-    }
-    scenePositionToXY(_sceneX: number, _sceneY: number): TilePosition {
-        throw new Error('Quad map not supported.');
-    }
-
-    qrToScenePosition(q: number, r: number): ScenePosition {
-        const vector = this._qrToXY(q,r);
+    yxToScenePosition(_y: number, _x: number): ScenePosition {
+        const vector = this._qrToXY(_x,_y);
         return {
             x: vector.x,
             y: vector.y,
             z: 0
         }
     }
-
-    scenePositionToQR(sceneX: number, sceneY: number): TileHexPosition {
-        const qr = this._xyToQR(new Vector2(sceneX, sceneY));
-        return qr;
+    scenePositionToYX(_sceneX: number, _sceneY: number): TilePosition {
+        const qr = this._xyToQR(new Vector2(_sceneX, _sceneY));
+        return {
+            y: qr.r,
+            x: qr.q
+        }
     }
+
+
 
     _xyToQR(point: Vector2):{q: number, r:number}{
         var q = ( 2./3 * point.x                        ) / this._size
@@ -529,7 +535,7 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
 
         for(let q=0; q<this._cols; q++){
             for(let r=0; r<this._rows; r++){
-                const center = this._helper.qrToScenePosition(q,r);
+                const center = this._helper.yxToScenePosition(r,q);
                 const xCenter = center.x;
                 const yCenter = center.y;
                 
@@ -586,19 +592,19 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // const that = this;
         this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
-            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
-            var geometry = helper.getGeometry();
-            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-            var grid = new THREE.Mesh( geometry, material );
-            
-            // // grid
-            // var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+            // const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
+            // var geometry = helper.getGeometry();
             // var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
             // var grid = new THREE.Mesh( geometry, material );
-            // // grid.rotation.order = 'YXZ';
-            // // grid.rotation.y = - Math.PI / 2;
-            // // grid.rotation.x = - Math.PI / 2;
-            // grid.position.z=-0.01
+            
+            // grid
+            var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            var grid = new THREE.Mesh( geometry, material );
+            // grid.rotation.order = 'YXZ';
+            // grid.rotation.y = - Math.PI / 2;
+            // grid.rotation.x = - Math.PI / 2;
+            grid.position.z=-0.01
             this.mapHolderObject.add( grid );
         return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
@@ -636,7 +642,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         const renderable = this.renderablesFactory!.spawnRenderableObject(tile.t);
         const object3D = renderable.data as THREE.Object3D;
 
-        const scenePosition = this.xyToScenePosition(tile.y,tile.x);
+        const scenePosition = this.yxToScenePosition(tile.y,tile.x);
         const cDirection = direction||'S'
 
         this.mapHolderObject.add(object3D);
@@ -652,12 +658,13 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     }
 
     /**
+     * Converts tile coordinates (y - row, x-column) into scene x,y,z position
      * It is assumed that tile pivot point is at its base (x,y) center
-     * @param y 
-     * @param x 
-     * @returns 
+     * @param y tile row
+     * @param x tile column
+     * @returns {x: number, y: number, z: number} position
      */
-    xyToScenePosition(y: number, x:number){
+    yxToScenePosition(y: number, x:number){
         // const originTilePosition = {
         //     x: this._width/2+1,
         //     y: this._height/2
@@ -681,9 +688,9 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
      * Translates actual scene position (x,y) into map tile position (y,x)
      * @param sceneX scene x position
      * @param sceneY scene y position
-     * @returns (y,x) tile position
+     * @returns (y,x) tile position (row, column)
      */
-    scenePositionToXY(sceneX:number,sceneY:number){  
+    scenePositionToYX(sceneX:number,sceneY:number){  
         
         const _tilesCountY = this.height/this.tileSize
         
@@ -700,12 +707,6 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         return position;
     }
 
-    qrToScenePosition(_q: number, _r: number): ScenePosition {
-        throw new Error('QR coords to Scene not supported for quadratic map.');
-    }
-    scenePositionToQR(_sceneX: number, _sceneY: number): TileHexPosition {
-        throw new Error('Scene to QR coords not supported for quadratic map.');
-    }    
 
     /**
      * adds any 3d object into map (map holder)
@@ -768,3 +769,28 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     
     
 }
+
+export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
+    initialize(): Promise<void> {
+        
+        // const that = this;
+        this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
+
+            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
+            var geometry = helper.getGeometry();
+            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            var grid = new THREE.Mesh( geometry, material );
+            grid.position.z=-0.01
+            
+            this.mapHolderObject.add( grid );
+        return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+            this._createMapHelpers();
+        })            
+    }
+
+    yxToScenePosition(y: number, x:number){
+        const helper = new HexFlatTopPositionHelper(this.tileSize);
+        return helper.yxToScenePosition(y, x);
+    }
+}
+

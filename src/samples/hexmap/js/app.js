@@ -51,8 +51,8 @@ class AppDemo {
         const mapRenderablesSpecification = {
             main: {
                 name: "mapAssets",
-                url: "./assets/models-prod.gltf",
-                pivotCorrection: "-0.5,-0.5,0"
+                url: "./assets/tiles.gltf",
+                pivotCorrection: "-0.5,-0.433012701892219,0"
             },
             helpers: {
                 name: "mapHelpers",
@@ -62,7 +62,7 @@ class AppDemo {
         }
         let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
 
-        mapRenderer = new gngine.MapQuadRendererThreeJs(3,2, this.emitter)
+        mapRenderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)
         mapRenderer.setRenderablesFactory(mapTileFactory);
         // map renderer will render map tiles into main map view
         mapRenderer.setView(mainMapView);

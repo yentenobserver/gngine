@@ -24,7 +24,7 @@ import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, Action
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
 import { } from '../src/gui/renderer/renderers'
-import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TileHexPosition, TilePosition} from '../src/gui/renderer/map-renderers'
+import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TilePosition} from '../src/gui/renderer/map-renderers'
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
@@ -2352,7 +2352,7 @@ describe("Renderers",()=>{
                 view.scene = new THREE.Scene;
                 map.setView(view); 
                 s1 = sinon.stub(view.camera,"lookAt");
-                s2 = sinon.stub(map,"xyToScenePosition").returns({x: 10, y:10, z: 0});
+                s2 = sinon.stub(map,"yxToScenePosition").returns({x: 10, y:10, z: 0});
             })
             afterEach(()=>{
                 s1.restore();
@@ -2728,7 +2728,7 @@ describe("Renderers",()=>{
                 rf = new RenderablesDefaultFactory(specification);
                 map.setRenderablesFactory(rf);
 
-                s1 = sinon.stub(map,"xyToScenePosition").returns({
+                s1 = sinon.stub(map,"yxToScenePosition").returns({
                     x: 100, y: 100, z: 100
                 })
                 s10 = sinon.spy(map.mapHolderObject,"add");
@@ -2778,61 +2778,61 @@ describe("Renderers",()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked); 
             })
             it("upper left scene corner",()=>{
-                const r = map.xyToScenePosition(0,0);  
-                const xy = map.scenePositionToXY(r.x, r.y);              
+                const r = map.yxToScenePosition(0,0);  
+                const xy = map.scenePositionToYX(r.x, r.y);              
                 return expect(`${xy.y},${xy.x}`).eq("0,0");
             })
             it("upper right scene corner",()=>{
-                const r = map.xyToScenePosition(0,39);  
-                const xy = map.scenePositionToXY(r.x, r.y);              
+                const r = map.yxToScenePosition(0,39);  
+                const xy = map.scenePositionToYX(r.x, r.y);              
                 return expect(`${xy.y},${xy.x}`).eq("0,39");
             })
             it("lower left scene corner",()=>{
-                const r = map.xyToScenePosition(19,0);  
-                const xy = map.scenePositionToXY(r.x, r.y);              
+                const r = map.yxToScenePosition(19,0);  
+                const xy = map.scenePositionToYX(r.x, r.y);              
                 return expect(`${xy.y},${xy.x}`).eq("19,0");
             })
             it("lower right scene corner",()=>{
-                const r = map.xyToScenePosition(19,39);  
-                const xy = map.scenePositionToXY(r.x, r.y);              
+                const r = map.yxToScenePosition(19,39);  
+                const xy = map.scenePositionToYX(r.x, r.y);              
                 return expect(`${xy.y},${xy.x}`).eq("19,39");
             })
             it("center of scene ",()=>{
-                const r = map.xyToScenePosition(9,19);  
-                const xy = map.scenePositionToXY(r.x, r.y);              
+                const r = map.yxToScenePosition(9,19);  
+                const xy = map.scenePositionToYX(r.x, r.y);              
                 return expect(`${xy.y},${xy.x}`).eq("9,19");
             })
         })
-        describe("xyToScenePosition",()=>{
+        describe("yxToScenePosition",()=>{
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked); 
             })
             it("positions upper left tile",()=>{
-                const r = map.xyToScenePosition(0,0);                
+                const r = map.yxToScenePosition(0,0);                
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
                     x: -map.width/2+map.tileSize/2, y: map.height/2-map.tileSize/2, z: 0
                 }))
             })
             it("positions upper right tile",()=>{
-                const r = map.xyToScenePosition(0,39);
+                const r = map.yxToScenePosition(0,39);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
                     x: map.width/2-map.tileSize/2, y: map.height/2-map.tileSize/2, z: 0
                 }))
             })
             it("positions lower left tile",()=>{
-                const r = map.xyToScenePosition(19,0);
+                const r = map.yxToScenePosition(19,0);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
                     x: -map.width/2+map.tileSize/2, y: -map.height/2+map.tileSize/2, z: 0
                 }))
             })
             it("positions lower right tile",()=>{
-                const r = map.xyToScenePosition(19,39);
+                const r = map.yxToScenePosition(19,39);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
                     x: map.width/2-map.tileSize/2, y: -map.height/2+map.tileSize/2, z: 0
                 }))
             })
             it("positions center tile",()=>{
-                const r = map.xyToScenePosition(9,19);
+                const r = map.yxToScenePosition(9,19);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
                     x: -map.tileSize/2, y: map.tileSize/2, z: 0
                 }))
@@ -3586,10 +3586,8 @@ describe("Renderers",()=>{
                 tile3 = {id: "", t: "", x:20, y: 20};
                 mapProvider = {
                     add: ()=>{},
-                    scenePositionToXY: (_sceneX: number, _sceneY: number) => <TilePosition>{},
-                    xyToScenePosition: (_y: number, _x: number)=><ScenePosition>{},  
-                    qrToScenePosition: (_q: number, _r: number)=><ScenePosition>{},
-                    scenePositionToQR: (_sceneX: number, _sceneY: number)=><TileHexPosition>{}                          
+                    scenePositionToYX: (_sceneX: number, _sceneY: number) => <TilePosition>{},
+                    yxToScenePosition: (_y: number, _x: number)=><ScenePosition>{}                    
                 }
                 rf = new RenderablesDefaultFactory(<RenderablesSpecification>{});
                 indicator = new AreaMapIndicatorThreeJs(mapProvider, rf, "key");
@@ -3695,7 +3693,7 @@ describe("Renderers",()=>{
             describe("render",()=>{
                 beforeEach(()=>{
                     s2.restore();
-                    s7 = sinon.stub(mapProvider,"xyToScenePosition");
+                    s7 = sinon.stub(mapProvider,"yxToScenePosition");
                     s7.withArgs(0,0).returns({x: 0, y:1})
                     s7.withArgs(10,10).returns({x: 11, y:10})
                     s7.withArgs(20,20).returns({x: 20, y:20})

@@ -1,7 +1,7 @@
 export interface TileBase {
     id: string,
-    x: number, // 0 left row
-    y: number, // 0 upper row
+    x: number, // for quad tiles this is the column, for hex tiles this is also a column aka q
+    y: number, // for quad tiles this is the row, for hex tiles this is also a row aka r
     
     t: string   // type of tile (terrain)
 }
