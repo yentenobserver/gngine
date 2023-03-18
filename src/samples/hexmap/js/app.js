@@ -107,7 +107,7 @@ class AppDemo {
             // }
         }
         const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
-        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, mapRenderer);
+        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, new gngine.HexFlatTopOrientationProvider());
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
         await unitRenderer.initialize();
@@ -226,8 +226,8 @@ class AppDemo {
             }
         }
         unitRenderer.put(unit, tile,"S");
-        unitRenderer.put(unit2, tile2,"E");
-        unitRenderer.put(unit3, tile3,"E");
+        unitRenderer.put(unit2, tile2,"NW");
+        // unitRenderer.put(unit3, tile3,"E");
 
         this.mapRenderer = mapRenderer;
         this.emitter.on("interaction.*",(event)=>{

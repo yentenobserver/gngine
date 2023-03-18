@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
+import { Matrix4, Quaternion, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -62,6 +62,70 @@ export interface OrientationProvider {
      * @param direction 
      */
     orientate(object:any, direction:string):void;
+}
+
+export enum HexFlatTopDirections {
+    N = 'N',
+    NE = 'NE',
+    NW = 'NW',
+
+    S = 'S',  
+    SE = 'SE',
+    SW = 'SW'
+}
+
+export class HexFlatTopOrientationProvider implements OrientationProvider{
+    orientate(object:any, direction:string){
+        if(![
+            HexFlatTopDirections.N.valueOf(),
+            HexFlatTopDirections.NE.valueOf(),
+            HexFlatTopDirections.NW.valueOf(),
+            HexFlatTopDirections.S.valueOf(),
+            HexFlatTopDirections.SE.valueOf(),
+            HexFlatTopDirections.SW.valueOf(),
+        ].includes(direction)){
+            throw new Error(`Unsupported direction ${direction} for HexFlatTop orientation.`);
+        }
+        const object3D = <THREE.Object3D>object;
+
+        // reset rotations
+        object3D.quaternion.set(0,0,0,1);
+
+        // objects by default face West
+        switch (direction) {
+            case HexFlatTopDirections.N:                
+                //   object3D.rotateZ(THREE.MathUtils.degToRad(180));                            
+                
+                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-2*45));
+              break;
+            case HexFlatTopDirections.NE:
+            //   object3D.rotateZ(THREE.MathUtils.degToRad(240));            
+                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-3*45));
+              break;
+            case HexFlatTopDirections.NW:
+            //   object3D.rotateZ(THREE.MathUtils.degToRad(120));            
+                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-1*45));
+              break;
+            case HexFlatTopDirections.SE:
+            //   object3D.rotateZ(THREE.MathUtils.degToRad(60));                            
+                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(3*45));
+              break;
+            case HexFlatTopDirections.SW:
+            //   object3D.rotateZ(THREE.MathUtils.degToRad(300));                            
+                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(1*45));
+              break;            
+            default:
+                // default is S south
+                //   object3D.rotateZ(THREE.Math.degToRad(90));
+                
+                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(2*45));
+              break;
+        }
+
+        
+
+    }
+    
 }
 
 export interface MapWritable{
@@ -496,7 +560,7 @@ export class HexFlatTopPositionHelper implements MapPositionProvider {
 
     _qrToXY(q:number, r:number):Vector2{
         const xCenter = q*this._width*3/4;
-        const yCenter = q%2==1?r*this._height+this._height/2:r*this._height;
+        const yCenter = q%2==1?-r*this._height-this._height/2:-r*this._height;
         return new Vector2(xCenter, yCenter);
     }
     
@@ -791,6 +855,10 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
     yxToScenePosition(y: number, x:number){
         const helper = new HexFlatTopPositionHelper(this.tileSize);
         return helper.yxToScenePosition(y, x);
+    }
+    orientate(_object:THREE.Object3D, _direction:string){
+        // for hex map there is no such thing as orientate as hex are dimensions are not equal
+        return;
     }
 }
 

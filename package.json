@@ -26,7 +26,7 @@
     "test": "env TS_NODE_PROJECT=\"tsconfig-test.json\" mocha -r ts-node/register **/test/**/*.test.ts",
     "coverage": "nyc --reporter html --reporter text npm test",
     "gltfit": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i src/assets/models-prod.dae src/assets/models-prod.gltf",
-    "gltfunits": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i src/samples/map1/assets/units-prod.dae src/samples/map1/assets/units.gltf",
+    "gltfunits": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i models/units-prod.dae src/samples/map1/assets/units.gltf && tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i models/units-prod.dae src/samples/hexmap/assets/units.gltf",
     "gltfhextiles": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i models/hex-tiles.dae src/samples/hexmap/assets/tiles.gltf"
   },
   "files": [
