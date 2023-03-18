@@ -91,11 +91,10 @@ export class HexFlatTopOrientationProvider implements OrientationProvider{
         // reset rotations
         object3D.quaternion.set(0,0,0,1);
 
-        // objects by default face West
+        // objects by default face West (are aligned east->west)
         switch (direction) {
             case HexFlatTopDirections.N:                
-                //   object3D.rotateZ(THREE.MathUtils.degToRad(180));                            
-                
+                //   object3D.rotateZ(THREE.MathUtils.degToRad(180));                                            
                 object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-2*45));
               break;
             case HexFlatTopDirections.NE:
