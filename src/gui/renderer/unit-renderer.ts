@@ -1,4 +1,4 @@
-import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3 } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, AxesHelper } from "three";
 import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
@@ -325,6 +325,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         this.holderObject.name = UnitsRendererThreeJS.NAME;
     }
     initialize(): Promise<void> {
+        this.holderObject.add(new AxesHelper( 40 ) )
         return this.renderablesFactory!.loadTemplates(["_UNIT"]);
     }
 
@@ -336,8 +337,13 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         this.view = view as PlaygroundViewThreeJS;
         // all units must be added as child objects in map so map controlls work correctly
         const mapObject = this.view.scene.getObjectByName( UnitsRendererThreeJS.MAP_NAME, true );
-        mapObject.add(this.holderObject);
-        // this.view.scene.add(this.holderObject);
+        if(mapObject)
+            // when we have map we must add units under map object for proper map rotation 
+            mapObject.add(this.holderObject);
+        else{
+            this.view.scene.add(this.holderObject);
+        }
+        
     }
     
 

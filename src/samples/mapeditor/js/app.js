@@ -306,20 +306,113 @@ class AppDemo {
             main: {
                 name: "main",
                 json: JSON.stringify(assetJsonObject),                    
-                pivotCorrection: "0,0,0.12"
+                pivotCorrection: "0.15,-0.3,0.1"
             }
         }
+        // const specification = {           
+        //     main: {
+        //         name: "main",
+        //         url: "../hexmap/assets/units.gltf",
+        //         pivotCorrection: "0.15,-0.3,0.1"
+        //     }
+        // }
         const unitFactory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
         await unitFactory.loadTemplates(["_UNIT"]);
         console.log(unitFactory.spawnableRenderablesNames());
+        
         // canvas for thumbnail generation
-        for(let i=0; i<unitFactory.spawnableRenderablesNames().length; i++){
-            var canvas = document.createElement('canvas');
-            canvas.width = 100;
-            canvas.height = 100;
-            canvas.hidden = true;
-            
+        var canvas = document.createElement('canvas',{id: "somexId"});
+        canvas.width = 400;
+        canvas.height = 400;
+        document.body.appendChild(canvas)
+        // canvas.hidden = true;
+
+        
+        let p = new gngine.PlaygroundThreeJs(document.getElementById("unitCanvas"),this.emitter);
+        p.initialize();                
+        let mainView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter); 
+        await p.attach(mainView);        
+        mainView._setupScene(); 
+        p.run();
+        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());
+        unitRenderer.setRenderablesFactory(unitFactory);
+        unitRenderer.setView(mainView);
+        await unitRenderer.initialize();
+
+        const tile = {
+            "id": "0,0",
+            "x": 0,
+            "y": 0,
+            "d": "S",
+            "t": "C_T_GRASS_1_TILE",
+            "loc": {
+              "n": "Grassland",
+              "g": "43.74650403587078,7.421766928360976"
+            },
+            "ext": {},
+            "nft": {
+              "v": 100,
+              "b": "ETHEREUM",
+              "i": "123",
+              "t": "0x123",
+              "o": "0x0022"
+            }
         }
+
+        let j = 0;
+        const unit = {
+            actionPoints: 1,
+            actionRunner: undefined,
+            actionsAllowed: [],
+            actionsQueue: [],
+            attackStrength: (_unit)=>{ return 1},
+            defendStrength: (_unit)=>{ return 1},
+            gainBattleExperience: ()=>{},
+            hitPoints: 5,
+            rangeStrength: 10,
+            strength: 10,
+            sight: 2,
+            uid: "",
+            unitSpecification: {
+                hitPoints: 10,
+                name: "Type",
+                tuid: unitFactory.spawnableRenderablesNames()[j].split("_")[0]
+            }
+        }
+        unitRenderer.put(unit, tile,"S");            
+        // this.emitter.emit("playground:screenshot");
+
+
+        // this.emitter.on("playground:screenshot:data",(dataUrl)=>{
+        //     console.log("Got screenshot")
+        //     console.log(dataUrl)
+        //     document.getElementById("preview").src = dataUrl;
+        //     if(j<unitFactory.spawnableRenderablesNames().length)
+        //         j++;
+        //     const unit = {
+        //         actionPoints: 1,
+        //         actionRunner: undefined,
+        //         actionsAllowed: [],
+        //         actionsQueue: [],
+        //         attackStrength: (_unit)=>{ return 1},
+        //         defendStrength: (_unit)=>{ return 1},
+        //         gainBattleExperience: ()=>{},
+        //         hitPoints: 5,
+        //         rangeStrength: 10,
+        //         strength: 10,
+        //         sight: 2,
+        //         uid: "",
+        //         unitSpecification: {
+        //             hitPoints: 10,
+        //             name: "Type",
+        //             tuid: unitFactory.spawnableRenderablesNames()[j].split("_")[0]
+        //         }
+        //     }
+        //     unitRenderer.put(unit, tile,"S");            
+        //     this.emitter.emit("playground:screenshot");
+        // })
+
+        
         
     }
 

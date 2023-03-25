@@ -38,15 +38,6 @@
 </head>
 
 <body>
-    <style type="text/css">
-        /* Set the size of the div element that contains the map */
-        #gmap {
-            /* height: 400px; */
-            /* The height is 400 pixels */
-            width: 100%;
-            /* The width is the width of the web page */
-        }
-    </style>
     <style>
         .container-canvas {
             /* This could be done in one single declaration. See the extended sample. */
@@ -199,6 +190,7 @@
                     </tr>
                 </tbody>
             </table>
+            <img width="400" height="400" id="preview"></img>
         </section>
         
     </div>
@@ -674,7 +666,35 @@
             </p>
         </div>
     </footer>
+    <div class="columns">
+        <div class="column is-three-quarters">
+            <div class="container-canvas">
+                <div class="lds-facebook" rv-class-is-hidden="model.loading.done">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <canvas id="unitCanvas" class="v3d"></canvas>
+            </div>
+            <div class="container-canvas">
+                <div class="lds-facebook" rv-class-is-hidden="model.loading.done">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                
+            </div>
 
+            <!-- <p class="is-size-6 is-hidden-mobile"><a target="_blank"
+                    rv-href="model.city.d.w">{model.city.d.l}<br />Learn more on
+                    Wikipedia</a></p>
+            <p class="is-size-6 is-hidden-mobile"><a target="_blank" rv-href="model.city.d.m">See
+                    original city on Google Maps</a></p> -->
+
+        </div>
+        <div class="column"></div>
+    </div>
+    
 </body>
 
 </html>

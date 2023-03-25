@@ -155,6 +155,10 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
     _height: number;
 
     constructor(hexWidth: number){
+        if(!hexWidth)
+            throw new Error("hexWidth must be provided for HexFlatTopPositionProviderThreeJs")
+        if(hexWidth<=0)
+            throw new Error("hexWidth must be positive for HexFlatTopPositionProviderThreeJs")
         this._width = hexWidth;
         this._size = this._width/2;
         this._height = Math.sqrt(3)*this._size;
@@ -207,6 +211,18 @@ export class QuadPositionProviderThreeJs implements MapPositionProvider {
     height: number;
 
     constructor(width:number, height:number, tileSize:number){
+        if(!width)
+            throw new Error("width must be provided for QuadPositionProviderThreeJs")
+        if(width<=0)
+            throw new Error("width must be positive for QuadPositionProviderThreeJs")
+        if(height<=0)
+            throw new Error("height must be positive for QuadPositionProviderThreeJs")            
+        if(!height)
+            throw new Error("height must be provided for QuadPositionProviderThreeJs")                        
+        if(tileSize<=0)
+            throw new Error("tileSize must be positive for QuadPositionProviderThreeJs")                        
+        if(!tileSize)
+            throw new Error("tileSize must be provided for QuadPositionProviderThreeJs")                        
         this.width = width;
         this.height = height;
         this.tileSize = tileSize;

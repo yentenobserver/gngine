@@ -116,6 +116,12 @@ export class PlaygroundThreeJs extends Playground{
 
             
         this._renderer!.render(mainView.scene!, mainView.camera!);                
+        // carefull, may slow down rendering
+        if(this._screenshotRequested){
+            this._screenshotRequested = false;
+            const imageDataUrl:string = this._renderer.domElement.toDataURL();
+            this.emitter.emit(Events.PLAYGROUND.SCREENSHOT_RESULT, imageDataUrl);
+        }
         
 
         // if HUD is available
@@ -123,12 +129,7 @@ export class PlaygroundThreeJs extends Playground{
             this._renderer!.clearDepth()
             this._renderer!.render(hudView.scene!, hudView.camera!);                
         }
-        // carefull, may slow down rendering
-        if(this._screenshotRequested){
-            this._screenshotRequested = false;
-            const imageDataUrl:string = this._renderer.domElement.toDataURL();
-            this.emitter.emit(Events.PLAYGROUND.SCREENSHOT_RESULT, imageDataUrl);
-        }
+        
     }
 
     _attachInteractionListeners(): void {        
@@ -547,6 +548,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // camera.position.set(0, -50, 20);
         // camera.position.set(0.2, -5, 4);
         camera.position.set(0, -5, 4);
+        // camera.position.set(0, -25, 4);
         camera.lookAt(0,0,0);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
         
