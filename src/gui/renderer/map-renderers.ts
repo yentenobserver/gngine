@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Matrix4, Quaternion, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
+import { Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -7,125 +7,17 @@ import { TileBase } from "../../logic/map/common.notest";
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
+import { HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs, ScenePosition, TilePosition } from './providers';
 import { Renderable, RenderablesFactory, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';
 import { Renderer } from './renderers';
 
-export interface ScenePosition {
-    x: number,
-    y: number,
-    z: number
-}
 
-export interface TilePosition {
+
+// export interface TileHexPosition {
     
-    y: number,    
-    x: number,
-}
-
-export interface TileHexPosition {
-    
-    q: number,    
-    r: number,
-}
-
-/**
- * Provides translation between scene/world coordinates (pixel on screen/scene) vs map coordinates
- * (either x,y for quad maps or q,r for hex maps)
- */
-export interface MapPositionProvider{
-    /**
-     * Converts TileBase tile position (row, column) into scene coordinates (x,y,z).
-     * @see TileBase for more details
-     * @param y tile row (aka r for hex tile)
-     * @param x tile column (aka q for hex tile)
-     */
-    yxToScenePosition(y: number, x:number):ScenePosition,
-    /**
-     * Converts scene coordinates (x,y) into tile position (row, column)
-     * @param {number} sceneX scene position.x
-     * @param {number} sceneY scene position.y
-     */
-    scenePositionToYX(sceneX:number,sceneY:number):TilePosition,    
-    // // hex map support
-    // qrToScenePosition(q: number, r:number):ScenePosition,
-    // scenePositionToQR(sceneX:number,sceneY:number):TileHexPosition,    
-}
-
-
-export interface OrientationProvider {
-    /**
-     * It is assumed that object pivot point is at its base center.
-     * It is also assumed that by default when loaded/spawned tile is S oriented.
-     * Do not use it for rotation - only once when one wants to
-     * put tile in proper orientation/direction.
-     * @param object 
-     * @param direction 
-     */
-    orientate(object:any, direction:string):void;
-}
-
-export enum HexFlatTopDirections {
-    N = 'N',
-    NE = 'NE',
-    NW = 'NW',
-
-    S = 'S',  
-    SE = 'SE',
-    SW = 'SW'
-}
-
-export class HexFlatTopOrientationProvider implements OrientationProvider{
-    orientate(object:any, direction:string){
-        if(![
-            HexFlatTopDirections.N.valueOf(),
-            HexFlatTopDirections.NE.valueOf(),
-            HexFlatTopDirections.NW.valueOf(),
-            HexFlatTopDirections.S.valueOf(),
-            HexFlatTopDirections.SE.valueOf(),
-            HexFlatTopDirections.SW.valueOf(),
-        ].includes(direction)){
-            throw new Error(`Unsupported direction ${direction} for HexFlatTop orientation.`);
-        }
-        const object3D = <THREE.Object3D>object;
-
-        // reset rotations
-        object3D.quaternion.set(0,0,0,1);
-
-        // objects by default face West (are aligned east->west)
-        switch (direction) {
-            case HexFlatTopDirections.N:                
-                //   object3D.rotateZ(THREE.MathUtils.degToRad(180));                                            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-2*45));
-              break;
-            case HexFlatTopDirections.NE:
-            //   object3D.rotateZ(THREE.MathUtils.degToRad(240));            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-3*45));
-              break;
-            case HexFlatTopDirections.NW:
-            //   object3D.rotateZ(THREE.MathUtils.degToRad(120));            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-1*45));
-              break;
-            case HexFlatTopDirections.SE:
-            //   object3D.rotateZ(THREE.MathUtils.degToRad(60));                            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(3*45));
-              break;
-            case HexFlatTopDirections.SW:
-            //   object3D.rotateZ(THREE.MathUtils.degToRad(300));                            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(1*45));
-              break;            
-            default:
-                // default is S south
-                //   object3D.rotateZ(THREE.Math.degToRad(90));
-                
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(2*45));
-              break;
-        }
-
-        
-
-    }
-    
-}
+//     q: number,    
+//     r: number,
+// }
 
 export interface MapWritable{
     add(object: Renderable):void;
@@ -516,56 +408,6 @@ export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
 }
 
 /**
- * Provides set of position convertion between pixel world and map 
- * world (this instance is for hexagonal flat top maps)
- */
-export class HexFlatTopPositionHelper implements MapPositionProvider {
-    _width: number;
-    _size: number;
-    _height: number;
-
-    constructor(hexWidth: number){
-        this._width = hexWidth;
-        this._size = this._width/2;
-        this._height = Math.sqrt(3)*this._size;
-    }
-    yxToScenePosition(_y: number, _x: number): ScenePosition {
-        const vector = this._qrToXY(_x,_y);
-        return {
-            x: vector.x,
-            y: vector.y,
-            z: 0
-        }
-    }
-    scenePositionToYX(_sceneX: number, _sceneY: number): TilePosition {
-        const qr = this._xyToQR(new Vector2(_sceneX, _sceneY));
-        return {
-            y: qr.r,
-            x: qr.q
-        }
-    }
-
-
-
-    _xyToQR(point: Vector2):{q: number, r:number}{
-        var q = ( 2./3 * point.x                        ) / this._size
-        var r = (-1./3 * point.x  +  Math.sqrt(3)/3 * point.y) / this._size
-        // return axial_round(Hex(q, r))    
-        return {
-            q: Math.round(q),
-            r: Math.round(r)
-        }
-    }        
-
-    _qrToXY(q:number, r:number):Vector2{
-        const xCenter = q*this._width*3/4;
-        const yCenter = q%2==1?-r*this._height-this._height/2:-r*this._height;
-        return new Vector2(xCenter, yCenter);
-    }
-    
-}
-
-/**
  * Helper that can generate threejs plane of hex shapes. It uses flat top odd approach
  * for putting hexes into rows and columns
  */
@@ -576,7 +418,7 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
     _width: number;
     _height: number;    
     _size: number;
-    _helper: HexFlatTopPositionHelper;
+    _helper: HexFlatTopPositionProviderThreeJs;
 
     constructor(cols:number, rows:number, width: number){
         this._cols = cols;
@@ -585,7 +427,7 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
         this._size = this._width/2;
         this._height = Math.sqrt(3)*this._size;
         
-        this._helper = new HexFlatTopPositionHelper(this._width);
+        this._helper = new HexFlatTopPositionProviderThreeJs(this._width);
         
     }
     /**
@@ -646,8 +488,9 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
 
 
 
-// unit changed(unitUpdated, location/path)
-// tile changed(tileUpdated)
+/**
+ * ThreeJS implementation of quad map renderer. It renders quad map
+ */
 export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         
     initialize(): Promise<void> {
@@ -669,7 +512,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
             // grid.rotation.x = - Math.PI / 2;
             grid.position.z=-0.01
             this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+        return this.renderablesFactory!.loadTemplates(["ASSET", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
         })            
     }
@@ -728,23 +571,25 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
      * @returns {x: number, y: number, z: number} position
      */
     yxToScenePosition(y: number, x:number){
-        // const originTilePosition = {
-        //     x: this._width/2+1,
-        //     y: this._height/2
+        const provider = new QuadPositionProviderThreeJs(this.width, this.height, this.tileSize);
+        return provider.yxToScenePosition(y,x);
+        // // const originTilePosition = {
+        // //     x: this._width/2+1,
+        // //     y: this._height/2
+        // // }
+
+        // const _normalizedWidth = this.width/this.tileSize;
+        // const _normalizedHeight = this.height/this.tileSize
+
+        // const position = {
+        //     x: x-_normalizedWidth/2+this.tileSize/2,
+        //     y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2,
+        //     z: 0
         // }
-
-        const _normalizedWidth = this.width/this.tileSize;
-        const _normalizedHeight = this.height/this.tileSize
-
-        const position = {
-            x: x-_normalizedWidth/2+this.tileSize/2,
-            y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2,
-            z: 0
-        }
-        // console.log(x,y,position);
-        return position;
+        // // console.log(x,y,position);
+        // return position;
         
-        // 33,31 -> 0,-1,0
+        // // 33,31 -> 0,-1,0
 
     }
     /**
@@ -754,20 +599,23 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
      * @returns (y,x) tile position (row, column)
      */
     scenePositionToYX(sceneX:number,sceneY:number){  
-        
-        const _tilesCountY = this.height/this.tileSize
-        
-        const normSceneX = sceneX+this.width/2;
-        const normSceneY = sceneY+this.height/2;
 
-        const tileX = Math.floor(normSceneX);
-        const tileY =  Math.floor(_tilesCountY-normSceneY);
+        const provider = new QuadPositionProviderThreeJs(this.width, this.height, this.tileSize);
+        return provider.scenePositionToYX(sceneX, sceneY);
+        
+        // const _tilesCountY = this.height/this.tileSize
+        
+        // const normSceneX = sceneX+this.width/2;
+        // const normSceneY = sceneY+this.height/2;
 
-        const position = {
-            y:tileY,
-            x: tileX
-        }
-        return position;
+        // const tileX = Math.floor(normSceneX);
+        // const tileY =  Math.floor(_tilesCountY-normSceneY);
+
+        // const position = {
+        //     y:tileY,
+        //     x: tileX
+        // }
+        // return position;
     }
 
 
@@ -790,27 +638,33 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
      */
     orientate(object:THREE.Object3D, direction:string){
         const object3D = <THREE.Object3D>object;
-        // const prevPosition = object3D.position;
-        switch (direction) {
-            case 'N':                
-              object3D.rotateZ(THREE.MathUtils.degToRad(180));
-            //   object3D.position.setX(prevPosition.x+this.tileSize)
-            //   object3D.position.setY(prevPosition.y+this.tileSize)
-              break;
-            case 'E':
-              object3D.rotateZ(THREE.MathUtils.degToRad(90));
-              // move back
-            //   object3D.position.setX(prevPosition.x+this.tileSize)
-              break;
-            case 'W':
-              object3D.rotateZ(THREE.MathUtils.degToRad(-90));
-            //   object3D.position.setY(prevPosition.y+this.tileSize)
-              break;
-            default:
-                // default is S south
-                //   object3D.rotateZ(THREE.Math.degToRad(90));
-              break;
-        }
+
+
+        const provider = new QuadOrientationProviderThreeJs();
+
+        provider.orientate(object3D, direction);
+
+        // // const prevPosition = object3D.position;
+        // switch (direction) {
+        //     case 'N':                
+        //       object3D.rotateZ(THREE.MathUtils.degToRad(180));
+        //     //   object3D.position.setX(prevPosition.x+this.tileSize)
+        //     //   object3D.position.setY(prevPosition.y+this.tileSize)
+        //       break;
+        //     case 'E':
+        //       object3D.rotateZ(THREE.MathUtils.degToRad(90));
+        //       // move back
+        //     //   object3D.position.setX(prevPosition.x+this.tileSize)
+        //       break;
+        //     case 'W':
+        //       object3D.rotateZ(THREE.MathUtils.degToRad(-90));
+        //     //   object3D.position.setY(prevPosition.y+this.tileSize)
+        //       break;
+        //     default:
+        //         // default is S south
+        //         //   object3D.rotateZ(THREE.Math.degToRad(90));
+        //       break;
+        // }
     }
 
     _createMapHelpers(){
@@ -852,11 +706,11 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
     }
 
     yxToScenePosition(y: number, x:number){
-        const helper = new HexFlatTopPositionHelper(this.tileSize);
+        const helper = new HexFlatTopPositionProviderThreeJs(this.tileSize);
         return helper.yxToScenePosition(y, x);
     }
     orientate(_object:THREE.Object3D, _direction:string){
-        // for hex map there is no such thing as orientate as hex are dimensions are not equal
+        // for hex map there is no such thing as orientate as hex dimensions are not equal
         return;
     }
 }

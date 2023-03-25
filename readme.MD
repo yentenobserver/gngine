@@ -34,3 +34,34 @@ Map specification is provided in JSON file. Map consists of tiles. Each tile has
     }
 ]
 ```
+
+## Specyfying tile assets for rendering 
+
+Following rules must be followed in order to create proper 3D tile assets:
+* ```General:``` there can be many tiles in a single file. Each tile must be a Group with name properly set
+* ```General:``` each asset's name must start with "ASSET"
+* ```General:``` asset's name should match map tile type
+* ```Tile Assets:``` each single tile group must have one subgroup which name contains "TILE". Subgroup that contains name "TILE" will be used for tile selection and interactions.
+* ```Unit Assets:``` unit asset's name must contain "UNIT"
+
+Sample name & groups structure:
+``` 
+// here is a forest tile. It's a group that contains two subgroups. One for trees and one for tile.
+ASSET_FOREST
+-> ASSET_FOREST_TILE
+-> ASSET_FOREST_TREES
+
+// here is a building tile. One subgroup is for the tile, second is for the building that is rendered on the tile.
+ASSET_BUILDING_1
+-> ASSET_TILE
+-> ASSET_BUILDING_TOWER
+
+
+// here is a sample unit. it does not have any subgroups
+ASSET_UNIT_WARRIOR_1
+
+```
+
+Following names are restricted and should not be used in groups:
+* ```MAP_HLPR_HIGHLIGHT``` - this is a restricted name for a highlight element
+

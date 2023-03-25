@@ -3,7 +3,7 @@ import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
-import { MapPositionProvider, OrientationProvider } from "./map-renderers";
+import { MapPositionProvider, OrientationProvider } from "./providers";
 import { Renderable, RenderablesFactory, RenderablesSpecification, RenderablesThreeJSFactory } from "./renderables-factory";
 
 import { Renderer } from "./renderers";

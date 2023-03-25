@@ -15,9 +15,11 @@ export {RenderablesFactory, RenderablesThreeJSFactory} from './gui/renderer/rend
 export type {Renderable, RenderableThreeJS, RenderablesSpecification, RenderablesSpecificationMap, RenderableSpecificationItem} from './gui/renderer/renderables-factory';
 
 export {  Renderer } from './gui/renderer/renderers'
-export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, MapHexFlatTopOddRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, HexFlatTopOrientationProvider} from './gui/renderer/map-renderers'
+export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, MapHexFlatTopOddRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator } from './gui/renderer/map-renderers'
 export {HudComponent, HudComponentLargeThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRenderer, HudRendererThreeJs, SpriteFactory, SpriteFactoryx128x128x4xL} from './gui/renderer/hud-renderers'
-export type {Rotations, ScenePosition, MapPositionProvider, MapWritable, TilePosition} from './gui/renderer/map-renderers'
+export type {Rotations, MapWritable } from './gui/renderer/map-renderers'
+export type {ScenePosition, MapPositionProvider, TilePosition, HexFlatTopDirections, OrientationProvider, QuadDirections} from './gui/renderer/providers'
+export {HexFlatTopOrientationProviderThreeJs, HexFlatTopPositionProviderThreeJs, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs} from './gui/renderer/providers'
 export { UnitRenderablesThreeJSFactory, UnitsRenderer, UnitsRendererThreeJS } from './gui/renderer/unit-renderer';
 export type { UnitRenderablesFactory as UnitRenderableFactory } from './gui/renderer/unit-renderer';
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs} from "./gui/playground/playground"

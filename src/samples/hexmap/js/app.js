@@ -98,7 +98,7 @@ class AppDemo {
             main: {
                 name: "unitsAssets",
                 url: "./assets/units.gltf",
-                pivotCorrection: "-0.3,-0.15,0.1"
+                pivotCorrection: "0.15,-0.3,0.1"
             }
             // helpers: {
             //     name: "mapHelpers",
@@ -107,7 +107,7 @@ class AppDemo {
             // }
         }
         const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
-        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, new gngine.HexFlatTopOrientationProvider());
+        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, new gngine.HexFlatTopOrientationProviderThreeJs());
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
         await unitRenderer.initialize();
@@ -227,7 +227,7 @@ class AppDemo {
         }
         unitRenderer.put(unit, tile,"S");
         unitRenderer.put(unit2, tile2,"NW");
-        // unitRenderer.put(unit3, tile3,"E");
+        unitRenderer.put(unit3, tile3,"SE");
 
         this.mapRenderer = mapRenderer;
         this.emitter.on("interaction.*",(event)=>{

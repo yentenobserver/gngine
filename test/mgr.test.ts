@@ -24,9 +24,11 @@ import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, Action
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
 import { } from '../src/gui/renderer/renderers'
-import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapPositionProvider, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent, ScenePosition, TilePosition} from '../src/gui/renderer/map-renderers'
+import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent} from '../src/gui/renderer/map-renderers'
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
+
+import {MapPositionProvider, ScenePosition, TilePosition} from '../src/gui/renderer/providers';
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
@@ -2020,11 +2022,11 @@ describe('Playground', () => {
             })
             it("sets proper camera up vector",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.up.y).eq(0);
+                return expect(playgroundView.camera!.up.y).eq(1);
             })
             it("sets proper camera up vector",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.up.z).eq(1);
+                return expect(playgroundView.camera!.up.z).eq(0);
             })
 
             it("sets proper scene name",()=>{
@@ -2617,9 +2619,9 @@ describe("Renderers",()=>{
                 })
                 
             })  
-            it("loads 'C_' or 'instance' named templates",()=>{
+            it("loads 'ASSET' or 'MAP_HLPR_HIGHLIGHT' named templates",()=>{
                 return map.initialize().then(()=>{
-                    return expect(JSON.stringify(s1.getCall(0).args[0])).eq(JSON.stringify(["C_","instance","MAP_HLPR_HIGHLIGHT"]));
+                    return expect(JSON.stringify(s1.getCall(0).args[0])).eq(JSON.stringify(["ASSET","MAP_HLPR_HIGHLIGHT"]));
                 })
             })          
         })
@@ -2841,22 +2843,22 @@ describe("Renderers",()=>{
         describe("orientate",()=>{
             const o = new THREE.Object3D();
             beforeEach(()=>{
-                s1 = sinon.stub(o,"rotateZ");
+                s1 = sinon.stub(o,"rotateOnWorldAxis");
             })
             afterEach(()=>{
                 s1.restore();
             })
             it("rotates 180 degree along z-axis for N-north",()=>{                
                 map.orientate(o,"N");
-                return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(180));
+                return expect(Math.abs(s1.getCall(0).args[1])).eq(THREE.MathUtils.degToRad(180));
             })
             it("rotates -90 degree along z-axis for W-west",()=>{                
                 map.orientate(o,"W");
-                return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(-90));
+                return expect(s1.getCall(0).args[1]).eq(THREE.MathUtils.degToRad(-90));
             })
             it("rotates 90 degree along z-axis for E-east",()=>{                
                 map.orientate(o,"E");
-                return expect(s1.getCall(0).args[0]).eq(THREE.MathUtils.degToRad(90));
+                return expect(s1.getCall(0).args[1]).eq(THREE.MathUtils.degToRad(90));
             })
             it("does nothing for S-south as this is default orientation for tile",()=>{                
                 map.orientate(o,"S");

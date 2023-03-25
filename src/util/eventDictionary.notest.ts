@@ -20,6 +20,10 @@ export const Events = {
     },
     DEBUG: {
         DUMP_VIEW: "debug:dump:view",        
+    },
+    PLAYGROUND: {
+        SCREENSHOT: "playground:screenshot", // () - request playground screenshot on next render cycle
+        SCREENSHOT_RESULT: "playground:screenshot:data", // (screenshotDataUrl:string) - result (image) taken from playground
     }
     
 }

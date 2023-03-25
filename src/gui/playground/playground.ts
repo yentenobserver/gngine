@@ -47,6 +47,8 @@ export class PlaygroundThreeJs extends Playground{
         prevHeight: 0
     };
 
+    _screenshotRequested:boolean = false;
+
     constructor(canvasHTMLElement:any, emitter: EventEmitter){
         super(canvasHTMLElement, emitter);        
         
@@ -121,12 +123,20 @@ export class PlaygroundThreeJs extends Playground{
             this._renderer!.clearDepth()
             this._renderer!.render(hudView.scene!, hudView.camera!);                
         }
+        // carefull, may slow down rendering
+        if(this._screenshotRequested){
+            this._screenshotRequested = false;
+            const imageDataUrl:string = this._renderer.domElement.toDataURL();
+            this.emitter.emit(Events.PLAYGROUND.SCREENSHOT_RESULT, imageDataUrl);
+        }
     }
 
     _attachInteractionListeners(): void {        
         this.container.addEventListener( 'pointermove', this._onInteraction.bind(this) );
         this.container.addEventListener( 'pointerdown', this._onInteraction.bind(this) );
         this.emitter.on(Events.DEBUG.DUMP_VIEW, (data:any)=>{this._onEvent(Events.DEBUG.DUMP_VIEW, data)} );
+
+        this.emitter.on(Events.PLAYGROUND.SCREENSHOT, ()=>{this._screenshotRequested = true} );
     }
     _onInteraction(...event:any[]): void {        
         for (let index = 0; this.views&&index < this.views.length; index++) {
@@ -611,7 +621,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         let result = undefined;
 
         // first see what tile did we hit
-        const tilePickResult = this.pickObjectOfNames(pointerEvent,["_TILE"])
+        const tilePickResult = this.pickObjectOfNames(pointerEvent,["TILE"])
         if(tilePickResult?.object){
             const worldPosition = new THREE.Vector3();
             tilePickResult.object.getWorldPosition(worldPosition);
@@ -629,7 +639,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
             
         }
         // then also check what unit did we hit
-        const unitPickResult = this.pickObjectOfNames(pointerEvent,["_UNIT"])
+        const unitPickResult = this.pickObjectOfNames(pointerEvent,["UNIT"])
         if(unitPickResult?.object){
             const worldPosition = new THREE.Vector3();
             unitPickResult.object.getWorldPosition(worldPosition);

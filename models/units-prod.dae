@@ -4,8 +4,8 @@
         <contributor>
             <authoring_tool>SketchUp 17.3.116</authoring_tool>
         </contributor>
-        <created>2023-03-17T08:01:32Z</created>
-        <modified>2023-03-17T08:01:32Z</modified>
+        <created>2023-03-25T16:08:28Z</created>
+        <modified>2023-03-25T16:08:28Z</modified>
         <unit meter="0.0254000" name="inch" />
         <up_axis>Z_UP</up_axis>
     </asset>
@@ -26,12 +26,30 @@
     <library_visual_scenes>
         <visual_scene id="ID2">
             <node name="SketchUp">
+                <instance_geometry url="#ID75">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="Material2" target="#ID76">
+                                <bind_vertex_input semantic="UVSET0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
+                <instance_geometry url="#ID81">
+                    <bind_material>
+                        <technique_common>
+                            <instance_material symbol="Material2" target="#ID76">
+                                <bind_vertex_input semantic="UVSET0" input_semantic="TEXCOORD" input_set="0" />
+                            </instance_material>
+                        </technique_common>
+                    </bind_material>
+                </instance_geometry>
                 <node name="skp_camera_Last_Saved_SketchUp_View">
-                    <matrix>0.9950186 0.0669776 -0.0738378 70.2154770 -0.0996896 0.6685145 -0.7369873 -61.2961807 -0.0000000 0.7406769 0.6718614 63.5840454 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
+                    <matrix>0.9330540 0.0972693 -0.3463365 -5.7588048 -0.3597364 0.2522890 -0.8982984 -148.2967529 -0.0000000 0.9627507 0.2703905 50.9683990 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                     <instance_camera url="#ID1" />
                 </node>
                 <node id="ID3" name="T34_DEFAULT_10_UNIT">
-                    <matrix>1.0000000 0.0000000 0.0000000 5.5825914 0.0000000 1.0000000 0.0000000 8.1061623 0.0000000 0.0000000 1.0000000 -0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
+                    <matrix>0.0000000 -1.0000000 0.0000000 15.9848138 1.0000000 0.0000000 0.0000000 4.4573251 -0.0000000 0.0000000 1.0000000 -0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                     <node id="ID4" name="group_0">
                         <matrix>1.0000000 0.0000000 0.0000000 18.2467098 0.0000000 1.0000000 0.0000000 2.1613379 0.0000000 0.0000000 1.0000000 3.9370079 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                         <instance_geometry url="#ID5">
@@ -70,7 +88,7 @@
                     </node>
                 </node>
                 <node id="ID31" name="T34_ActionUnitMove_5_UNIT">
-                    <matrix>1.0000000 0.0000000 0.0000000 35.6921269 0.0000000 1.0000000 0.0000000 8.2856833 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
+                    <matrix>0.0000000 -1.0000000 0.0000000 35.6921269 1.0000000 0.0000000 0.0000000 3.8283582 -0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                     <node id="ID32" name="group_3">
                         <matrix>1.0000000 0.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                         <instance_geometry url="#ID33">
@@ -109,7 +127,7 @@
                     </node>
                 </node>
                 <node id="ID53" name="T34_ActionUnitMove_10_UNIT">
-                    <matrix>1.0000000 0.0000000 0.0000000 66.4800624 0.0000000 1.0000000 0.0000000 8.4527290 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
+                    <matrix>0.0000000 -1.0000000 0.0000000 62.9367553 1.0000000 0.0000000 0.0000000 4.6243708 -0.0000000 0.0000000 1.0000000 -0.0000000 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                     <node id="ID54" name="group_6">
                         <matrix>1.0000000 0.0000000 0.0000000 18.7734384 0.0000000 1.0000000 0.0000000 2.1258627 0.0000000 0.0000000 1.0000000 3.9370079 0.0000000 0.0000000 0.0000000 1.0000000</matrix>
                         <instance_geometry url="#ID55">
@@ -439,6 +457,48 @@
                 </triangles>
             </mesh>
         </geometry>
+        <geometry id="ID75">
+            <mesh>
+                <source id="ID78">
+                    <float_array id="ID80" count="6">72.0810056 41.6159880 0.0000000 72.0810056 0.0000000 0.0000000</float_array>
+                    <technique_common>
+                        <accessor count="2" source="#ID80" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="ID79">
+                    <input semantic="POSITION" source="#ID78" />
+                </vertices>
+                <lines count="1" material="Material2">
+                    <input offset="0" semantic="VERTEX" source="#ID79" />
+                    <p>0 1</p>
+                </lines>
+            </mesh>
+        </geometry>
+        <geometry id="ID81">
+            <mesh>
+                <source id="ID82">
+                    <float_array id="ID84" count="6">39.3700787 0.0000000 0.0000000 39.3700787 22.7303256 0.0000000</float_array>
+                    <technique_common>
+                        <accessor count="2" source="#ID84" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="ID83">
+                    <input semantic="POSITION" source="#ID82" />
+                </vertices>
+                <lines count="1" material="Material2">
+                    <input offset="0" semantic="VERTEX" source="#ID83" />
+                    <p>0 1</p>
+                </lines>
+            </mesh>
+        </geometry>
     </library_geometries>
     <library_materials>
         <material id="ID7" name="material">
@@ -449,6 +509,9 @@
         </material>
         <material id="ID24" name="material_29">
             <instance_effect url="#ID25" />
+        </material>
+        <material id="ID76" name="edge_color000255">
+            <instance_effect url="#ID77" />
         </material>
     </library_materials>
     <library_effects>
@@ -482,6 +545,20 @@
                             <color>0.4941176 0.4980392 0.4980392 1.0000000</color>
                         </diffuse>
                     </lambert>
+                </technique>
+            </profile_COMMON>
+        </effect>
+        <effect id="ID77">
+            <profile_COMMON>
+                <technique sid="COMMON">
+                    <constant>
+                        <transparent opaque="A_ONE">
+                            <color>0.0000000 0.0000000 0.0000000 1.0000000</color>
+                        </transparent>
+                        <transparency>
+                            <float>1.0000000</float>
+                        </transparency>
+                    </constant>
                 </technique>
             </profile_COMMON>
         </effect>

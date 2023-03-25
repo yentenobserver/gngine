@@ -24,10 +24,10 @@ export interface RenderablesSpecificationMap extends RenderablesSpecification {
 }
 
 export abstract class RenderablesFactory{
-    specification: RenderablesSpecification;
+    specification: RenderablesSpecification;    
 
     constructor(specification: RenderablesSpecification){
-        this.specification = specification;
+        this.specification = specification;        
     }
 
     /**
@@ -42,6 +42,11 @@ export abstract class RenderablesFactory{
      * @param filterNames When provided only specifications that match (include) any of the names provided are returned
      */
     abstract loadTemplates(filterNames: string[]):Promise<void>;
+
+    /**
+     * Returns all renderables' names that can be spawned by this factory
+     */
+    abstract spawnableRenderablesNames():string[];
 }
 
 /* istanbul ignore next */
@@ -52,6 +57,9 @@ export class RenderablesDefaultFactory extends RenderablesFactory{
     loadTemplates(_filterNames: string[]): Promise<void> {
         throw new Error('Method not implemented.');
     }    
+    spawnableRenderablesNames():string[]{
+        return [];
+    }
 }
 
 export interface RenderableThreeJS extends Renderable{
@@ -278,7 +286,24 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             }); 
         });
     }
+    /**
+     * Returns names of all objects that can be spawned
+     * @returns array of spawnables' names
+     */
+    spawnableRenderablesNames():string[]{
+        const result:string[] = [];
+        this.templates.forEach((_value, key)=>{
+            result.push(key);
+        })
+        return result;
+    }
 
+    /**
+     * Selects objects which name includes any of the provided filter names (case insensitive).
+     * @param children array of objects to be checked
+     * @param filterNames optional - when provided only obects which name includes any of names are returned
+     * @returns array of objects which name matches filter or is equal to OBJECT3D
+     */
     _matchingChildren(children:any[], filterNames: string[]):any[]{
         return children.filter((item:any)=>{
             if(filterNames&&filterNames.length>0){
