@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Object3D } from 'three';
+import { Object3D, Vector3 } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 
@@ -460,16 +460,34 @@ export abstract class PlaygroundViewHudThreeJs extends PlaygroundViewThreeJS imp
       
 
 }
+export interface OptionsPlaygroundViewThreeJS {
+    cameraPosition: Vector3
+    cameraParams: {        
+        fov?: number, // for perspective
+        near: number, // for perspective and ortographic
+        far: number, // for perspective and ortographic    
+        sizing?: number // for ortographic
+    }
+}
+
 export abstract class PlaygroundViewMainThreeJs extends PlaygroundViewThreeJS implements PlaygroundViewMain{     
     camera: THREE.PerspectiveCamera|undefined;
-    
+    options: OptionsPlaygroundViewThreeJS;
     
     isViewMain: boolean;
     static VIEW_NAME: string = "MAIN_VIEW";
 
-    constructor(emitter: EventEmitter){
+    constructor(emitter: EventEmitter, options?:OptionsPlaygroundViewThreeJS){
         super(PlaygroundViewMainThreeJs.VIEW_NAME, emitter);
         this.isViewMain = true;
+        this.options = options || {
+            cameraParams: {                
+                fov: 50,
+                near: 0.1,
+                far: 1000                             
+            },
+            cameraPosition: new Vector3(0,-5,4)
+        }
     }             
 }
 
@@ -483,22 +501,30 @@ export interface SizingHudThreeJs {
 export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
     static CAMERA_NAME:string = "PLAYGROUND_HUD_CAM"
     static SCENE_NAME:string = "PLAYGROUND_HUD_SCENE"
-    _sizing: SizingHudThreeJs;
+    
+    options: OptionsPlaygroundViewThreeJS;
 
-    constructor(emitter:EventEmitter, _sizing?: SizingHudThreeJs){
+    constructor(emitter:EventEmitter, options?:OptionsPlaygroundViewThreeJS){
         super(emitter)
-        this._sizing = _sizing || {
-            camera: 20,            
-        }
+        this.options = options || {
+            cameraParams: {                
+                
+                near: 0.1,
+                far: 1000,
+                sizing: 20
+            },
+            cameraPosition: new Vector3(0,0,1)
+        }                
         this._setupScene();
     }
     
 
     _setupScene(){
         // this._camera = new THREE.OrthographicCamera( - this._width / 2, this._width / 2, this._height / 2, - this._height / 2, 10, 100 );
-        this.camera = new THREE.OrthographicCamera(- this._sizing.camera, this._sizing.camera, this._sizing.camera, - this._sizing.camera, .1, 1000);
+        this.camera = new THREE.OrthographicCamera(- this.options.cameraParams.sizing!, this.options.cameraParams.sizing!, this.options.cameraParams.sizing!, - this.options.cameraParams.sizing!, this.options.cameraParams.near, this.options.cameraParams.far);
         // this._camera.position.z = this._cameraSettings.z;
-        this.camera.position.set(0, 0, 1);
+        // this.camera.position.set(0, 0, 1);
+        this.camera.position.set(this.options.cameraPosition.x, this.options.cameraPosition.y, this.options.cameraPosition.z)
         // this._camera.up.set( 0, 0, 1 );
         // this._camera.lookAt(0,0,0);
         this.camera.name = PlaygroundViewHudThreeJsDefault.CAMERA_NAME
@@ -543,11 +569,12 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
     }
 
     _setupScene(){
-        
-        let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
+        let camera = new THREE.PerspectiveCamera(this.options.cameraParams.fov!,this.container.clientWidth / this.container.clientHeight, this.options.cameraParams.near, this.options.cameraParams.far);
+        // let camera = new THREE.PerspectiveCamera(50,this.container.clientWidth / this.container.clientHeight, .1, 1000);
         // camera.position.set(0, -50, 20);
         // camera.position.set(0.2, -5, 4);
-        camera.position.set(0, -5, 4);
+        // camera.position.set(0, -5, 4);
+        camera.position.set(this.options.cameraPosition.x, this.options.cameraPosition.y, this.options.cameraPosition.z);
         // camera.position.set(0, -25, 4);
         camera.lookAt(0,0,0);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
