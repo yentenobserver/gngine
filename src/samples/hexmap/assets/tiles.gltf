@@ -64,7 +64,7 @@
                 0.0,
                 1.0
             ],
-            "name": "C_T_GRASS_TILE"
+            "name": "MAS_C_T_GRASS_TILE"
         },
         {
             "mesh": 1,
@@ -86,7 +86,7 @@
                 0.0,
                 1.0
             ],
-            "name": "C_T_DEFAULT_TILE"
+            "name": "MAS_C_T_DEFAULT_TILE"
         },
         {
             "matrix": [

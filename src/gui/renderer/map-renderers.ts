@@ -512,7 +512,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
             // grid.rotation.x = - Math.PI / 2;
             grid.position.z=-0.01
             this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadTemplates(["ASSET", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+        return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
         })            
     }
@@ -691,7 +691,7 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
     initialize(): Promise<void> {
         
         // const that = this;
-        this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
+            this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
             const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
             var geometry = helper.getGeometry();
@@ -700,7 +700,7 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
             grid.position.z=-0.01
             
             this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadTemplates(["C_","instance", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+        return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
         })            
     }

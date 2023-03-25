@@ -116,7 +116,7 @@ class AppDemo {
             "x": 1,
             "y": 0,
             "d": "S",
-            "t": "C_T_GRASS_1_TILE",
+            "t": "MAS_C_T_GRASS_1_TILE",
             "loc": {
               "n": "Grassland",
               "g": "43.74650403587078,7.421766928360976"
@@ -135,7 +135,7 @@ class AppDemo {
             "x": 0,
             "y": 1,
             "d": "S",
-            "t": "C_T_DIRT_1_TILE",
+            "t": "MAS_C_T_DIRT_1_TILE",
             "loc": {
               "n": "Bushland",
               "g": "43.74650403587078,7.421766928360976"
@@ -154,7 +154,7 @@ class AppDemo {
             "x": 2,
             "y": 0,
             "d": "S",
-            "t": "C_T_DIRT_1_TILE",
+            "t": "MAS_C_T_DIRT_1_TILE",
             "loc": {
               "n": "Bushland",
               "g": "43.74650403587078,7.421766928360976"

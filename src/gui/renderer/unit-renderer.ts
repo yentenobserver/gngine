@@ -1,4 +1,4 @@
-import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, AxesHelper } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3 } from "three";
 import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
@@ -325,7 +325,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         this.holderObject.name = UnitsRendererThreeJS.NAME;
     }
     initialize(): Promise<void> {
-        this.holderObject.add(new AxesHelper( 40 ) )
+        // this.holderObject.add(new AxesHelper( 40 ) )
         return this.renderablesFactory!.loadTemplates(["_UNIT"]);
     }
 
