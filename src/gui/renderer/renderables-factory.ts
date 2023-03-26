@@ -12,7 +12,8 @@ export interface RenderableSpecificationItem {
     name: string,
     url?: string,
     json?: string,
-    pivotCorrection?: string
+    pivotCorrection?: string,
+    scaleCorrection?: number
 }
 
 export interface RenderablesSpecification {
@@ -161,6 +162,9 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             // else{
             //     result = cloned
             // }
+            if(specification.scaleCorrection){
+                cloned.scale.set(specification.scaleCorrection, specification.scaleCorrection,specification.scaleCorrection);
+            }
 
             wrap.add(cloned);
             result = wrap;

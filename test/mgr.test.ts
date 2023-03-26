@@ -2619,9 +2619,9 @@ describe("Renderers",()=>{
                 })
                 
             })  
-            it("loads 'ASSET' or 'MAP_HLPR_HIGHLIGHT' named templates",()=>{
+            it("loads 'MAS' or 'MAP_HLPR_HIGHLIGHT' named templates",()=>{
                 return map.initialize().then(()=>{
-                    return expect(JSON.stringify(s1.getCall(0).args[0])).eq(JSON.stringify(["ASSET","MAP_HLPR_HIGHLIGHT"]));
+                    return expect(JSON.stringify(s1.getCall(0).args[0])).eq(JSON.stringify(["MAS","MAP_HLPR_HIGHLIGHT"]));
                 })
             })          
         })
@@ -3128,7 +3128,8 @@ describe("Renderers",()=>{
                 specification = {
                     main: {
                         name: T1,
-                        pivotCorrection: "0.1,0.1,0.1"
+                        pivotCorrection: "0.1,0.1,0.1",
+                        scaleCorrection: 2.0
                     },
                 }
                 specification2 = {
@@ -3168,12 +3169,14 @@ describe("Renderers",()=>{
                 };
                 (<RenderablesThreeJSFactory>rf2).templates.set(T1,template3);
                 (<RenderablesThreeJSFactory>rf2).templates.set(T2,template4);
-                s3 = sinon.stub((<RenderablesThreeJSFactory>rf2),"_cloneMaterials");      
+                s3 = sinon.stub((<RenderablesThreeJSFactory>rf2),"_cloneMaterials");     
+                s4 = sinon.stub(o1.scale, "set").returns(new Vector3(0,0,0)); 
             })
             afterEach(()=>{
                 s1.restore();
                 s2.restore();
                 s3.restore();
+                s4.restore();
             })
             it("throws error on nonexisting template",()=>{                
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)("T3")}).to.throw("No template found");                                      
@@ -3202,9 +3205,18 @@ describe("Renderers",()=>{
                 const spawned = rf.spawnRenderableObject(T1);
                 return expect((<THREE.Object3D>spawned.data).children[0].position.x).eq(0.1);
             })
+            it("applies scale correction when requested in specification",()=>{                
+                rf.spawnRenderableObject(T1);
+                const call = s4.getCall(0);
+                return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: specification.main.scaleCorrection, y: specification.main.scaleCorrection, z: specification.main.scaleCorrection}));
+            })
             it("not applies pivot correction when not specified",()=>{
                 const spawned = rf2.spawnRenderableObject(T1);
                 return expect((<THREE.Object3D>spawned.data).position.x).eq(0);
+            })
+            it("not applies scale correction when not specified",()=>{
+                rf2.spawnRenderableObject(T1);
+                return expect(s4.callCount).eq(0);
             })
             it("throws error on invalid pivot specification",()=>{
                 specification.main.pivotCorrection = "abc"
