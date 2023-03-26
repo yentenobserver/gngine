@@ -306,7 +306,8 @@ class AppDemo {
             main: {
                 name: "main",
                 json: JSON.stringify(assetJsonObject),                    
-                pivotCorrection: "0.15,-0.3,0.1"
+                pivotCorrection: "0.15,-0.3,0.1",
+                // scaleCorrection: 0.01
             }
         }
         // const specification = {           

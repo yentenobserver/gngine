@@ -163,7 +163,9 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             //     result = cloned
             // }
             if(specification.scaleCorrection){
-                cloned.scale.set(specification.scaleCorrection, specification.scaleCorrection,specification.scaleCorrection);
+                if(specification.scaleCorrection<=0)
+                    throw new Error(`Can't apply scale correction for specification ${objectName}`)                
+                cloned.scale.set(specification.scaleCorrection, specification.scaleCorrection,specification.scaleCorrection);                                
             }
 
             wrap.add(cloned);

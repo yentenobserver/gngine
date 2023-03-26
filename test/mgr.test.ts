@@ -3222,6 +3222,10 @@ describe("Renderers",()=>{
                 specification.main.pivotCorrection = "abc"
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply pivot correction for specification");                    
             })  
+            it("throws error on invalid scale specification (scale must be positive)",()=>{
+                specification.main.scaleCorrection = -1
+                return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply scale correction for specification");                    
+            })  
             it("spawns renderable that can be hidden",()=>{
                 const spawned = rf.spawnRenderableObject(T1);
                 spawned.hide!();
