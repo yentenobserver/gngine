@@ -98,7 +98,7 @@ class AppDemo {
             main: {
                 name: "unitsAssets",
                 url: "./assets/units.gltf",
-                pivotCorrection: "-0.3,-0.15,0.1"
+                pivotCorrection: "0.15,-0.3,0.1"
             }
             // helpers: {
             //     name: "mapHelpers",
