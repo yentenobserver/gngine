@@ -177,15 +177,17 @@
             <table class="table is-fullwidth is-bordered is-striped">
                 <thead>
                     <th>Name</th>
-                    <th>Thumbnail</th>
-                    <th>Variants</th>
+                    <th>Modified</th>
+                    <th>Variant</th>
+                    <th>Thumbnail</th>                    
                     <th>Actions</th>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                    <tr rv-each-item="model.assetsData">
+                        <td>{item.name}</td>
+                        <td>{item.created}</td>
+                        <td>{item.fullName}</td>
+                        <td><img rv-src="item.thumbnail" width="200" height="200"></img></td>
                         <td></td>
                     </tr>
                 </tbody>
@@ -372,20 +374,27 @@
                     <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
                 </header>
                 <section class="modal-card-body">
-                    <article class="message">
+                    <article class="message" rv-class-is-hidden="model.busy">
                         <div class="message-body">
                           Here you can paste json file in ThreeJs 3d file format
                         </div>
                     </article>
-                    <div class="field">
+                    <div class="field" rv-class-is-hidden="model.busy">
                         <label class="label">ThreeJS JSON</label>
                         <div class="control">
                             <textarea class="textarea" placeholder="paste JSON here" rows="20" rv-value="model.message"></textarea>                            
                         </div>
                         <p class="help">This JSON will be parsed for 3D objects</p>
                     </div>
+                    <div class="field" rv-class-is-hidden="model.busy | eq false">
+                        <label class="label">Processing ({model.current}/{model.howMany}) {model.item.name} ...</label>
+                        <div id="unitCanvasHolder" class="control">
+                            <!-- <canvas id="unitCanvas" width="250" height="250"></canvas> -->
+                        </div>                        
+                    </div>
+                    
                 </section>
-                <footer class="modal-card-foot">
+                <footer class="modal-card-foot" rv-class-is-hidden="model.busy">
                     <button class="button is-success" rv-on-click="_handleOK">Save</button>
                     <button class="button" rv-on-click="_handleCancel">Cancel</button>
                 </footer>
@@ -393,6 +402,7 @@
             <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleConstructionCancel"></button> -->
         </div>
     </div>
+    
 
     <!-- Promo Display Modal -->
     <div id="promote">
@@ -666,34 +676,7 @@
             </p>
         </div>
     </footer>
-    <div class="columns">
-        <div class="column is-three-quarters">
-            <div class="container-canvas">
-                <div class="lds-facebook" rv-class-is-hidden="model.loading.done">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
-                <canvas id="unitCanvas" class="v3d"></canvas>
-            </div>
-            <div class="container-canvas">
-                <div class="lds-facebook" rv-class-is-hidden="model.loading.done">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
-                
-            </div>
 
-            <!-- <p class="is-size-6 is-hidden-mobile"><a target="_blank"
-                    rv-href="model.city.d.w">{model.city.d.l}<br />Learn more on
-                    Wikipedia</a></p>
-            <p class="is-size-6 is-hidden-mobile"><a target="_blank" rv-href="model.city.d.m">See
-                    original city on Google Maps</a></p> -->
-
-        </div>
-        <div class="column"></div>
-    </div>
     
 </body>
 

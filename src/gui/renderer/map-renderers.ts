@@ -206,7 +206,8 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     }
     
     _dispose(object3D:THREE.Mesh){
-        
+        if(!object3D.geometry)
+            return;
         object3D.geometry.dispose();
         
         // warning, material may be an array

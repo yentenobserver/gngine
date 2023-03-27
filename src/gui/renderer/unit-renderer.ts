@@ -1,4 +1,4 @@
-import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3 } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material } from "three";
 import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
@@ -302,6 +302,12 @@ export abstract class UnitsRenderer extends Renderer {
      */
     abstract put(unit: UnitBase, _at?: TileBase, direction?: string):void;
 
+    /**
+     * Removes using from rendering. The unit is no longer rendered at it's current positions
+     * @param unit unit to be removed
+     */
+    abstract remove(unit: UnitBase): void;
+
     // /**
     //  * Triggers unit appearance at to (when from is empty) or unit move (probably
     //  * with animation) between from and to.
@@ -344,6 +350,46 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
             this.view.scene.add(this.holderObject);
         }
         
+    }
+    
+    _dispose(object3D:THREE.Mesh){
+        if(!object3D.geometry)
+            return;
+        
+        object3D.geometry.dispose();
+        
+        // warning, material may be an array
+        const material =  object3D.material as Material;
+        material.dispose()
+        
+        // todo texture?
+    }
+
+    /**
+     * Removes and cleans resources for the unit.
+     * @param unit unit to be removed and cleaned from memory
+     */
+    remove(unit: UnitBase): void {
+        const that = this;
+        // find the object
+        let objects3D = that.holderObject.children.filter((item)=>{            
+            return item.userData.unitData.uid == unit.uid;
+        })
+
+        if(objects3D&&objects3D[0]){
+            let object3D = objects3D[0];
+            // remove
+            that.holderObject.remove(object3D);
+            
+            
+
+            // release memory            
+            // that._dispose(object3D as THREE.Mesh);
+            object3D.traverse((child)=>{
+                
+                that._dispose(child as THREE.Mesh)
+            })
+        }
     }
     
 

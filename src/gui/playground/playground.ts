@@ -3,6 +3,10 @@ import { Object3D, Vector3 } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 
+export interface PlaygroundOptions {
+    enableScreenshots: boolean
+}
+
 /**
  * Playground is a separated display context
  * that can be embedded in external container (like a part of a web page).
@@ -14,12 +18,16 @@ export abstract class Playground{
     interactions: PlaygroundInteractions;
     views: PlaygroundView[];
     emitter: EventEmitter;
+    options: PlaygroundOptions;
 
-    constructor(container: any, emitter: EventEmitter){
+    constructor(container: any, emitter: EventEmitter, options?:PlaygroundOptions){
         this.container = container;
         this.interactions = new PlaygroundInteractions();
         this.views = [];
         this.emitter = emitter
+        this.options = options || {
+            enableScreenshots: false
+        }
         
     }   
     initialize():void{
@@ -28,6 +36,11 @@ export abstract class Playground{
     abstract attach(view:PlaygroundView):Promise<void>;
     abstract run():void;
 
+    /**
+     * Returns screenshot of the current playground look.
+     * @returns {string} image from playground in data url format
+     */
+    abstract takeScreenShot():string;
 
     abstract _attachInteractionListeners():void;
     abstract _onInteraction(...event:any[]):void;
@@ -41,16 +54,15 @@ export abstract class Playground{
  */
 export class PlaygroundThreeJs extends Playground{
     
+    
     _renderer: THREE.WebGLRenderer|any;
     _resizeInfo: any = {
         prevWidth: 0,
         prevHeight: 0
-    };
+    };    
 
-    _screenshotRequested:boolean = false;
-
-    constructor(canvasHTMLElement:any, emitter: EventEmitter){
-        super(canvasHTMLElement, emitter);        
+    constructor(canvasHTMLElement:any, emitter: EventEmitter, options?:PlaygroundOptions){
+        super(canvasHTMLElement, emitter, options);        
         
     }
     initialize(): void {
@@ -116,13 +128,6 @@ export class PlaygroundThreeJs extends Playground{
 
             
         this._renderer!.render(mainView.scene!, mainView.camera!);                
-        // carefull, may slow down rendering
-        if(this._screenshotRequested){
-            this._screenshotRequested = false;
-            const imageDataUrl:string = this._renderer.domElement.toDataURL();
-            this.emitter.emit(Events.PLAYGROUND.SCREENSHOT_RESULT, imageDataUrl);
-        }
-        
 
         // if HUD is available
         if(hudView){
@@ -132,12 +137,20 @@ export class PlaygroundThreeJs extends Playground{
         
     }
 
+    takeScreenShot(): string {
+        if(!this.options.enableScreenshots)
+            throw new Error(`Playground "enableScreenshots" option must be set for screenshots to be operational`);
+        if(this._renderer&&this._renderer.domElement)
+            return this._renderer.domElement.toDataURL();
+        else{
+            throw new Error("Can't take screenshot as renderer is not properly bound to dom element");
+        }
+    }
+
     _attachInteractionListeners(): void {        
         this.container.addEventListener( 'pointermove', this._onInteraction.bind(this) );
         this.container.addEventListener( 'pointerdown', this._onInteraction.bind(this) );
         this.emitter.on(Events.DEBUG.DUMP_VIEW, (data:any)=>{this._onEvent(Events.DEBUG.DUMP_VIEW, data)} );
-
-        this.emitter.on(Events.PLAYGROUND.SCREENSHOT, ()=>{this._screenshotRequested = true} );
     }
     _onInteraction(...event:any[]): void {        
         for (let index = 0; this.views&&index < this.views.length; index++) {
@@ -161,11 +174,14 @@ export class PlaygroundThreeJs extends Playground{
         if(canvasElement.nodeName!="CANVAS")
             throw new Error(`Invalid canvas html element`);
 
-        // initialize renderer
-        var renderer = new THREE.WebGLRenderer({
+        let rendererOptions = {
             canvas: canvasElement,
-            antialias: true
-        });
+            antialias: true,
+            preserveDrawingBuffer: this.options.enableScreenshots // required for takeScreenShot method, be carefull, when enabled may have performance impact
+        }
+        
+        // initialize renderer
+        var renderer = new THREE.WebGLRenderer(rendererOptions);
         // renderer.setClearColor(0x000000);
         renderer.setClearColor( 0xeeeeee, 1 );
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -461,12 +477,13 @@ export abstract class PlaygroundViewHudThreeJs extends PlaygroundViewThreeJS imp
 
 }
 export interface OptionsPlaygroundViewThreeJS {
-    cameraPosition: Vector3
+    cameraPosition: Vector3,    
     cameraParams: {        
         fov?: number, // for perspective
         near: number, // for perspective and ortographic
         far: number, // for perspective and ortographic    
-        sizing?: number // for ortographic
+        sizing?: number, // for ortographic
+        height?: number // how high camera aims
     }
 }
 
@@ -484,7 +501,8 @@ export abstract class PlaygroundViewMainThreeJs extends PlaygroundViewThreeJS im
             cameraParams: {                
                 fov: 50,
                 near: 0.1,
-                far: 1000                             
+                far: 1000,
+                height: 0                             
             },
             cameraPosition: new Vector3(0,-5,4)
         }
@@ -564,8 +582,8 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
 export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
     static CAMERA_NAME:string = "PLAYGROUND_MAIN_CAM"
     static SCENE_NAME:string = "PLAYGROUND_MAIN_SCENE"
-    constructor(emitter: EventEmitter){
-        super(emitter)
+    constructor(emitter: EventEmitter, options?:OptionsPlaygroundViewThreeJS){
+        super(emitter, options)
     }
 
     _setupScene(){
@@ -576,7 +594,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // camera.position.set(0, -5, 4);
         camera.position.set(this.options.cameraPosition.x, this.options.cameraPosition.y, this.options.cameraPosition.z);
         // camera.position.set(0, -25, 4);
-        camera.lookAt(0,0,0);
+        camera.lookAt(0,0,this.options.cameraParams.height);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
         
         // camera.up.set( 0, 0, 1 );

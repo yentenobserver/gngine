@@ -22,7 +22,7 @@
     "build:minjs:umd": "terser dist/gamengine.umd.js --compress --mangle > dist/gamengine.umd.min.js",
     "build:minjs:esm": "terser dist/gamengine.esm.js --compress --mangle > dist/gamengine.esm.min.js",
     "build:minjs": "npm run build:minjs:esm -s && npm run build:minjs:umd -s",
-    "build": "npm run build:js -s && npm run build:minjs -s && npm run build:types -s",
+    "build": "date && npm run build:js -s && npm run build:minjs -s && npm run build:types -s",
     "test": "env TS_NODE_PROJECT=\"tsconfig-test.json\" mocha -r ts-node/register **/test/**/*.test.ts",
     "coverage": "nyc --reporter html --reporter text npm test",
     "gltftiles": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i models/models-prod.dae src/samples/map1/assets/models-prod.gltf ",
