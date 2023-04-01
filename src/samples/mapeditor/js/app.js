@@ -15,10 +15,17 @@ class AppDemo {
                 tileData: {},
                 tileDataStr: {},
             },
-            assetsData: []
+            assetsData: [],
+            assets: {
+                original: [],
+                filtered: [],
+                filter: ""
+            }
 
         }
         this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
+        this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
+        
     }
     static async getInstance(emitter, mapCanvas){
         const a = new AppDemo(emitter, mapCanvas)
@@ -292,6 +299,10 @@ class AppDemo {
         });
     }
 
+    async _handleFilter(e, that){        
+        that.model.assets.filtered = that.model.assets.original.filter((item)=>{return item.name.toLowerCase().includes(that.model.assets.filter) || item.tags.join(",").toLowerCase().includes(that.model.assets.filter) })
+    }
+
     loadAsset(url, type){
         return fetch(url).then((response)=>{
             if(type=='JSON')
@@ -506,12 +517,36 @@ class AppDemo {
     //     // console.log(assetsData);
         
     // }
-    async processAddAsset(assetsInfo){
+
+    async _handeAddTags(e, that){
+        console.log(e);
         
+        const asset = that.model.assets.original.find((item)=>{return item.name.toLowerCase() == e.target.dataset.id.toLowerCase()})
+        that.emitter.emit("showModal:addTags",asset);
+
+    }
+
+    
+    async processAddTags(asset){
+        const item = this.model.assets.original.find((item)=>{return item.name == asset.name})
+        item.tags = asset.tags;
+
+        this._handleFilter({}, this);
+    }
+
+    async processAddAsset(assetsInfo){
+        assetsInfo.forEach((item)=>{item.that = this})
 
         // first remove objects that are in the new assetsInfo array
         this.model.assetsData = this.model.assetsData.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.fullName == item.fullName }) == -1 })
         this.model.assetsData = this.model.assetsData.concat(assetsInfo);
+
+
+        this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.name == item.name }) == -1 })
+        this.model.assets.original = this.model.assets.original.concat(assetsInfo);
+
+        this.model.assets.filtered = this.model.assets.original 
+
 
 
         // let j = 0;

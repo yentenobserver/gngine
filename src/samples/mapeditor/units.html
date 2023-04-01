@@ -35,6 +35,8 @@
 
     <script src="js/app.js"></script>
     <script src="js/addAssetModalController.js"></script>
+    <script src="js/addTagsModalController.js"></script>
+    
 </head>
 
 <body>
@@ -151,16 +153,16 @@
                 <div class="level-left">
                 <div class="level-item">
                     <p class="subtitle is-5">
-                    <strong>123</strong> assets
+                    <strong>{model.assets.filtered | size}</strong> assets
                     </p>
                 </div>
                 <div class="level-item">
                     <div class="field has-addons">
                     <p class="control">
-                        <input class="input" type="text" placeholder="Find an asset">
+                        <input rv-value="model.assets.filter" class="input" type="text" placeholder="Find an asset">
                     </p>
                     <p class="control">
-                        <button class="button">
+                        <button class="button" rv-on-click="_handleFilter">
                         Search
                         </button>
                     </p>
@@ -176,23 +178,35 @@
             <h1 class="title">Unit 3D Assets</h1>
             <table class="table is-fullwidth is-bordered is-striped">
                 <thead>
-                    <th>Name</th>
+                    <th>Type Code</th>
+                    <th>Tags</th>
                     <th>Modified</th>
-                    <th>Variant</th>
-                    <th>Thumbnail</th>                    
+                    <th>Variants</th>                    
                     <th>Actions</th>
                 </thead>
                 <tbody>
-                    <tr rv-each-item="model.assetsData">
+                    <tr rv-each-item="model.assets.filtered">
                         <td>{item.name}</td>
+                        <td>
+                            <span class="tag" rv-each-tag="item.tags" style="margin-right: 0.75em;">
+                            {tag}
+                          </span>
+                        </td>
                         <td>{item.created}</td>
-                        <td>{item.fullName}</td>
-                        <td><img rv-src="item.thumbnail" width="200" height="200"></img></td>
-                        <td></td>
+                        <td>
+                            <ul>
+                                <li rv-each-subitem="item.variants">
+                                    {subitem.fullName}</br>
+                                    <img rv-src="subitem.thumbnail" width="100" height="100"></img>
+                                </li>
+                            </ul>
+                            
+                        </td>
+                        <!-- <td><img rv-src="item.thumbnail" width="200" height="200"></img></td> -->
+                        <td><button class="button is-light" rv-on-click="item.that._handeAddTags" rv-data-id="item.name">Edit tags</button></td>
                     </tr>
                 </tbody>
-            </table>
-            <img width="400" height="400" id="preview"></img>
+            </table>            
         </section>
         
     </div>
@@ -204,165 +218,9 @@
     <canvas id="canvas"></canvas> -->
     <!-- <div id="wrapper"></div> -->
 
-    <!-- Modals -->
+    <!-- Modals -->    
 
-    <!-- Construction Modal -->
-    <div id="loadFromJsonxxxx">
-        <div class="modal" rv-class-is-active="model.display">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-                <header class="modal-card-head">
-                    <p class="modal-card-title">Insert asset json</p>
-                    <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
-                </header>
-
-
-                <section class="modal-card-body">
-                    <div class="tabs is-hidden-touch">
-                        <ul>
-                            <li rv-class-is-active="model.currentCategory.i | eq category.i"
-                                rv-each-category="model.categories">
-                                <!-- <a>{category.n}</a> -->
-                                <a href="#" rv-on-click="model.setCategory"
-                                    rv-data-category-id="category.i">{category.n}</a>
-                            </li>
-                            <!-- <li><a>Residential</a></li>
-                        <li><a>Amenities</a></li>
-                        <li><a>Industry</a></li>
-                        <li><a>Commerce</a></li> -->
-                        </ul>
-                    </div>
-
-                    <div class="dropdown is-active is-hidden-desktop">
-                        <div class="dropdown-trigger">
-                            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu"
-                                rv-on-click="_handleMobileCategoryMenuShow">
-                                <span>{model.currentCategory.n}</span>
-                                <span class="icon is-small">
-                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                </span>
-                            </button>
-                        </div>
-                        <div class="dropdown-menu is-hidden" id="dropdown-menu" role="menu"
-                            rv-class-is-hidden="model.mobileMenu.hide">
-                            <div class="dropdown-content">
-                                <a href="#" class="dropdown-item" rv-data-category-id="category.i"
-                                    rv-on-click="model._handleMobileCategoryMenuClick"
-                                    rv-each-category="model.categories">
-                                    {category.n}
-                                </a>
-                                <!-- <a class="dropdown-item">
-                                Residential
-                            </a>
-                            <a href="#" class="dropdown-item is-active">
-                                Amenities
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                Industry
-                            </a>-->
-                                <!-- <hr class="dropdown-divider"> -->
-                                <!-- <a href="#" class="dropdown-item">
-                                Commerce
-                            </a> -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dropdown is-active ">
-                        <div class="dropdown-trigger">
-                            <button class="button" aria-haspopup="true" aria-controls="dropdown-direction"
-                                rv-on-click="_handleDirectionMenuShow">
-                                <span>{model.objectDirection.name}</span>
-                                <span class="icon is-small">
-                                    <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                </span>
-                            </button>
-                        </div>
-                        <div class="dropdown-menu is-hidden" id="dropdown-direction" role="menu"
-                            rv-class-is-hidden="model.directionMenu.hide">
-                            <div class="dropdown-content">
-                                <a href="#" class="dropdown-item" rv-data-direction-id="direction.code"
-                                    rv-on-click="model._handleDirectionMenuClick"
-                                    rv-each-direction="model.objectDirectionDict">
-                                    {direction.name}
-                                </a>
-                                <!-- <a class="dropdown-item">
-                                Residential
-                            </a>
-                            <a href="#" class="dropdown-item is-active">
-                                Amenities
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                Industry
-                            </a>-->
-                                <!-- <hr class="dropdown-divider"> -->
-                                <!-- <a href="#" class="dropdown-item">
-                                Commerce
-                            </a> -->
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container-canvas "
-                        style="min-width: 220px; min-height: 320px; height: 45%; width: 100%">
-                        <canvas id="resourceSelector" class="v3d"></canvas>
-                    </div>
-                    <div class="columns is-mobile">
-                        <div class="column">
-                            <button class="button is-link is-outlined is-fullwidth" rv-on-click="prev">
-                                Prev
-                            </button>
-                        </div>
-                        <div class="column is-half has-text-centered">
-                            <p class="is-size-7">{model.currentCategoryItemNo} of {model.currentCategoryItemCount}</p>
-                        </div>
-                        <div class="column">
-                            <button class="button is-link is-outlined is-fullwidth" rv-on-click="next">
-                                Next
-                            </button>
-                        </div>
-                    </div>
-                    <p class="subtitle">{model.currentTileTypeDefinition.n}</p>
-                    <table class="table is-fullwidth is-borderless">
-                        <tbody>
-                            <tr>
-                                <th>Happiness: <p class="is-size-7"></p>
-                                </th>
-                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.h}pts</span></td>
-                                <th>Commerce: <p class="is-size-7"></p>
-                                </th>
-                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.w}pts</span></td>
-                            </tr>
-                            <tr>
-
-                                <th>Science: <p class="is-size-7"></p>
-                                </th>
-                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.s}pts</span></td>
-                                <th>Culture: <p class="is-size-7"></p>
-                                </th>
-                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.c}pts</span></td>
-                            </tr>
-                            <tr>
-                                <th>Military: <p class="is-size-7"></p>
-                                </th>
-                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.m}pts</span></td>
-                                <th>Religion: <p class="is-size-7"></p>
-                                </th>
-                                <td><span class="tag is-light">{model.currentTileTypeDefinition.c.r}pts</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-                <footer class="modal-card-foot">
-                    <button class="button is-success" rv-on-click="_handleBuild">Build</button>
-                    <button class="button" rv-on-click="_handleCancel">Cancel</button>
-                </footer>
-            </div>
-
-            <!-- <button class="modal-close is-large" aria-label="close" rv-class-is-hidden="model.user | hasRole ADMIN"></button> -->
-
-        </div>
-    </div>
-
-    <!-- Modal -->
+    <!-- Add Asset -->
     <div id="loadAssetModal">
 
         <div class="modal" rv-class-is-active="model.display">
@@ -370,7 +228,8 @@
             <div class="modal-background"></div>
             <div class="modal-card">
                 <header class="modal-card-head">
-                    <p class="modal-card-title">Import assets</p>                    
+                    <p class="modal-card-title" rv-class-is-hidden="model.busy">Import assets</p>                    
+                    <p class="modal-card-title" rv-class-is-hidden="model.busy | eq false">Importing assets...</p>                    
                     <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
                 </header>
                 <section class="modal-card-body">
@@ -402,7 +261,41 @@
             <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleConstructionCancel"></button> -->
         </div>
     </div>
-    
+    <!-- Add Tags -->
+    <div id="addTagsModal">
+
+        <div class="modal" rv-class-is-active="model.display">
+        <!-- <div class="modal" class="is-active"></div> -->
+            <div class="modal-background"></div>
+            <div class="modal-card">
+                <header class="modal-card-head">
+                    <p class="modal-card-title" rv-class-is-hidden="model.busy">Add tags</p>                                        
+                    <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
+                </header>
+                <section class="modal-card-body">                    
+                    <div class="field" rv-class-is-hidden="model.busy">
+                        <label class="label">Tags</label>
+                        <div class="control">
+                            <textarea class="textarea" placeholder="paste comma separated tags here" rows="2" rv-value="model.message"></textarea>                            
+                        </div>
+                        <p class="help">Tags should be comma separated</p>
+                    </div>
+                    <div class="field" rv-class-is-hidden="model.busy | eq false">
+                        <label class="label">Processing ({model.current}/{model.howMany}) {model.item.name} ...</label>
+                        <div id="unitCanvasHolder" class="control">
+                            <!-- <canvas id="unitCanvas" width="250" height="250"></canvas> -->
+                        </div>                        
+                    </div>
+                    
+                </section>
+                <footer class="modal-card-foot" rv-class-is-hidden="model.busy">
+                    <button class="button is-success" rv-on-click="_handleOK">Save</button>
+                    <button class="button" rv-on-click="_handleCancel">Cancel</button>
+                </footer>
+            </div>
+            <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleConstructionCancel"></button> -->
+        </div>
+    </div>
 
     <!-- Promo Display Modal -->
     <div id="promote">
@@ -624,6 +517,9 @@
             rivets.bind(document.getElementById('loadAssetModal'),controller);
         })
 
+        AddTagsModalController.getInstance(emitter).then((controller)=>{
+            rivets.bind(document.getElementById('addTagsModal'),controller);
+        })
         AppDemo.getInstance(emitter, mapCanvas).then((demo)=>{
             rivets.bind(document.getElementById('app'), demo);
             // const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);

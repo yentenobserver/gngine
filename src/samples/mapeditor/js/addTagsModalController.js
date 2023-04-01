@@ -1,4 +1,4 @@
-class AddAssetModalController {
+class AddTagsModalController {
     constructor(emitter){
         this.emitter = emitter;
         this.model = {
@@ -9,17 +9,19 @@ class AddAssetModalController {
                 name:""
             },
             howMany: 0,
-            current: 0
+            current: 0,
+            item: {}
         }
-        this.emitter.on("showModal:addAsset",()=>{
-            this.model.message = "";
+        this.emitter.on("showModal:addTags",(item)=>{
+            this.model.message = item.tags.join(",") || "" ;
             this.model.display = true;
+            this.model.item = item
         })
         
     }
 
     static async getInstance(emitter){
-        const a = new AddAssetModalController(emitter)        
+        const a = new AddTagsModalController(emitter)        
         return a;
     }
 
@@ -29,26 +31,10 @@ class AddAssetModalController {
 
     async _handleOK(e, that){
         that.model.busy = true;
-        const assetsInfo = await that.processAddAsset(JSON.parse(that.model.message));
-        const assetsByTypeObject = assetsInfo.reduce((result, item)=>{ 
-            const typeId = item.name;
-
-            result[typeId] = result[typeId] || [];            
-            result[typeId].push(item);
-            return result;
-        }, Object.create(null))
-        const assetsByType = []
-        Object.keys(assetsByTypeObject).forEach((item)=>{
-            assetsByType.push({
-                name: item,
-                created: assetsByTypeObject[item][0].created,
-                variants: assetsByTypeObject[item],
-                tags: [item]
-            });
-        })
-
-        that.emitter.emit("AddAssetModalController:json", assetsByType)
-        // that.emitter.emit("AddAssetModalController:json", JSON.parse(that.model.message))
+        
+        that.model.item.tags = that.model.message.split(",").map((item)=>{return item.trim()})
+        that.model.item.tags = that.model.item.tags.filter((item)=>{return item})
+        that.emitter.emit("AddTagsModalController:item", that.model.item)        
         that.model.busy = false
         that.model.display = false
     }
@@ -162,7 +148,7 @@ class AddAssetModalController {
             const waitForScreenshot = new Promise((resolve, reject)=>{
                 setTimeout(()=>{                                        
                     resolve(p.takeScreenShot())
-                },500);
+                },2000);
             })
             const screenshotDataUrl = await waitForScreenshot;
 
@@ -179,7 +165,6 @@ class AddAssetModalController {
                 created: Date.now(),
                 // renderable: unitFactory.spawn(unit).data.toJSON()
                 renderableJSON: unitFactory.spawn(unit).data.toJSON()
-                
             });
             unitRenderer.remove(unit);
         }
