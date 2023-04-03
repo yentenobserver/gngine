@@ -1,4 +1,4 @@
-import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material, AxesHelper } from "three";
 import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
@@ -160,7 +160,7 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
         // sprite.position.set(0, 0, lengths[hitPoints]-1);
         sprite.scale.set(0.5*lengths[hitPoints], 0.075, 1);
         // sprite.position.set((0.5*lengths[hitPoints]-0.5)/2 , 0, bbox.max.z+(0.5*bbox.max.z));
-        sprite.position.set(0 , 0, bbox.max.z+(0.5*bbox.max.z));
+        sprite.position.set(0 , 0, bbox.max.z+(2*bbox.max.z));
         object3D.add(sprite);
         // console.log(object3D);
         

@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Material, Object3D } from 'three';
+import { Box3, Material, Object3D, Vector3 } from 'three';
 
 export interface Renderable{
     name: string,
@@ -13,7 +13,8 @@ export interface RenderableSpecificationItem {
     url?: string,
     json?: string,
     pivotCorrection?: string,
-    scaleCorrection?: number
+    scaleCorrection?: number,
+    autoPivotCorrection?: boolean // important it is assumed that previous pivot point is in the "lower left (x,y)" position. 
 }
 
 export interface RenderablesSpecification {
@@ -158,7 +159,19 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 catch(error:any){
                     throw new Error(`Can't apply pivot correction for specification ${objectName}`);
                 }                
+            }else if(specification.autoPivotCorrection){
+                const bbBox = new Box3();
+                const sizeVector = new Vector3();                
+                bbBox.setFromObject(cloned).getSize(sizeVector);                
+
+                console.log(`Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
+
+                // const correction:THREE.Vector3 = new THREE.Vector3(vectorXYZ[0], vectorXYZ[1], vectorXYZ[2])                                                      
+                cloned.position.set(-sizeVector.x/2,-sizeVector.y/2, cloned.position.z);                    
+                console.log(`Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
+
             }
+
             // else{
             //     result = cloned
             // }

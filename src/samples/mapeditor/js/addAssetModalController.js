@@ -61,7 +61,8 @@ class AddAssetModalController {
             main: {
                 name: "main",
                 json: JSON.stringify(assetJsonObject),                    
-                pivotCorrection: "0.15,-0.3,0.1",
+                // pivotCorrection: "0.15,-0.3,0.1",
+                autoPivotCorrection: true
                 // scaleCorrection: 0.01
             }
         }
@@ -162,7 +163,7 @@ class AddAssetModalController {
             const waitForScreenshot = new Promise((resolve, reject)=>{
                 setTimeout(()=>{                                        
                     resolve(p.takeScreenShot())
-                },50);
+                },2000);
             })
             const screenshotDataUrl = await waitForScreenshot;
 
