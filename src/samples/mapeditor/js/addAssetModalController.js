@@ -162,7 +162,7 @@ class AddAssetModalController {
             const waitForScreenshot = new Promise((resolve, reject)=>{
                 setTimeout(()=>{                                        
                     resolve(p.takeScreenShot())
-                },500);
+                },50);
             })
             const screenshotDataUrl = await waitForScreenshot;
 
