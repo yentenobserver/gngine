@@ -538,11 +538,11 @@ class AppDemo {
         assetsInfo.forEach((item)=>{item.that = this})
 
         // first remove objects that are in the new assetsInfo array
-        this.model.assetsData = this.model.assetsData.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.fullName == item.fullName }) == -1 })
-        this.model.assetsData = this.model.assetsData.concat(assetsInfo);
+        // this.model.assetsData = this.model.assetsData.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.fullName == item.fullName }) == -1 })
+        // this.model.assetsData = this.model.assetsData.concat(assetsInfo);
 
 
-        this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.name == item.name }) == -1 })
+        this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.name == item.name && item.kind == item2.kind }) == -1 })
         this.model.assets.original = this.model.assets.original.concat(assetsInfo);
 
         this.model.assets.filtered = this.model.assets.original 

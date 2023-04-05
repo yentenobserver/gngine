@@ -523,7 +523,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // find the object
         let objects3D = that.mapHolderObject.children.filter((item)=>{
             // return item.userData&&item.userData.tileData?item.userData.tileData.x == tile.x && item.userData.tileData.y == tile.y:false;
-            return item.userData.tileData.x == tile.x && item.userData.tileData.y == tile.y;
+            return item.type.toLowerCase()=="object3d" && item.userData && item.userData.tileData && item.userData.tileData.x &&  item.userData.tileData.x == tile.x && item.userData.tileData.y == tile.y;
         })
 
         if(objects3D&&objects3D[0]){

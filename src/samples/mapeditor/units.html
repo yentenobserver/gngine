@@ -178,6 +178,7 @@
             <h1 class="title">Asset Editor</h1>
             <table class="table is-fullwidth is-bordered is-striped">
                 <thead>
+                    <th>Kind</th>
                     <th>Type Code</th>
                     <th>Tags</th>
                     <th>Modified</th>
@@ -186,6 +187,7 @@
                 </thead>
                 <tbody>
                     <tr rv-each-item="model.assets.filtered">
+                        <td>{item.kind}</td>
                         <td>{item.name}</td>
                         <td>
                             <span class="tag" rv-each-tag="item.tags" style="margin-right: 0.75em;">

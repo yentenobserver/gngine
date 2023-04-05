@@ -42,6 +42,7 @@ class AddAssetModalController {
         Object.keys(assetsByTypeObject).forEach((item)=>{
             assetsByType.push({
                 name: item,
+                kind: assetsByTypeObject[item][0].kind,
                 created: assetsByTypeObject[item][0].created,
                 variants: assetsByTypeObject[item],
                 tags: [item]
@@ -69,8 +70,9 @@ class AddAssetModalController {
         if(kind == "Unit"){
             factory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
             await factory.loadTemplates(["_UNIT"]);            
-        }else{
-
+        }else if (kind == "HexTile"){
+            factory = new gngine.RenderablesThreeJSFactory(specification, new THREE.GLTFLoader());            
+            await factory.loadTemplates(["_TILE"]);            
         }
         console.log(factory.spawnableRenderablesNames());
 
@@ -108,12 +110,15 @@ class AddAssetModalController {
     async prepareRenderer(kind, factory, view){
         // prepare Renderer
         let renderer = {};
-        if(kind == "Unit"){
-            renderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());
-            renderer.setRenderablesFactory(factory);
-            renderer.setView(view);
-            await renderer.initialize();
+        if(kind == "Unit"){            
+            renderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());            
+        }else if(kind == "HexTile"){
+            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)            
         }
+        renderer.setRenderablesFactory(factory);
+        renderer.setView(view);
+        await renderer.initialize();
+
 
         return renderer;        
     }
@@ -271,7 +276,33 @@ class AddAssetModalController {
                 // renderer.put(item, tile,"SW"); 
                 renderableJSON = player.spawn({unit: item}).data.toJSON();
 
+            }else if(that.model.kind == "HexTile"){
+                item = {
+                    "id": "0,0",
+                    "x": 0,
+                    "y": 0,
+                    "d": "S",
+                    "t": spawnableNames[j],
+                    "loc": {
+                      "n": "Grassland",
+                      "g": "43.74650403587078,7.421766928360976"
+                    },
+                    "ext": {},
+                    "nft": {
+                      "v": 100,
+                      "b": "ETHEREUM",
+                      "i": "123",
+                      "t": "0x123",
+                      "o": "0x0022"
+                    }
+                }
+                name = spawnableNames[j]
+                player.display(item,"SW");
+                renderableJSON = player.spawn({name: name}).data.toJSON();
             }
+
+
+
                        
             const waitForScreenshot = new Promise((resolve, reject)=>{
                 setTimeout(()=>{                                        
