@@ -1,10 +1,10 @@
-import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material, AxesHelper } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material } from "three";
 import { TileBase } from "../../logic/map/common.notest";
 import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
 import { MapPositionProvider, OrientationProvider } from "./providers";
-import { Renderable, RenderablesFactory, RenderablesSpecification, RenderablesThreeJSFactory } from "./renderables-factory";
+import { Renderable, RenderablesFactory, RenderablesSpecification, RenderablesThreeJSFactory, SpawnSpecification } from "./renderables-factory";
 
 import { Renderer } from "./renderers";
 
@@ -37,13 +37,17 @@ interface UnitHolder{
 //     state: RenderableWorkerState       
 // }
 
+export interface UnitSpawnSpecification extends SpawnSpecification{
+    unit: SpecsBase&SpecsType&Actionable
+}
+
 export interface UnitRenderablesFactory extends RenderablesFactory{
     /**
      * Spawns new renderable for given unit data.
      * @param unit unit type and instance data to be spawned
      * @returns {Renderable} renderable or error is thrown when none can be spawned
      */
-    spawn(unit: SpecsBase&SpecsType&Actionable):Renderable;
+    spawn(unit: UnitSpawnSpecification):Renderable;
 
     _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType&Actionable):void;
 }
@@ -108,14 +112,14 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
      * @param unit unit type and instance data to be spawned
      * @returns {Renderable} renderable or error is thrown when none can be spawned
      */
-    spawn(unit: SpecsBase&SpecsType&Actionable):Renderable{
+    spawn(unit: UnitSpawnSpecification):Renderable{
         // it is assumed that the model items should be named accordingly to following rules
         // [STATE]_[HITPOINTS]_UNIT
         // the factory will translate unit data into proper object name
         // algorith:
         // [STATE] = unit.actionRunner.code or "DEFAULT" when not found
         // [HITPOINTS] = Math.round(10*unit.hitPoints/unit.unitSpecification.hitPoints), when not found search by adding 1 until one is found
-        const names = this._generateNames(unit);
+        const names = this._generateNames(unit.unit);
 
         let renderable = undefined;
 
@@ -129,9 +133,9 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
             finally{}
         }
         if(!renderable)
-            throw new Error(`No template found for unit type ${unit.unitSpecification.name} ${unit.unitSpecification.tuid}`);
+            throw new Error(`No template found for unit type ${unit.unit.unitSpecification.name} ${unit.unit.unitSpecification.tuid}`);
 
-        this._addHPBar(renderable, unit);
+        this._addHPBar(renderable, unit.unit);
         // console.log(JSON.stringify(renderable.data.toJSON()));
         return renderable;
     }
@@ -400,7 +404,7 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
      * @param direction direction where to face the unit
      */
     put(unit: UnitBase, _at?: TileBase, direction?: string):void{
-        const renderable = (<UnitRenderablesFactory>this.renderablesFactory!).spawn(unit);
+        const renderable = (<UnitRenderablesFactory>this.renderablesFactory!).spawn({unit: unit});
         const object3D = renderable.data as Object3D;
         const scenePosition = this.mapProvider.yxToScenePosition(_at!.y,_at!.x);                
 

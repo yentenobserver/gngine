@@ -25,6 +25,10 @@ export interface RenderablesSpecificationMap extends RenderablesSpecification {
     helpers: RenderableSpecificationItem
 }
 
+export interface SpawnSpecification{
+    name?: string // the most basic type of specification, by name, which is equall to invoking spawnRenderableObject(objectName:string) directly
+}
+
 export abstract class RenderablesFactory{
     specification: RenderablesSpecification;    
 
@@ -49,10 +53,19 @@ export abstract class RenderablesFactory{
      * Returns all renderables' names that can be spawned by this factory
      */
     abstract spawnableRenderablesNames():string[];
+
+    /**
+     * Creates new instance of Renderable that can be drawn on view, it uses more
+     * "entity" approach where the entity to be instantiated is passed instead of 
+     * just plain name
+     * @param specification item specification to be instantiated
+     */
+    abstract spawn(specification: SpawnSpecification):Renderable;
 }
 
 /* istanbul ignore next */
 export class RenderablesDefaultFactory extends RenderablesFactory{
+    
     spawnRenderableObject(_objectName: string): Renderable {
         throw new Error('Method not implemented.');
     }
@@ -61,6 +74,10 @@ export class RenderablesDefaultFactory extends RenderablesFactory{
     }    
     spawnableRenderablesNames():string[]{
         return [];
+    }
+
+    spawn(_specification: SpawnSpecification): Renderable {
+        throw new Error('Method not implemented.');
     }
 }
 
@@ -75,6 +92,7 @@ export interface RenderableTemplateThreeJS {
 }
 
 export class RenderablesThreeJSFactory extends RenderablesFactory {
+    
     
     // templates:Map<string, THREE.Object3D>;
     templates:Map<string, RenderableTemplateThreeJS>;
@@ -164,11 +182,11 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 const sizeVector = new Vector3();                
                 bbBox.setFromObject(cloned).getSize(sizeVector);                
 
-                console.log(`Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
+                // console.log(`Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
 
                 // const correction:THREE.Vector3 = new THREE.Vector3(vectorXYZ[0], vectorXYZ[1], vectorXYZ[2])                                                      
                 cloned.position.set(-sizeVector.x/2,-sizeVector.y/2, cloned.position.z);                    
-                console.log(`Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
+                // console.log(`Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
 
             }
 
@@ -197,6 +215,10 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         }else{
             throw new Error(`No template found ${objectName}`);
         }        
+    }
+
+    spawn(specification: SpawnSpecification): Renderable {
+        return this.spawnRenderableObject(specification.name!);
     }
 
     /**

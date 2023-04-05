@@ -3835,23 +3835,23 @@ describe("Renderers",()=>{
             })
 
             it("generates names to try",()=>{
-                factory1.spawn(UnitsMocks.unit1);
+                factory1.spawn({unit: UnitsMocks.unit1});
                 return expect(s2.callCount).eq(1);
             })
             it("tries to spawn with name",()=>{
-                factory1.spawn(UnitsMocks.unit1);
+                factory1.spawn({unit: UnitsMocks.unit1});
                 return expect(s1.callCount).eq(names.length);
             })
             it("handles spawning error gracefully",()=>{
-                factory1.spawn(UnitsMocks.unit1);
+                factory1.spawn({unit: UnitsMocks.unit1});
                 return expect(s1.callCount).eq(2);
             })
             it("add hit points bar",()=>{
-                factory1.spawn(UnitsMocks.unit1);
+                factory1.spawn({unit: UnitsMocks.unit1});
                 return expect(s5.callCount).eq(1);
             })
             it("throws an error when no match at all is found",()=>{
-                return expect(()=>{factory2.spawn.bind(factory2)(UnitsMocks.unit1)}).to.throw("No template found for unit type"); 
+                return expect(()=>{factory2.spawn.bind(factory2)({unit: UnitsMocks.unit1})}).to.throw("No template found for unit type"); 
             })
         })
     })

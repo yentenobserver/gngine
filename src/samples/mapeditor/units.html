@@ -239,12 +239,26 @@
                         </div>
                     </article>
                     <div class="field" rv-class-is-hidden="model.busy">
-                        <label class="label">ThreeJS JSON</label>
+                        <label class="label">Asset Kind</label>
+                        <div class="control">
+                            <div class="select" >
+                              <select rv-value="model.kind">
+                                <option value="Unit">Unit</option>
+                                <option value="HexTile">Hex Tile</option>
+                                <option value="QuadTile">Quad Tile</option>
+                              </select>
+                            </div>
+                          </div>
+                        <p class="help">Assets of given type will be created</p>
+                    </div>
+                    <div class="field" rv-class-is-hidden="model.busy">
+                        <label class="label">Assets ThreeJS JSON</label>
                         <div class="control">
                             <textarea class="textarea" placeholder="paste JSON here" rows="20" rv-value="model.message"></textarea>                            
                         </div>
                         <p class="help">This JSON will be parsed for 3D objects</p>
                     </div>
+                    
                     <div class="field" rv-class-is-hidden="model.busy | eq false">
                         <label class="label">Processing ({model.current}/{model.howMany}) {model.item.name} ...</label>
                         <div id="unitCanvasHolder" class="control">
