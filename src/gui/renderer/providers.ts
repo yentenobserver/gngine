@@ -67,7 +67,9 @@ export enum QuadDirections {
     W = "W",
     S = "S"
 }
-
+/**
+ * 
+ */
 export class HexFlatTopOrientationProviderThreeJs implements OrientationProvider{
     orientate(object:any, direction:string){
         if(![
@@ -147,7 +149,12 @@ export class QuadOrientationProviderThreeJs implements OrientationProvider{
 
 /**
  * Provides set of position convertion between pixel world and map 
- * world (this instance is for hexagonal flat top maps)
+ * world (this instance is for hexagonal flat top maps).
+ * This provider resuts in odd-q style of map (odd columns are shoved down).
+ * Rules:
+ * * rows (r) grow along the y axis
+ * * cols (q) grow along the x axis
+ * * hex(0,0) in map world is centered at (0,0) in pixel world
  */
 export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
     _width: number;
@@ -204,6 +211,10 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
  * coordinates are converted. 
  * 
  * (this instance is for quad maps)
+ * * Rules:
+ * * rows (y) grow along the y axis
+ * * cols (x) grow along the x axis
+ * * quad(0,0) in map world is centered at (0,0) in pixel world
  */
 export class QuadPositionProviderThreeJs implements MapPositionProvider {
     tileSize: number;

@@ -70,11 +70,11 @@ class AddAssetModalController {
         if(kind == "Unit"){
             factory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
             await factory.loadTemplates(["_UNIT"]);            
-        }else if (kind == "HexTile"){
+        }else if (kind == "HexTile" || kind == "QuadTile"){
             factory = new gngine.RenderablesThreeJSFactory(specification, new THREE.GLTFLoader());            
-            await factory.loadTemplates(["_TILE"]);            
+            await factory.loadTemplates(["MAS"]);            
         }
-        console.log(factory.spawnableRenderablesNames());
+        // console.log(factory.spawnableRenderablesNames());
 
         return factory;
     }
@@ -114,7 +114,10 @@ class AddAssetModalController {
             renderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());            
         }else if(kind == "HexTile"){
             renderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)            
+        }else if(kind == "QuadTile"){
+            renderer = new gngine.MapQuadRendererThreeJs(3,2, this.emitter)
         }
+        
         renderer.setRenderablesFactory(factory);
         renderer.setView(view);
         await renderer.initialize();
@@ -298,6 +301,30 @@ class AddAssetModalController {
                 }
                 name = spawnableNames[j]
                 player.display(item,"SW");
+                renderableJSON = player.spawn({name: name}).data.toJSON();
+            }
+            else if(that.model.kind == "QuadTile"){
+                item = {
+                    "id": "0,0",
+                    "x": 0,
+                    "y": 0,
+                    "d": "S",
+                    "t": spawnableNames[j],
+                    "loc": {
+                      "n": "Grassland",
+                      "g": "43.74650403587078,7.421766928360976"
+                    },
+                    "ext": {},
+                    "nft": {
+                      "v": 100,
+                      "b": "ETHEREUM",
+                      "i": "123",
+                      "t": "0x123",
+                      "o": "0x0022"
+                    }
+                }
+                name = spawnableNames[j]
+                player.display(item,"S");
                 renderableJSON = player.spawn({name: name}).data.toJSON();
             }
 
