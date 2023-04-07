@@ -251,18 +251,25 @@ export class QuadPositionProviderThreeJs implements MapPositionProvider {
         //     y: this._height/2
         // }
 
-        const _normalizedWidth = this.width/this.tileSize;
-        const _normalizedHeight = this.height/this.tileSize
+        // const _normalizedWidth = this.width/this.tileSize;
+        // const _normalizedHeight = this.height/this.tileSize
 
+        // const position = {
+        //     x: x-_normalizedWidth/2+this.tileSize/2,
+        //     y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2,
+        //     z: 0
+        // }
+        // // console.log(x,y,position);
+        // return position;
+        
+        // 33,31 -> 0,-1,
         const position = {
-            x: x-_normalizedWidth/2+this.tileSize/2,
-            y: (y-_normalizedHeight/2)<0?Math.abs(y-_normalizedHeight/2)-this.tileSize/2:-Math.abs(y-_normalizedHeight/2)-this.tileSize/2,
+            x: this.tileSize*x,
+            y: this.tileSize*y,
             z: 0
         }
-        // console.log(x,y,position);
+
         return position;
-        
-        // 33,31 -> 0,-1,0
 
     }
     /**
@@ -273,17 +280,23 @@ export class QuadPositionProviderThreeJs implements MapPositionProvider {
      */
     scenePositionToYX(sceneX:number,sceneY:number){  
         
-        const _tilesCountY = this.height/this.tileSize
+        // const _tilesCountY = this.height/this.tileSize
         
-        const normSceneX = sceneX+this.width/2;
-        const normSceneY = sceneY+this.height/2;
+        // const normSceneX = sceneX+this.width/2;
+        // const normSceneY = sceneY+this.height/2;
 
-        const tileX = Math.floor(normSceneX);
-        const tileY =  Math.floor(_tilesCountY-normSceneY);
+        // const tileX = Math.floor(normSceneX);
+        // const tileY =  Math.floor(_tilesCountY-normSceneY);
+
+        // const position = {
+        //     y:tileY,
+        //     x: tileX
+        // }
+        // return position;
 
         const position = {
-            y:tileY,
-            x: tileX
+            y:Math.ceil(sceneY/this.tileSize-this.tileSize/2),
+            x: Math.ceil(sceneX/this.tileSize-this.tileSize/2)
         }
         return position;
     }
