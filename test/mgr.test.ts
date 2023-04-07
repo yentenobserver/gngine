@@ -2872,10 +2872,34 @@ describe("Renderers",()=>{
             provider = new HexFlatTopPositionProviderThreeJs(1);
         })
         describe("yxToScenePosition", ()=>{
-            it("hex(0,0) is located at map (0,0",()=>{
+            it("hex(0,0) is located at map (0,0)",()=>{
                 return expect(JSON.stringify(provider.yxToScenePosition(0,0))).eq(JSON.stringify({x: 0, y:0, z:0}))
             })
+            it("hex(3,3) is located at map (2.25,-3.031088913245535)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(3,3))).eq(JSON.stringify({x: 2.25, y:-3.031088913245535, z:0}))
+            })
+            it("hex(0,3) is located at map (2.25,-0.4330127018922193)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(0,3))).eq(JSON.stringify({x: 2.25, y:-0.4330127018922193, z:0}))
+            })
+            it("hex(3,0) is located at map (0,-2.598076211353316)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(3,0))).eq(JSON.stringify({x: 0, y:-2.598076211353316, z:0}))
+            })
         })
+        describe("scenePositionToYX", ()=>{
+            it("map(0,0) is at hex(0,0)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(0,0))).eq(JSON.stringify({y: 0, x: 0}));
+            })
+            it("map(2.25, -3.031088913245535) is at hex(3,3)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(2.25, -3.031088913245535))).eq(JSON.stringify({y: 3, x: 3}))
+            })
+            it("map(3,0) is at hex(0,3)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(2.25, -0.4330127018922193))).eq(JSON.stringify({y: 0, x: 3}))
+            })
+            it("map(0,-3) is at hex(3,0)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(0,-2.598076211353316))).eq(JSON.stringify({y: 3, x: 0}))
+            })
+        })
+        
     })
     describe("QuadPositionProviderThreeJs",()=>{
         
