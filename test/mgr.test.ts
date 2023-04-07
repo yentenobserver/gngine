@@ -28,7 +28,7 @@ import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapQuadRenderer
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
-import {MapPositionProvider, ScenePosition, TilePosition} from '../src/gui/renderer/providers';
+import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, QuadPositionProviderThreeJs, ScenePosition, TilePosition} from '../src/gui/renderer/providers';
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
@@ -2812,31 +2812,31 @@ describe("Renderers",()=>{
             it("positions upper left tile",()=>{
                 const r = map.yxToScenePosition(0,0);                
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: -map.width/2+map.tileSize/2, y: map.height/2-map.tileSize/2, z: 0
+                    x: 0, y: 0, z: 0
                 }))
             })
             it("positions upper right tile",()=>{
                 const r = map.yxToScenePosition(0,39);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: map.width/2-map.tileSize/2, y: map.height/2-map.tileSize/2, z: 0
+                    x: 39, y: 0, z: 0
                 }))
             })
             it("positions lower left tile",()=>{
                 const r = map.yxToScenePosition(19,0);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: -map.width/2+map.tileSize/2, y: -map.height/2+map.tileSize/2, z: 0
+                    x: 0, y: -19, z: 0
                 }))
             })
             it("positions lower right tile",()=>{
                 const r = map.yxToScenePosition(19,39);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: map.width/2-map.tileSize/2, y: -map.height/2+map.tileSize/2, z: 0
+                    x: 39, y: -19, z: 0
                 }))
             })
             it("positions center tile",()=>{
                 const r = map.yxToScenePosition(9,19);
                 return expect(JSON.stringify(r)).eq(JSON.stringify({
-                    x: -map.tileSize/2, y: map.tileSize/2, z: 0
+                    x: 19, y: -9, z: 0
                 }))
             })
         })
@@ -2865,6 +2865,56 @@ describe("Renderers",()=>{
                 return expect(s1.callCount).eq(0);
             })
         })
+    })
+    describe("HexFlatTopPositionProviderThreeJs",()=>{
+        let provider: HexFlatTopPositionProviderThreeJs;
+        beforeEach(()=>{
+            provider = new HexFlatTopPositionProviderThreeJs(1);
+        })
+        describe("yxToScenePosition", ()=>{
+            it("hex(0,0) is located at map (0,0",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(0,0))).eq(JSON.stringify({x: 0, y:0, z:0}))
+            })
+        })
+    })
+    describe("QuadPositionProviderThreeJs",()=>{
+        
+        let provider: QuadPositionProviderThreeJs;
+        beforeEach(()=>{
+            provider = new QuadPositionProviderThreeJs(3,4,1);
+        })
+        describe("yxToScenePosition",()=>{
+            // (row, col)
+            it("quad(0,0) is located at map (0,0)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(0,0))).eq(JSON.stringify({x: 0, y:0, z:0}))
+            })
+            // (row, col)
+            it("quad(3,3) is located at map (3,-3)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(3,3))).eq(JSON.stringify({x: 3, y:-3, z:0}))
+            })
+            // (row, col)
+            it("quad(0,3) is located at map (3,0)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(0,3))).eq(JSON.stringify({x: 3, y:0, z:0}))
+            })
+            // (row, col)
+            it("quad(3,0) is located at map (0,3)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(3,0))).eq(JSON.stringify({x: 0, y: -3, z:0}))
+            })
+        });
+        describe("scenePositionToYX",()=>{
+            it("map(0,0) is at quad(0,0)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(0,0))).eq(JSON.stringify({y: 0, x: 0}));
+            })
+            it("map(3,-3) is at quad(3,3)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(3,-3))).eq(JSON.stringify({y: 3, x: 3}))
+            })
+            it("map(3,0) is at quad(0,3)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(3,0))).eq(JSON.stringify({y: 0, x: 3}))
+            })
+            it("map(0,-3) is at quad(3,0)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(0,-3))).eq(JSON.stringify({y: 3, x: 0}))
+            })
+        });
     })
     describe("HudComponentMapNavigationThreeJs",()=>{
         let s1: SinonStub;

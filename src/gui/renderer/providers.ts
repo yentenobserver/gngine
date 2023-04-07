@@ -200,7 +200,7 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
 
     _qrToXY(q:number, r:number):Vector2{
         const xCenter = q*this._width*3/4;
-        const yCenter = q%2==1?-r*this._height-this._height/2:-r*this._height;
+        const yCenter = q%2==1?-r*this._height-this._height/2:-r*this._height; // here we go negative in y (map left top hex(0,0) is at 0,0)
         return new Vector2(xCenter, yCenter);
     }
     
@@ -265,7 +265,7 @@ export class QuadPositionProviderThreeJs implements MapPositionProvider {
         // 33,31 -> 0,-1,
         const position = {
             x: this.tileSize*x,
-            y: this.tileSize*y,
+            y: -this.tileSize*y,// here we go negative in y (map left top quad(0,0) is at 0,0)
             z: 0
         }
 
@@ -295,7 +295,7 @@ export class QuadPositionProviderThreeJs implements MapPositionProvider {
         // return position;
 
         const position = {
-            y:Math.ceil(sceneY/this.tileSize-this.tileSize/2),
+            y: -Math.ceil(sceneY/this.tileSize-this.tileSize/2),
             x: Math.ceil(sceneX/this.tileSize-this.tileSize/2)
         }
         return position;
