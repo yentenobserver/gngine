@@ -4,6 +4,7 @@ export interface TileBase {
     y: number, // for quad tiles this is the row, for hex tiles this is also a row aka r
     
     t: string   // type of tile (terrain)
+    r?: string // renderable name representing this tile
 }
 
 export interface TileBasePlace extends TileBase {

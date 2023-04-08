@@ -546,7 +546,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         this.put(tile, direction)
     }
     put(tile: TileBase, direction?: string): void {
-        const renderable = this.renderablesFactory!.spawnRenderableObject(tile.t);
+        const renderable = this.renderablesFactory!.spawnRenderableObject(tile.r!);
         const object3D = renderable.data as THREE.Object3D;
 
         const scenePosition = this.yxToScenePosition(tile.y,tile.x);
