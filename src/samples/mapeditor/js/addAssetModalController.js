@@ -88,7 +88,7 @@ class AddAssetModalController {
         p.initialize();    
         let viewOptions = {
             cameraParams: {                
-                fov: 50,
+                fov: 100,
                 near: 0.1,
                 far: 1000,
                 height: 0.25                             

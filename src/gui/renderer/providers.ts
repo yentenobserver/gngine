@@ -179,7 +179,7 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
         }
     }
     scenePositionToYX(_sceneX: number, _sceneY: number): TilePosition {
-        const qr = this._xyToQR(new Vector2(_sceneX, -_sceneY)); // axial coords , minus as we are again y axis
+        const qr = this._xyToQR(new Vector2(_sceneX, -_sceneY)); // axial coords , minus as we are against y axis
         const qr_offset = this._axial_to_oddq(qr);
         return {
             y: qr_offset.r,

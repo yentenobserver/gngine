@@ -42,7 +42,19 @@ class AppDemo {
         
         let mapRenderer;
 
-        let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter); 
+        let viewOptions = {
+            cameraParams: {                
+                fov: 50,
+                near: 0.1,
+                far: 1000,
+                height: 0.25                             
+            },
+            // cameraPosition: new THREE.Vector3(0,-1,0.75)
+            cameraPosition: new THREE.Vector3(0,-5,4)
+            
+        }
+
+        let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
 
         await p.attach(mainMapView);
         
