@@ -145,7 +145,8 @@
                     <div class="block">
                         <strong>Name:</strong> {model.selected.tile.name}<br>
                         <strong>Id:</strong> {model.selected.tile.uuid}<br>
-                        <strong>Position:</strong> ({model.selected.tile.worldPosition.x}, {model.selected.tile.worldPosition.y}, {model.selected.tile.worldPosition.z}) ({model.selected.tile.position.x}, {model.selected.tile.position.y}, {model.selected.tile.position.z})
+                        <strong>Position:</strong> ({model.selected.tile.worldPosition.x}, {model.selected.tile.worldPosition.y}, {model.selected.tile.worldPosition.z}) ({model.selected.tile.position.x}, {model.selected.tile.position.y}, {model.selected.tile.position.z})<br>
+                        <strong>Scene Position</strong> {model.selected.tileScenePosition | jsonStringify}
                     </div>
                     <div class="block">
                         <strong>Tile Data:</strong> {model.selected.tileDataStr}<br>                        

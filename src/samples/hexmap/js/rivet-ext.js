@@ -236,6 +236,11 @@ function initializeRivetFormatters() {
         return description;
     }
 
+    rivets.formatters.jsonStringify = function (value){
+        if(value)
+            return JSON.stringify(value)
+    }
+
     rivets.formatters.decodeTransactionType = function (value){
         var descriptions = {
             'T': 'Napiwek',

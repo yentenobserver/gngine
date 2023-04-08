@@ -11,9 +11,12 @@ class AppDemo {
                 unit: {},
                 unitData: {},
                 unitDataStr: {},
+                unitScenePosition: {},
                 tile: {},
                 tileData: {},
                 tileDataStr: {},
+                tileEvent: {},
+                tileScenePosition: {}
             }
         }
     }
@@ -261,6 +264,7 @@ class AppDemo {
                 }
                 that.model.selected.unit = event.interactingObject;
                 that.model.selected.unit.worldPosition = event.worldPosition;
+                that.model.selected.unitScenePosition = event.scenePosition
                 // console.log(that.model.selected.unit);
             }
             
@@ -282,6 +286,7 @@ class AppDemo {
                 }
                 that.model.selected.tile = event.interactingObject
                 that.model.selected.tile.worldPosition = event.worldPosition
+                that.model.selected.tileScenePosition = event.scenePosition
             };
             
             

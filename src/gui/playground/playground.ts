@@ -263,6 +263,7 @@ export interface PlaygroundView3D {
 interface PickResultThreeJs {
     object: THREE.Object3D,
     hierarchy: THREE.Object3D[], // [n-1] object itself, [0] - parent of all parents
+    scenePos: Vector3
 }
 
 export interface MatchingThreeJs {
@@ -402,7 +403,8 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
             
             const pickResult: PickResultThreeJs = {
                 hierarchy: hierarchy,
-                object: o
+                object: o,
+                scenePos: matching.point
             }
 
             return pickResult
@@ -568,7 +570,8 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
                 interactingObject: hudPickResult.object,
                 originalEvent: pointerEvent,
                 data: hudPickResult,
-                worldPosition: worldPosition
+                worldPosition: worldPosition,
+                scenePosition: hudPickResult.scenePos
             }
             this.emitter.emit(Events.INTERACTIONS.HUD,interactionEvent)
             return interactionEvent;
@@ -679,7 +682,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
                 interactingObject: tilePickResult.object,
                 originalEvent: pointerEvent,
                 data: tilePickResult,
-                worldPosition: worldPosition
+                worldPosition: worldPosition,
+                scenePosition: tilePickResult.scenePos
             }
             this.emitter.emit(Events.INTERACTIONS.TILE,interactionEvent)
             result = interactionEvent;
@@ -697,7 +701,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
                 interactingObject: unitPickResult.object,
                 originalEvent: pointerEvent,
                 data: unitPickResult,
-                worldPosition: worldPosition
+                worldPosition: worldPosition,
+                scenePosition: unitPickResult.scenePos
             }
             this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
             result = interactionEvent;
@@ -727,5 +732,6 @@ export interface PlaygroundInteractionEvent extends EngineEvent{
     originalEvent: any, // original event from UI that triggered the interaction
     interactingObject: any, // the object that took part in the interaction
     data: any // additional interaction data
-    worldPosition: any // interacting object world position
+    worldPosition: any // interacting object world position,
+    scenePosition: any // scene position when interaction took place
 }

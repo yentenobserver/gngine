@@ -32,7 +32,7 @@ import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, QuadPositionProv
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
-import { Vector3 } from 'three';
+import { Vector2, Vector3 } from 'three';
 import { Renderable, RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
 
 
@@ -1804,7 +1804,7 @@ describe('Playground', () => {
                 }
                 playgroundView1.scene = new THREE.Scene();
                 s1 = sinon.stub(pointerEvent,"preventDefault");
-                s2 = sinon.stub(playgroundView1,"_pickScenePosition");
+                s2 = sinon.stub(playgroundView1,"_pickScenePosition").returns(new Vector2(1,1));
                 s3 = sinon.stub(playgroundView1._raycaster,"setFromCamera");
                 s4 = sinon.stub(playgroundView1._raycaster,"intersectObjects");
                 s5 = sinon.stub(playgroundView1,"_findClosestObjectMatching");
@@ -2059,7 +2059,8 @@ describe('Playground', () => {
 
                 s1 = sinon.stub(p1,"pickObjectOfNames").returns({
                     object: new THREE.Object3D(),
-                    hierarchy: []
+                    hierarchy: [],
+                    scenePos: new Vector3()
                 });
                 s2 = sinon.stub(p2,"pickObjectOfNames");
                 s3 = sinon.stub(messageBusMocked,"emit");
@@ -2879,24 +2880,37 @@ describe("Renderers",()=>{
                 return expect(JSON.stringify(provider.yxToScenePosition(3,3))).eq(JSON.stringify({x: 2.25, y:-3.031088913245535, z:0}))
             })
             it("hex(0,3) is located at map (2.25,-0.4330127018922193)",()=>{
-                return expect(JSON.stringify(provider.yxToScenePosition(0,3))).eq(JSON.stringify({x: 2.25, y:-0.4330127018922193, z:0}))
-            })
-            it("hex(3,0) is located at map (0,-2.598076211353316)",()=>{
                 return expect(JSON.stringify(provider.yxToScenePosition(3,0))).eq(JSON.stringify({x: 0, y:-2.598076211353316, z:0}))
             })
+            it("hex(3,0) is located at map (0,-2.598076211353316)",()=>{
+                return expect(JSON.stringify(provider.yxToScenePosition(0,3))).eq(JSON.stringify({x: 2.25, y:-0.4330127018922193, z:0}))
+            })
+            
         })
         describe("scenePositionToYX", ()=>{
             it("map(0,0) is at hex(0,0)",()=>{
                 return expect(JSON.stringify(provider.scenePositionToYX(0,0))).eq(JSON.stringify({y: 0, x: 0}));
             })
-            it("map(2.25, -3.031088913245535) is at hex(3,3)",()=>{
-                return expect(JSON.stringify(provider.scenePositionToYX(2.25, -3.031088913245535))).eq(JSON.stringify({y: 3, x: 3}))
+            it("map(0.75, -1.3) is at hex(1,1)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(0.75, -1.3))).eq(JSON.stringify({y: 1, x: 1}))
             })
-            it("map(3,0) is at hex(0,3)",()=>{
-                return expect(JSON.stringify(provider.scenePositionToYX(2.25, -0.4330127018922193))).eq(JSON.stringify({y: 0, x: 3}))
+            it("map(3,0) is at hex(0,4)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(3, 0))).eq(JSON.stringify({y: 0, x: 4}))
             })
             it("map(0,-3) is at hex(3,0)",()=>{
-                return expect(JSON.stringify(provider.scenePositionToYX(0,-2.598076211353316))).eq(JSON.stringify({y: 3, x: 0}))
+                return expect(JSON.stringify(provider.scenePositionToYX(0,-3))).eq(JSON.stringify({y: 3, x: 0}))
+            })
+            it("map(2.52, -2.30) is at hex(2,3)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(2.52, -2.3))).eq(JSON.stringify({y: 2, x: 3}))
+            })
+            it("map(1.5, -0.87) is at hex(2,1)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(1.5, -0.87))).eq(JSON.stringify({y: 1 , x: 2}))
+            })
+            it("map(1.8, -1) is at hex(2,1)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(1.8, -1))).eq(JSON.stringify({y: 1 , x: 2}))
+            })
+            it("map(2.44, -3.3) is at hex(3,3)",()=>{
+                return expect(JSON.stringify(provider.scenePositionToYX(2.44, -3.3))).eq(JSON.stringify({y: 3 , x: 3}))
             })
         })
         
@@ -3041,7 +3055,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3058,7 +3073,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -3075,7 +3091,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3092,7 +3109,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -3109,7 +3127,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3126,7 +3145,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -3143,7 +3163,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -3160,7 +3181,8 @@ describe("Renderers",()=>{
                     },
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
-                    worldPosition: {}
+                    worldPosition: {},
+                    scenePosition: new Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];

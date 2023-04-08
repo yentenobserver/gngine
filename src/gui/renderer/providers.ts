@@ -14,8 +14,8 @@ export interface ScenePosition {
  */
 export interface TilePosition {
     
-    y: number,    
-    x: number,
+    y: number, // row, r in hex coords
+    x: number, // column, q in hex coords
 }
 
 /**
@@ -179,10 +179,11 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
         }
     }
     scenePositionToYX(_sceneX: number, _sceneY: number): TilePosition {
-        const qr = this._xyToQR(new Vector2(_sceneX, _sceneY));
+        const qr = this._xyToQR(new Vector2(_sceneX, -_sceneY)); // axial coords , minus as we are again y axis
+        const qr_offset = this._axial_to_oddq(qr);
         return {
-            y: qr.r,
-            x: qr.q
+            y: qr_offset.r,
+            x: qr_offset.q
         }
     }
 
@@ -191,6 +192,10 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
     _xyToQR(point: Vector2):{q: number, r:number}{
         var q = ( 2./3 * point.x                        ) / this._size
         var r = (-1./3 * point.x  +  Math.sqrt(3)/3 * point.y) / this._size
+        // var r = (-1./3 * point.x  -  Math.sqrt(3)/3 * point.y) / this._size
+
+        // console.log(q,r);
+        // var r = (1./3 * point.x  -  Math.sqrt(3)/3 * point.y) / this._size
         // return axial_round(Hex(q, r))    
         return {
             q: Math.round(q),
@@ -203,6 +208,31 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
         const yCenter = q%2==1?-r*this._height-this._height/2:-r*this._height; // here we go negative in y (map left top hex(0,0) is at 0,0)
         return new Vector2(xCenter, yCenter);
     }
+
+    // function oddq_offset_to_pixel(hex):
+    // var x = size * 3/2 * hex.col
+    // var y = size * sqrt(3) * (hex.row + 0.5 * (hex.col&1))
+    // return Point(x, y)
+
+    _axial_to_oddq(hex_axial: {q: number, r:number}):{q: number, r:number}{
+        var col = hex_axial.q
+        var row = hex_axial.r + (hex_axial.q - (hex_axial.q&1)) / 2
+        return {
+            q: col,
+            r: row
+        }
+    }
+    
+
+    _oddq_to_axial(hex: {q: number, r:number}):{q: number, r:number}{
+        var q = hex.q
+        var r = hex.r - (hex.q - (hex.q&1)) / 2
+        return {
+            q: q,
+            r: r
+        }
+    }
+    
     
 }
 
