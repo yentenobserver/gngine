@@ -34,7 +34,7 @@ export class UnitSpecs {
     }
 }
 
-export abstract class UnitBase extends UnitActionable implements SpecsBase, SpecsType {
+export abstract class UnitBase extends UnitActionable implements SpecsBase, SpecsType, SpecsFlag {
     uid: string;
     actionPoints: number;
     hitPoints: number;
@@ -43,6 +43,8 @@ export abstract class UnitBase extends UnitActionable implements SpecsBase, Spec
     sight: number;
     strength: number;
     rangeStrength: number;
+
+    flag: string;
           
     constructor(){
         super();                
@@ -57,7 +59,9 @@ export abstract class UnitBase extends UnitActionable implements SpecsBase, Spec
         this.sight = 0;
         this.strength = 0;
         this.rangeStrength = 0;
+        this.flag = "#FF0000"   // red team by default
     }
+    
 
     abstract attackStrength(unit: UnitBase):number;
     abstract defendStrength(unit: UnitBase):number;
@@ -77,6 +81,9 @@ export interface SpecsBase extends Specs {
     sight: number;
     strength: number;
     rangeStrength: number;    
+}
+export interface SpecsFlag extends Specs{
+    flag: string // hex color of flag
 }
 /**
  * Unit instance location data

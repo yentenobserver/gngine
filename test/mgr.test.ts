@@ -3889,6 +3889,8 @@ describe("Renderers",()=>{
 
             let s5:SinonStub;
             let s6:SinonStub;
+            let s7:SinonStub;
+            let s8:SinonStub;
             
             beforeEach(()=>{
                 l = {
@@ -3920,6 +3922,8 @@ describe("Renderers",()=>{
 
                 s5 = sinon.stub(factory1, "_addHPBar").returns();
                 s6 = sinon.stub(factory2, "_addHPBar").returns();
+                s7 = sinon.stub(factory1, "_addFlag").returns();
+                s8 = sinon.stub(factory2, "_addFlag").returns();
             })
             afterEach(()=>{
                 s1.restore();
@@ -3927,7 +3931,9 @@ describe("Renderers",()=>{
                 s3.restore();
                 s4.restore();  
                 s5.restore();   
-                s6.restore();              
+                s6.restore();   
+                s7.restore();   
+                s8.restore();              
             })
 
             it("generates names to try",()=>{
@@ -3945,6 +3951,10 @@ describe("Renderers",()=>{
             it("add hit points bar",()=>{
                 factory1.spawn({unit: UnitsMocks.unit1});
                 return expect(s5.callCount).eq(1);
+            })
+            it("add flag",()=>{
+                factory1.spawn({unit: UnitsMocks.unit1});
+                return expect(s7.callCount).eq(1);
             })
             it("throws an error when no match at all is found",()=>{
                 return expect(()=>{factory2.spawn.bind(factory2)({unit: UnitsMocks.unit1})}).to.throw("No template found for unit type"); 

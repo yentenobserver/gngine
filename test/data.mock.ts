@@ -383,6 +383,7 @@ export const UnitsMocks = {
         strength: 10,
         sight: 2,
         uid: "",
+        flag: "#ffffff",
         unitSpecification: {
             hitPoints: 10,
             name: "Type",
@@ -402,6 +403,7 @@ export const UnitsMocks = {
         strength: 10,
         sight: 2,
         uid: "",
+        flag: "#ffffff",
         unitSpecification: {
             hitPoints: 10,
             name: "Type",
@@ -421,6 +423,7 @@ export const UnitsMocks = {
         strength: 10,
         sight: 2,
         uid: "",
+        flag: "#ffffff",
         unitSpecification: {
             hitPoints: 10,
             name: "Type",
@@ -440,6 +443,7 @@ export const UnitsMocks = {
         strength: 10,
         sight: 2,
         uid: "",
+        flag: "#ffffff",
         unitSpecification: {
             hitPoints: 10,
             name: "Type",

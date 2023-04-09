@@ -18,6 +18,24 @@ export interface TilePosition {
     x: number, // column, q in hex coords
 }
 
+export interface CanvasProvider {
+    createCanvas(width: number, height: number):any 
+}
+
+export class DocumentCanvasContextProvider implements CanvasProvider {
+    createCanvas(width: number, height: number):any {
+        const canvas = document.createElement( 'canvas' );
+        canvas.width = width;
+        canvas.height = height;
+        return canvas;
+    }
+    static getInstance(){
+        const i = new DocumentCanvasContextProvider();
+        return i;
+    }
+    
+}
+
 /**
  * Provides translation between scene/world coordinates (pixel on screen/scene) vs map coordinates
  * (either x,y for quad maps or q,r for hex maps)

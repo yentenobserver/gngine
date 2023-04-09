@@ -1,9 +1,9 @@
-import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material } from "three";
+import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material, CanvasTexture } from "three";
 import { TileBase } from "../../logic/map/common.notest";
-import { Actionable, SpecsBase, SpecsType, UnitBase } from "../../logic/units/unit";
+import { Actionable, SpecsBase, SpecsFlag, SpecsType, UnitBase } from "../../logic/units/unit";
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
-import { MapPositionProvider, OrientationProvider } from "./providers";
+import { DocumentCanvasContextProvider, MapPositionProvider, OrientationProvider } from "./providers";
 import { Renderable, RenderablesFactory, RenderablesSpecification, RenderablesThreeJSFactory, SpawnSpecification } from "./renderables-factory";
 
 import { Renderer } from "./renderers";
@@ -38,7 +38,7 @@ interface UnitHolder{
 // }
 
 export interface UnitSpawnSpecification extends SpawnSpecification{
-    unit: SpecsBase&SpecsType&Actionable
+    unit: SpecsBase&SpecsType&Actionable&SpecsFlag
 }
 
 export interface UnitRenderablesFactory extends RenderablesFactory{
@@ -49,7 +49,7 @@ export interface UnitRenderablesFactory extends RenderablesFactory{
      */
     spawn(unit: UnitSpawnSpecification):Renderable;
 
-    _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType&Actionable):void;
+    _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType):void;
 }
 
 /**
@@ -136,11 +136,12 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
             throw new Error(`No template found for unit type ${unit.unit.unitSpecification.name} ${unit.unit.unitSpecification.tuid}`);
 
         this._addHPBar(renderable, unit.unit);
+        this._addFlag(renderable, unit.unit);
         // console.log(JSON.stringify(renderable.data.toJSON()));
         return renderable;
     }
 
-    _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType&Actionable){
+    _addHPBar(renderable: Renderable, unit: SpecsBase&SpecsType){
         const object3D = <Object3D>renderable.data;
         var bbox = new Box3().setFromObject(object3D);
         // console.log("BBOX", bbox);
@@ -168,6 +169,45 @@ export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory imp
         object3D.add(sprite);
         // console.log(object3D);
         
+    }
+
+    _addFlag(renderable: Renderable, unit: SpecsFlag):void{
+        const object3D = <Object3D>renderable.data;
+        var bbox = new Box3().setFromObject(object3D);
+
+        const width:number = 256;
+        const height:number = 256
+        const offset:number = 30;
+        // const offsetX:number = offset/Math.sqrt(2);
+        const offsetY:number = offset/Math.sqrt(2);
+        const borderColor: string = "#FFFFFF"
+
+        const canvas = DocumentCanvasContextProvider.getInstance().createCanvas(width,height);
+        var ctx = canvas.getContext( '2d' );
+        // draw the triangle (it will be the border)
+        ctx.beginPath();
+        ctx.moveTo( 0, 0 );
+        ctx.lineTo( width, 0 );
+        ctx.lineTo( width/2, height );
+        ctx.fillStyle = borderColor; // set dynamic color here
+        ctx.fill();
+
+        // draw the internal (offset) triangle (it will be the body)
+        ctx.beginPath();
+        ctx.moveTo( 0+offset, 0+offsetY );
+        ctx.lineTo( width-offset, 0+offsetY );
+        ctx.lineTo( width/2, height-offset );
+        ctx.fillStyle = unit.flag; // set dynamic color here
+        ctx.fill();
+
+        const texture = new CanvasTexture( canvas );
+        const material = new SpriteMaterial( { map: texture } );
+        const sprite = new Sprite(material);
+        sprite.scale.set(0.2,0.2,1)
+        sprite.name = "UI_FLAG"
+        // add it higher than the HP BAR
+        sprite.position.set(0 , 0, bbox.max.z+(0.3*bbox.max.z));
+        object3D.add(sprite);
     }
 }
 
