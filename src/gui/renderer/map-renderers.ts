@@ -368,72 +368,20 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     }
 
     zoom(level: number): void {
-        const prevPos = this.view!.camera.position.clone();
-        const npoint = this.state.current.tileWorldPos?.clone();
-        console.log("positions", prevPos, npoint);
-
+        // const prevPos = this.view!.camera.position.clone();
+        const npoint = this.state.current.tileWorldPos?.clone();        
         const prevZoomLevel = this.state.zoomLevel;
-
-        // 12 - 5
-        // 13 - 4
-        // 14 - 3
-        // 15 - 2
-        // 16 - 1
-        // 0-16
-
-        // (16-level)+1
-        // // 4
-
-        // 13 starting zoom level
-        // 16 max zoom level (closest)
-        // 1 min zoom level (farthest)
         level>=0?this.state.zoomLevel+=1:this.state.zoomLevel-=1;
-
         this.state.zoomLevel = Math.max(Math.min(this.state.zoomLevel,17),1);
-
-        
-
         const positionZ = 16-this.state.zoomLevel +1;
-
-        console.log("zoom", this.state.zoomLevel, positionZ)
-
         if(this.state.zoomLevel > 16)
             return;
         
         this.view!.camera.position.setZ(positionZ);
 
-        //         
-
-        
-
-        
-        // const distance = this.view!.camera.position.distanceTo(npoint);
-
         const direction = npoint!.clone().sub(this.view!.camera.position);
-        console.log("direction pre", direction, direction.length());
-        // direction.setLength(1/(this.state.zoomLevel*this.state.zoomLevel));
         direction.setLength((this.state.zoomLevel-prevZoomLevel)/(positionZ));
-        console.log("direction", direction, direction.length());
-
         this.view!.camera.position.add(direction);
-
-        console.log("camera", prevPos, this.view!.camera.position );
-
-        // this.view!.camera.lookAt(this.state.lookAt);
-
-        // // this.view!.camera.position.z = positionZ;
-        // // this.view!.camera.lookAt(this.state.lookAt);
-
-        // // 
-        // const from = this.view!.camera.position.clone();
-        // const to = this.view!.camera.position.clone();
-        // to.z = positionZ;
-
-        // const translation = new Vector3();
-        // translation.subVectors(to, from);
-
-        // this.view!.camera.position.add(translation);
-        // // this.view!.camera.lookAt(this.state.lookAt);
         this.view!.camera.lookAt(npoint);
         
     } 
