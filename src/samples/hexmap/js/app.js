@@ -196,6 +196,7 @@ class AppDemo {
             strength: 10,
             sight: 2,
             uid: "",
+            flag: "#FF0000",
             unitSpecification: {
                 hitPoints: 10,
                 name: "Type",
@@ -215,6 +216,7 @@ class AppDemo {
             strength: 10,
             sight: 2,
             uid: "u2",
+            flag: "#FF0000",
             unitSpecification: {
                 hitPoints: 10,
                 name: "Type",
@@ -234,6 +236,7 @@ class AppDemo {
             strength: 10,
             sight: 2,
             uid: "u3",
+            flag: "#0000FF",
             unitSpecification: {
                 hitPoints: 10,
                 name: "Type",
