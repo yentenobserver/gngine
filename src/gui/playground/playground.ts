@@ -599,8 +599,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // camera.position.set(0, -25, 4);
         camera.lookAt(0,0,this.options.cameraParams.height);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
-        
-        // camera.up.set( 0, 0, 1 );
+        // for zoom in/zoom out this is important
+        camera.up.set( 0, 0, 1 );
     
         // initialize scene
         let scene = new THREE.Scene();
