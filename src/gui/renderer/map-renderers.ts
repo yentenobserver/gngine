@@ -366,7 +366,15 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
         obj.rotateOnAxis(axis, theta); // rotate the OBJECT
     }
-
+    
+    /**
+     * Changes map zoom
+     * 
+     * 13 starting zoom level
+     * 16 max zoom level (closest)
+     * 1 min zoom level (farthest)
+     * @param level when negative then map zooms out, when positive map zooms in     
+     */
     zoom(level: number): void {
         // const prevPos = this.view!.camera.position.clone();
         const npoint = this.state.current.tileWorldPos?.clone();        
