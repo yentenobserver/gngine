@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
+import { Camera, Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -261,22 +261,88 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         //     throw new Error("Can't rotate. No map object in scene.");
         // }
 
-        const map = this._getMapObject();
+        
 
         const degree =  (this.state.sceneRotation + Math.sign(rotation)*360/60)%360;
         this.state.sceneRotation = degree
 
         const radians = Math.sign(rotation)*THREE.MathUtils.degToRad(360/60);
+        // const degrees = Math.sign(rotation)*THREE.MathUtils.radToDeg(radians);
 
         // map!.rotateZ(radians)
 
         // lets rotate around our newly selected tile
         
 
-        this._rotateAboutPoint(map!, this.state.current.tileWorldPos!, new Vector3(0,0,1), radians, true);
-        
+        // const map = this._getMapObject();
+        // this._rotateAboutPoint(map!, this.state.current.tileWorldPos!, new Vector3(0,0,1), radians, true);
 
+        // this.view?.camera.position.applyAxisAngle(new Vector3(0,0,1), radians);
+        // this.view?.camera.lookAt(this.state.current.tileWorldPos!)
+        this._rotateCameraAroundPoint(this.view?.camera, this.state.current.tileWorldPos!, -radians);
+
+    }    
+
+    _getCameraDirectionFromPoint(camera: Camera, point: Vector3){
+        // Create a vector from the camera position to the point of interest
+        const direction = new THREE.Vector3()
+        // direction.subVectors(point, camera.position)
+        direction.subVectors(camera.position, point)
+
+
+        // Get the camera angle from the direction vector
+        const angle = Math.atan2(direction.y, direction.x)
+
+        return angle;
     }
+
+    // function rotateCameraAroundPoint(camera, point, angle) {
+    //     // Calculate distance between camera and point
+    //     const distance = camera.position.distanceTo(point);
+      
+    //     // Calculate new camera position
+    //     const x = point.x + distance * Math.sin(angle);
+    //     const y = point.y + distance * Math.cos(angle);
+    //     const z = camera.position.z; // preserve z position
+      
+    //     // Set camera position
+    //     camera.position.set(x, y, z);
+      
+    //     // Set camera lookAt target to point
+    //     camera.lookAt(point);
+    //   }
+
+    _rotateCameraAroundPoint(camera:Camera, point: Vector3, angle: number) {
+
+        const npoint = point.clone().setZ(camera.position.z);
+
+        const cameraAngle = this._getCameraDirectionFromPoint(camera, npoint);
+
+        const newAngle = cameraAngle+angle;
+
+        // console.log("camera angle", cameraAngle, THREE.MathUtils.radToDeg(cameraAngle), cameraAngle-angle, THREE.MathUtils.radToDeg(cameraAngle-angle));
+        // Calculate distance between camera and point
+        const distance = camera.position.distanceTo(npoint);
+        // console.log("distance", distance, "cam pos", camera.position, "target", npoint, "angle", angle);
+        // Calculate new camera position
+        const x = npoint.x + distance * Math.cos(newAngle);
+        const y = npoint.y + distance * Math.sin(newAngle);
+        const z = camera.position.z; // preserve z position
+      
+        // console.log("new pos", x, y, z);
+
+        // translate???
+        // Set camera position
+        camera.position.set(x, y, z);
+        // console.log("cam pos", camera.position);
+      
+        const cameraAngleAfter = this._getCameraDirectionFromPoint(camera, npoint);
+
+        console.log("Camera angles", THREE.MathUtils.radToDeg(cameraAngle), THREE.MathUtils.radToDeg(cameraAngleAfter))
+
+        // Set camera lookAt target to point
+        camera.lookAt(point);
+      }
 
     // obj - your object (THREE.Object3D or derived)
     // point - the point of rotation (THREE.Vector3)
@@ -318,8 +384,19 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
         const positionZ = 16-this.state.zoomLevel +1;
 
-        this.view!.camera.position.z = positionZ;
-        this.view!.camera.lookAt(this.state.lookAt);
+        // this.view!.camera.position.z = positionZ;
+        // this.view!.camera.lookAt(this.state.lookAt);
+
+        // 
+        const from = this.view!.camera.position.clone();
+        const to = this.view!.camera.position.clone();
+        to.z = positionZ;
+
+        const translation = new Vector3();
+        translation.subVectors(to, from);
+
+        this.view!.camera.position.add(translation);
+        // this.view!.camera.lookAt(this.state.lookAt);
     } 
 
     goToTile(tile: TileBase, object: THREE.Object3D){
