@@ -712,7 +712,21 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
             }
             this.emitter.emit(Events.INTERACTIONS.UNIT,interactionEvent)
             result = interactionEvent;
-        }                
+        }       
+        
+        if(!result){
+            const interactionEvent: PlaygroundInteractionEvent = {
+                type: Events.INTERACTIONS.NON_CLASSIFIED,
+                viewName: this.name,
+                interactingObject: undefined,
+                originalEvent: pointerEvent,
+                data: undefined,
+                worldPosition: undefined,
+                scenePosition: undefined
+            }
+            this.emitter.emit(Events.INTERACTIONS.NON_CLASSIFIED, interactionEvent)
+        }
+            
         
         return result;
     }

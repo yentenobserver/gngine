@@ -16,7 +16,8 @@ export const Events = {
     INTERACTIONS: {
         UNIT: "interaction:unit", // (event: PlaygroundInteractionEvent)
         TILE: "interaction:tile", // (event: PlaygroundInteractionEvent)
-        HUD: "interaction:hud" // (event: PlaygroundInteractionEvent)
+        HUD: "interaction:hud", // (event: PlaygroundInteractionEvent)
+        NON_CLASSIFIED: "interaction:noclassified" // ()
     },
     DEBUG: {
         DUMP_VIEW: "debug:dump:view",        

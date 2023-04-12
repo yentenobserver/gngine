@@ -59,6 +59,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
 
         this.emitter.on(Events.INTERACTIONS.TILE,this._onEvent.bind(this))
         this.emitter.on(Events.INTERACTIONS.UNIT, this._onEvent.bind(this))
+        this.emitter.on(Events.INTERACTIONS.NON_CLASSIFIED, this._onEvent.bind(this))
         // this.emitter.on(Events.INTERACTIONS.HUD, this._onEvent.bind(this))
 
         this.emitter.on(Events.MAP.ROTATE, this._onEvent.bind(this))
@@ -89,55 +90,39 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     abstract zoom(level: number):void;
 
     _onEvent(event:PlaygroundInteractionEvent|MapEvent|MapRotateEvent):void{
-        
-        // console.log("Got map event", event);
-        // check if this is a tile related event
-        if(event.type == Events.INTERACTIONS.TILE){
 
-            let tileData:TileBase|undefined = undefined;
-            let object:THREE.Object3D|undefined = undefined;
-            for(let i=(<PlaygroundInteractionEvent>event).data.hierarchy.length-1; i>= 0; i--){
-                if((<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData){                
-                    tileData = (<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData
-                    object = (<PlaygroundInteractionEvent>event).data.hierarchy[i]
+        switch(event.type){
+            case Events.INTERACTIONS.TILE:
+                let tileData:TileBase|undefined = undefined;
+                let object:THREE.Object3D|undefined = undefined;
+                for(let i=(<PlaygroundInteractionEvent>event).data.hierarchy.length-1; i>= 0; i--){
+                    if((<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData){                
+                        tileData = (<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData
+                        object = (<PlaygroundInteractionEvent>event).data.hierarchy[i]
+                    }
+                } 
+                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointermove" && this.highlightTiles([tileData]);
+                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
+            break;
+            case Events.MAP.ROTATE:
+                if((<MapRotateEvent>event).direction == DIRECTION.LEFT){
+                    this.rotate(1)
+                }else{
+                    this.rotate(-1)
                 }
-            } 
-            tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointermove" && this.highlightTiles([tileData]);
-            tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
-        }
-        // if(event.type == Events.MAP.ROTATE && event.originalEvent.type=="pointerdown"){
-        //     for(let i=event.data.hierarchy.length-1; i>= 0; i--){
-        //         if([                    
-        //             HudComponentMapNavigationThreeJs.CONTROLS.LEFT,
-        //             HudComponentMapNavigationThreeJs.CONTROLS.RIGHT
-        //             ].includes(event.data.hierarchy[i].name)){
-        //                 event.data.hierarchy[i].name == HudComponentMapNavigationThreeJs.CONTROLS.LEFT?this.rotate(1):this.rotate(-1);
-        //             }
-        //         if([                    
-        //             HudComponentMapNavigationThreeJs.CONTROLS.DOWN,
-        //             HudComponentMapNavigationThreeJs.CONTROLS.UP
-        //             ].includes(event.data.hierarchy[i].name)){
-        //                 event.data.hierarchy[i].name == HudComponentMapNavigationThreeJs.CONTROLS.DOWN?this.zoom(-1):this.zoom(1);
-        //             }
-                
-        //     }
-        // }
-
-        if(event.type == Events.MAP.ROTATE ){
-            if((<MapRotateEvent>event).direction == DIRECTION.LEFT){
-                this.rotate(1)
-            }else{
-                this.rotate(-1)
-            }
-        }
-
-        if(event.type == Events.MAP.ZOOM ){
-            if((<MapZoomEvent>event).direction == DIRECTION.OUT){
-                this.zoom(-1)
-            }else{
-                this.zoom(1)
-            }
-        }
+            break;
+            case Events.MAP.ZOOM:
+                if((<MapZoomEvent>event).direction == DIRECTION.OUT){
+                    this.zoom(-1)
+                }else{
+                    this.zoom(1)
+                }
+            break;
+            case Events.INTERACTIONS.NON_CLASSIFIED:
+                // clear highlight
+                this.highlightTiles([]);
+            break;
+        }            
     }
 }
 
@@ -562,6 +547,8 @@ export abstract class AreaMapIndicator extends MapIndicator{
     }
     forTiles(tiles: TileBase[]): void {
         this.hide();
+        if(tiles.length==0)
+            return;
         if(this.renderables.length<tiles.length){
             const delta = tiles.length-this.renderables.length;
             for(let i=0; i<delta;i++){
