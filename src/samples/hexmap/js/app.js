@@ -56,10 +56,10 @@ class AppDemo {
 
         let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
 
-        await p.attach(mainMapView);
+        // await p.attach(mainMapView);
         
-        mainMapView._setupScene(); 
-        p.run();
+        // mainMapView._setupScene(); 
+        // p.run();
         
 
         this.playground = p;
@@ -76,6 +76,18 @@ class AppDemo {
             }
         }
         let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
+
+        
+        
+        
+
+        await p.attach(mainMapView);
+        
+        mainMapView._setupScene(); 
+        p.run();
+
+        let hudView = new gngine.PlaygroundViewHudThreeJsDefault(this.emitter);
+        await p.attach(hudView);
 
         mapRenderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)
         mapRenderer.setRenderablesFactory(mapTileFactory);
@@ -98,9 +110,6 @@ class AppDemo {
         that.map.theMap.forEach((val, _key) => {
             mapRenderer.put(val, val.d);
         });
-        
-        let hudView = new gngine.PlaygroundViewHudThreeJsDefault(this.emitter);
-        await p.attach(hudView);
 
         const hudRenderer = new gngine.HudRendererThreeJs(this.emitter);
         hudRenderer.setView(hudView);

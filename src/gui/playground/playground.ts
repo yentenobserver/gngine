@@ -85,7 +85,13 @@ export class PlaygroundThreeJs extends Playground{
             return item.name != view.name
         })
         
-        this.views.push(view);
+        if(potentialHudView.isViewHud){
+            // make sure hud view is always the first view (for handling hud controls as priority against map elements)
+            this.views.unshift(view);
+        }else{
+            this.views.push(view);
+        }
+        
         
         return Promise.resolve();
     }
