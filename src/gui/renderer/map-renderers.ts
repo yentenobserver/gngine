@@ -182,7 +182,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         
         this.tileSize = 1;  
         this.state = {
-            zoomLevel: 13 ,
+            zoomLevel: 10 ,
             current: {
                 tile: undefined,
                 tileWorldPos: new Vector3(this.yxToScenePosition(0,0).x, this.yxToScenePosition(0,0).y,0),
@@ -376,22 +376,59 @@ export abstract class MapRendererThreeJs extends MapRenderer{
      * @param level when negative then map zooms out, when positive map zooms in     
      */
     zoom(level: number): void {
+        const levels = [
+            {distanceDelta: 0, zDelta: 1},//0 min zoom (birds eye view)
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0.2, zDelta: 0.8},
+            {distanceDelta: 0.4, zDelta: 0.6},
+            {distanceDelta: 0.6, zDelta: 0.3},
+            {distanceDelta: 0.8, zDelta: 0.15},
+            {distanceDelta: 0.8, zDelta: 0.125},
+            {distanceDelta: 0.8, zDelta: 0.06} // 15 max zoom (max details)            
+        ]
         // const prevPos = this.view!.camera.position.clone();
         const npoint = this.state.current.tileWorldPos?.clone();        
-        const prevZoomLevel = this.state.zoomLevel;
-        level>=0?this.state.zoomLevel+=1:this.state.zoomLevel-=1;
-        this.state.zoomLevel = Math.max(Math.min(this.state.zoomLevel,17),1);
-        const positionZ = 16-this.state.zoomLevel +1;
-        if(this.state.zoomLevel > 16)
-            return;
-        
-        this.view!.camera.position.setZ(positionZ);
 
-        const direction = npoint!.clone().sub(this.view!.camera.position);
-        direction.setLength((this.state.zoomLevel-prevZoomLevel)/(positionZ));
-        this.view!.camera.position.add(direction);
-        this.view!.camera.lookAt(npoint);
+        const prevZoomLevel = this.state.zoomLevel;
+        const newZoomLevel = level>=0?prevZoomLevel+1:prevZoomLevel-1;
         
+        if(newZoomLevel<0 || newZoomLevel>15)
+            return
+
+
+        
+
+        if(level>0){
+            // first move along z axis (either up or down by zDelta)
+            this.view!.camera.position.setZ(this.view!.camera.position.z-levels[newZoomLevel].zDelta);
+
+            // then move towards or away from target point
+            const direction = npoint!.clone().sub(this.view!.camera.position);
+            direction.setLength(Math.sign(level)*levels[newZoomLevel].distanceDelta);
+            this.view!.camera.position.add(direction);
+        }else{
+            
+            // first move towards or away from target point
+            const direction = npoint!.clone().sub(this.view!.camera.position);
+            direction.setLength(Math.sign(level)*levels[prevZoomLevel].distanceDelta);
+            this.view!.camera.position.add(direction);
+
+            // then move along z axis (either up or down by zDelta)
+            this.view!.camera.position.setZ(this.view!.camera.position.z+levels[prevZoomLevel].zDelta);
+            
+
+        }         
+        console.log(this.view!.camera.position.z)
+        this.state.zoomLevel = newZoomLevel;
+        this.view!.camera.lookAt(npoint);        
     } 
 
     goToTile(tile: TileBase, object: THREE.Object3D){
