@@ -321,9 +321,9 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         camera.position.set(x, y, z);
         // console.log("cam pos", camera.position);
       
-        const cameraAngleAfter = this._getCameraDirectionFromPoint(camera, npoint);
+        // const cameraAngleAfter = this._getCameraDirectionFromPoint(camera, npoint);
 
-        console.log("Camera angles", THREE.MathUtils.radToDeg(cameraAngle), THREE.MathUtils.radToDeg(cameraAngleAfter))
+        // console.log("Camera angles", THREE.MathUtils.radToDeg(cameraAngle), THREE.MathUtils.radToDeg(cameraAngleAfter))
 
         // Set camera lookAt target to point
         camera.lookAt(point);
@@ -411,7 +411,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
             
 
         }         
-        console.log(this.view!.camera.position.z)
+        // console.log(this.view!.camera.position.z)
         this.state.zoomLevel = newZoomLevel;
         this.view!.camera.lookAt(npoint);        
     } 
@@ -424,8 +424,8 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         // const localPosition = object.position;
         const localPosition = objectWorldPosition;
 
-        console.log(">>>>>>>>>>>")
-        console.log("tile", localPosition)
+        // console.log(">>>>>>>>>>>")
+        // console.log("tile", localPosition)
 
         const from = this.state.current.tileLocalPos?.clone();
         from!.z = 0;
@@ -433,14 +433,14 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         const to = localPosition.clone();
         to.z = 0;
 
-        console.log("from", from);
-        console.log("to", to);
+        // console.log("from", from);
+        // console.log("to", to);
 
         // const length = 3;
 
         const translation = new Vector3();
         translation.subVectors(to, from!)
-        console.log("trans", translation);
+        // console.log("trans", translation);
 
         // const map = this._getMapObject();
         // console.log("map before", map.position.clone());
@@ -737,7 +737,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         const scenePosition = this.yxToScenePosition(tile.y,tile.x);
         const cDirection = direction||'S'
 
-        console.log(`Tile2Scene ${JSON.stringify(tile)} ${scenePosition.x}, ${scenePosition.y}, ${scenePosition.z}`)
+        // console.log(`Tile2Scene ${JSON.stringify(tile)} ${scenePosition.x}, ${scenePosition.y}, ${scenePosition.z}`)
 
         this.mapHolderObject.add(object3D);
         object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)
