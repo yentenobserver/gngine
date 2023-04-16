@@ -881,7 +881,7 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
         // const that = this;
             this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
-            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
+            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
             var geometry = helper.getGeometry();
             var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
             var grid = new THREE.Mesh( geometry, material );

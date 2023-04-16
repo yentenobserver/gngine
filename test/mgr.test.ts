@@ -32,7 +32,7 @@ import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, QuadPositionProv
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
-import { Vector2, Vector3 } from 'three';
+import { Material, Mesh, Vector2, Vector3 } from 'three';
 import { Renderable, RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
 
 
@@ -3557,6 +3557,7 @@ describe("Renderers",()=>{
         describe("_cloneMaterials",()=>{
             let material:THREE.MeshBasicMaterial;
             let material2:THREE.MeshBasicMaterial;
+            let o4: Mesh;
 
             beforeEach(()=>{
                 l = {
@@ -3580,6 +3581,9 @@ describe("Renderers",()=>{
 
                 o3 = new THREE.Object3D();
 
+                const geometry3 = new THREE.BoxGeometry( 1, 1, 1 );                
+                o4 = new THREE.Mesh( geometry3, [material, material2] );
+
                 s10 = sinon.spy(<RenderablesThreeJSFactory>rf,"_cloneMaterials");
             })
             afterEach(()=>{
@@ -3596,6 +3600,15 @@ describe("Renderers",()=>{
             it("skips non mesh objects",()=>{
                 (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o3);
                 return expect(s10.callCount).eq(1);
+            })
+            it("clones all materials if there are more than one",()=>{
+                (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o4);
+
+                const materials = o4.material as Material[];
+
+                const different = materials[0] != material && materials[1] != material2;
+
+                return expect(different).is.true;
             })
         })
         describe("_addTemplate",()=>{

@@ -1,0 +1,311 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>gngine - Sample 3d quad map #1</title>
+    <meta name="description" content="Presentation of gngine features">
+    <meta name="author" content="yentenobserver">
+
+    <meta property="og:title" content="gngine sample page">
+    <meta property="og:type" content="website">
+    <meta property="og:url"
+        content="https://nftcity.rhodl.com/?pixelMapping=https://nftcity.rhodl.com/assets/pixelMapping.json&pixelMap=https://nftcity.rhodl.com/assets/monte-carlo.png&t=https://nftcity.rhodl.com/assets/terrain-prod.gltf">
+    <meta property="og:description" content="Presentation of gngine features">
+    <meta property="og:image" content="https://nftcity.rhodl.com/assets/ogimage.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/rivet.js"></script>
+    <script src="js/rivet-ext.js"></script>
+
+    
+
+    
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r124/three.min.js"
+        integrity="sha512-jeYvJdyAYkpQCY/omvCYQo89qA5YxDW4JBT7COPsHT2sOAanwxkZRFeP9gc69b5reSDpZIoyCqZQZcWZkbB5Gw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- this part MUST be after all global libs like THREE.js-->
+    <script src="../../../dist/gamengine.umd.js"></script>
+
+    <script src="js/mapEditorApp.js"></script>
+</head>
+
+<body>
+    <style type="text/css">
+        /* Set the size of the div element that contains the map */
+        #gmap {
+            height: 400px;
+            /* The height is 400 pixels */
+            width: 100%;
+            /* The width is the width of the web page */
+        }
+    </style>
+    <style>
+        .container-canvas {
+            /* This could be done in one single declaration. See the extended sample. */
+            margin-right: auto;
+            margin-left: auto;
+            width: 100%;
+            background-color: rgb(250, 248, 248);
+        }
+
+        .v3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .table.is-borderless td,
+        .table.is-borderless th {
+            border: 0;
+        }
+    </style>
+    <div id="app">
+        <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'ChooseKind'">        
+            <div class="field is-grouped">
+                <p class="control">
+                    <button class="button is-link" data-next-step="UseWizard" rv-on-click="_handleStepChooseKind">
+                    Use wizard
+                    </button>
+                </p>                
+                <p class="control">
+                    <button class="button is-success" data-next-step="UseJson" rv-on-click="_handleStepChooseKind">
+                    Use Json
+                    </button>
+                </p>
+            </div>              
+        </section>
+        <!-- wizard section -->
+        <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'UseWizard'">
+            <div class="field">
+                <label class="label">Map Name</label>
+                <div class="control">
+                  <input class="input" type="text" placeholder="user friendly name" rv-value="model.stepUseWizard.form.name.value" rv-class-is-danger="model.stepUseWizard.form.mapName.error | notEmpty">                  
+                </div>
+                <p class="help">At least 3 chars</p>
+            </div>
+            <div class="field" rv-class-is-hidden="model.busy">
+                <label class="label">Map Kind</label>
+                <div class="control">
+                    <div class="select" >
+                      <select rv-value="model.stepUseWizard.form.kind.value">                        
+                        <option value="HexTile">Hex Map</option>
+                        <option value="QuadTile">Square Map</option>
+                      </select>
+                    </div>
+                  </div>
+                <p class="help">Map & tiles geometry</p>
+            </div>
+            <div class="field" rv-class-is-hidden="model.busy">
+                <label class="label">Map Size (width x height)</label>
+                <div class="control">
+                    <div class="select" >
+                      <select rv-value="model.stepUseWizard.form.size.value">                        
+                        <option value="16x10">16x10</option>
+                        <option value="16x16">16x16</option>
+                        <option value="32x20">32x20</option>
+                        <option value="32x32">32x20</option>                        
+                      </select>
+                    </div>
+                  </div>
+                <p class="help">Map dimensions (in tiles)</p>
+            </div>
+            <div class="field">
+                <label class="label">Tags</label>
+                <div class="control">
+                  <input class="input" type="text" placeholder="i.e. WW2, Historic" rv-value="model.stepUseWizard.form.tags.value">                  
+                </div>
+                <p class="help">List of comma separated tags</p>
+            </div>
+            <div class="field">
+                <label class="label">Location (for real maps)</label>
+                <div class="control">
+                  <input class="input" type="text" placeholder="Real address" rv-value="model.stepUseWizard.form.address.value">                  
+                </div>
+                <p class="help">ie. 5th Avenue, New York, United States</p>
+                <div class="control">
+                    <input class="input" type="text" placeholder="Lat lon coordinates" rv-value="model.stepUseWizard.form.latlon.value">                  
+                </div>
+                <p class="help">ie. 40.730610,-73.935242</p>
+            </div>                    
+            <div class="field is-grouped">
+                <div class="control">
+                  <button class="button is-link" rv-on-click="_handleStepUseWizard" data-next-step="MapEdit">Create</button>
+                </div>
+                <div class="control">
+                  <button class="button is-link is-light" rv-on-click="_handleStepUseWizard" data-next-step="ChooseKind">Cancel</button>
+                </div>
+            </div>
+        </section>
+        <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
+            <div class="tile is-ancestor">
+                <div class="tile is-10 is-parent">
+                    <div class="tile is-child" id="map-holder">
+                        <!-- <canvas id="map" class="map playground"></canvas> -->
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-child">
+                        prawy
+                    </div>
+                </div>           
+            </div>
+            
+        </section>
+        <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
+            <div class="notification is-success" rv-each-item="model.notify.success">
+                <button class="delete" rv-on-click="model._handleNotifyClose"></button>
+                <strong>{item.title}</strong>
+                {item.msg}
+                <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
+                        details</a></span>
+            </div>
+            <div class="notification is-danger" rv-each-item="model.notify.error">
+                <button class="delete" rv-on-click="model._handleNotifyClose"></button>
+                <strong>{item.title}</strong>
+                {item.msg}
+                <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
+                        details</a></span>
+            </div>
+        </div>
+        
+    </div>
+        
+    <!-- Busy Modal -->
+    <div id="busy">
+
+        <div class="modal" rv-class-is-active="model.display">
+            <div class="modal-background"></div>
+            <div class="modal-content">
+                <button class="button is-warning is-loading" disabled></button><br>
+                <p class="subtitle my-3 px-2 py-2" style="background-color: #eff0f1; display: inline-block;">
+                    {model.message}
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-functions-compat.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore-compat.js"></script> -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth-compat.js"></script> -->
+
+
+
+
+
+    <script>        
+        class EventEmitter {
+            constructor() {
+                this.listeners = {};
+            }
+
+            static getInstance() {
+                return new EventEmitter();
+            }
+
+            on(event, callback) {
+                if (!this.listeners.hasOwnProperty(event)) {
+                    this.listeners[event] = [];
+                }
+
+                this.listeners[event].push(callback);
+
+                return this;
+            }
+
+            emit(event, ...data) {
+                // if (!this.listeners.hasOwnProperty(event)) {
+                //     return null;
+                // }
+
+                // for (let i = 0; i < this.listeners[event].length; i++) {
+                //     const callback = this.listeners[event][i];
+
+                //     callback.call(this, ...data);
+                // }
+
+                const that = this;
+
+                // handle wildcards
+                Object.keys(this.listeners).forEach(function(key,index) {
+                    // key: the name of the object key
+                    // index: the ordinal position of the key within the object 
+                    const regex = new RegExp(key,"g");
+                    if(regex.test(event)){
+                        for (let i = 0; i < that.listeners[key].length; i++) {
+                            const callback = that.listeners[key][i];
+                            callback.call(that, ...data);
+                        }
+                    }
+                });                
+            }
+        }
+        const emitter = EventEmitter.getInstance();
+        const mapCanvas = document.getElementById("map");        
+        initializeRivetFormatters()
+
+        App.getInstance(emitter, mapCanvas).then((demo)=>{
+            rivets.bind(document.getElementById('app'), demo);
+            // const demo2 = AppDemo.getInstance(emitter2, mapCanvas2);
+
+            window.mgr_tiles = [];
+            window.emitter = emitter;
+            window.demo = demo;
+
+            // emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
+            //     if(event.originalEvent.type=="pointerdown") {
+            //         for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+            //         if(event.data.hierarchy[i].userData.tileData){                
+            //             tileData = event.data.hierarchy[i].userData.tileData                    
+            //             window.mgr_tiles.push(tileData);
+            //         }
+            //     }
+            //     };
+                
+                
+            //     // console.log('TILE',event.originalEvent.type)
+            // });
+            // emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
+            //     if(event.originalEvent.type=="pointerdown") {
+            //         console.log('UNIT', event)
+            //     }
+                
+            // });
+            // emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
+
+
+        });
+
+
+
+
+
+    </script>
+    <!-- Async script executes immediately and must be after any DOM elements used in callback. -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                Made with <span style="color: #e25555;">&#9829;</span> in Switzerland<br>
+                &copy;
+                <span id="copyright">
+                    <script>document.getElementById('copyright').appendChild(document.createTextNode(new Date().getFullYear()))</script>
+                </span>
+                NFT City
+            </p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
