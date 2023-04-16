@@ -183,13 +183,14 @@ export class PlaygroundThreeJs extends Playground{
         let rendererOptions = {
             canvas: canvasElement,
             antialias: true,
+            alpha: true,
             preserveDrawingBuffer: this.options.enableScreenshots // required for takeScreenShot method, be carefull, when enabled may have performance impact
         }
         
         // initialize renderer
         var renderer = new THREE.WebGLRenderer(rendererOptions);
         // renderer.setClearColor(0x000000);
-        renderer.setClearColor( 0xeeeeee, 1 );
+        renderer.setClearColor( 0xeeeeee, 0.01 );
         renderer.setPixelRatio(window.devicePixelRatio);
 
         // https://discourse.threejs.org/t/gltfexported-model-is-way-darker/6686

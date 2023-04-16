@@ -402,9 +402,15 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
         
         object3D.geometry.dispose();
         
-        // warning, material may be an array
-        const material =  object3D.material as Material;
-        material.dispose()
+        if(Array.isArray(object3D.material)){
+            const materials = object3D.material as Material[];
+            materials.forEach((material)=>{
+                material.dispose();    
+            })
+        }else{
+            const material =  object3D.material as Material;
+            material.dispose()
+        }
         
         // todo texture?
     }

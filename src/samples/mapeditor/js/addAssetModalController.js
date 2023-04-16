@@ -240,6 +240,7 @@ class AddAssetModalController {
                     "y": 0,
                     "d": "S",
                     "t": "C_T_GRASS_1_TILE",
+                    "r": "C_T_GRASS_1_TILE",
                     "loc": {
                       "n": "Grassland",
                       "g": "43.74650403587078,7.421766928360976"
@@ -286,6 +287,7 @@ class AddAssetModalController {
                     "y": 0,
                     "d": "S",
                     "t": spawnableNames[j],
+                    "r": spawnableNames[j],
                     "loc": {
                       "n": "Grassland",
                       "g": "43.74650403587078,7.421766928360976"
@@ -310,6 +312,7 @@ class AddAssetModalController {
                     "y": 0,
                     "d": "S",
                     "t": spawnableNames[j],
+                    "r": spawnableNames[j],
                     "loc": {
                       "n": "Grassland",
                       "g": "43.74650403587078,7.421766928360976"

@@ -48,15 +48,24 @@ class GUIEngine {
                 
         let p = new gngine.PlaygroundThreeJs(canvas,emitter, playgroundOptions);
         p.initialize();    
+        // let viewOptions = {
+        //     cameraParams: {                
+        //         fov: 100,
+        //         near: 0.1,
+        //         far: 1000,
+        //         height: 0.25                             
+        //     },
+        //     cameraPosition: new THREE.Vector3(0,-1,0.75)
+        // }   
         let viewOptions = {
             cameraParams: {                
-                fov: 100,
+                fov: 50,
                 near: 0.1,
                 far: 1000,
-                height: 0.25                             
+                height: 0                             
             },
-            cameraPosition: new THREE.Vector3(0,-1,0.75)
-        }           
+            cameraPosition: new THREE.Vector3(0,-5,4)
+        }        
         let mainView = new gngine.PlaygroundViewMainThreeJsDefault(emitter, viewOptions); 
         await p.attach(mainView);        
         mainView._setupScene(); 
