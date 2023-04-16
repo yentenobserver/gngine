@@ -368,12 +368,12 @@ export abstract class MapRendererThreeJs extends MapRenderer{
      */
     zoom(level: number): void {
         const levels = [
-            {distanceDelta: 0, zDelta: 1},//0 min zoom (birds eye view)
-            {distanceDelta: 0, zDelta: 1},
-            {distanceDelta: 0, zDelta: 1},
-            {distanceDelta: 0, zDelta: 1},
-            {distanceDelta: 0, zDelta: 1},
-            {distanceDelta: 0, zDelta: 1},
+            {distanceDelta: 0, zDelta: 16},//0 min zoom (birds eye view)
+            {distanceDelta: 0, zDelta: 16},
+            {distanceDelta: 0, zDelta: 16},
+            {distanceDelta: 0, zDelta: 8},
+            {distanceDelta: 0, zDelta: 4},
+            {distanceDelta: 0, zDelta: 2},
             {distanceDelta: 0, zDelta: 1},
             {distanceDelta: 0, zDelta: 1},
             {distanceDelta: 0, zDelta: 1},
