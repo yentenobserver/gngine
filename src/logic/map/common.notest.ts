@@ -1,9 +1,52 @@
+export enum TileTerrainLandModifications {
+    RAILWAY = "RAILWAY",
+    ROAD = "ROAD",
+    FORREST = "FORREST",
+    BUILDING = "BUILDING",
+    RIVER = "RIVER",
+    IMPASSABLE = "IMPASSABLE"
+}
+
+export enum TileTerrainWaterModifications{
+    GLACIER = "GLACIER",
+    IMPASSABLE = "IMPASSABLE"
+}
+
+export enum TileTerrainWaterKind {
+    SEA = "SEA",
+    OCEAN = "OCEAN",
+    LAKE = "LAKE",
+    COASTAL = "COASTAL"    
+}
+
+export interface TileTerrainWater extends TileTerrain{
+    kind: TileTerrainWaterKind
+    modifications: TileTerrainWaterModifications[]
+}
+
+export enum TileTerrainLandKind {
+    MOUNTAINS = "MOUNTAINS",
+    PLAINS = "PLAINS",
+    HILL = "HILL",
+    DESERT = "DESERT",
+}
+
+export interface TileTerrainLand extends TileTerrain{
+    kind: TileTerrainLandKind,
+    modifications: TileTerrainLandModifications[]
+}
+
+export interface TileTerrain{
+    kind: any,
+    modifications: any[]
+}
+
 export interface TileBase {
     id: string,
     x: number, // for quad tiles this is the column, for hex tiles this is also a column aka q
     y: number, // for quad tiles this is the row, for hex tiles this is also a row aka r
     
-    t: string   // type of tile (terrain)
+    t: TileTerrain   // type of tile (terrain)
     r?: string // renderable name representing this tile
 }
 

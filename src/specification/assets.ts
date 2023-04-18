@@ -1,8 +1,8 @@
 export interface AssetVariantSpecs {        
-    fullName: string // variant name
+    fullName: string // variant name, this is used by renderer when selecting renderable for render
     thumbnail: string // variant thumbnail image in data url format
     created: number // creation timestamp
-    renderableJSON: string  // json representation that can be rendered by renderer    
+    renderable: string  // json string representation that can be rendered by renderer    
 }
 
 export interface AssetSpecs{

@@ -688,22 +688,22 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     initialize(): Promise<void> {
         
         // const that = this;
-        this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
+        // this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
-            // const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
-            // var geometry = helper.getGeometry();
-            // var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-            // var grid = new THREE.Mesh( geometry, material );
-            
-            // grid
-            var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
-            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-            var grid = new THREE.Mesh( geometry, material );
-            // grid.rotation.order = 'YXZ';
-            // grid.rotation.y = - Math.PI / 2;
-            // grid.rotation.x = - Math.PI / 2;
-            grid.position.z=-0.01
-            this.mapHolderObject.add( grid );
+        // const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(5,3,1);
+        // var geometry = helper.getGeometry();
+        // var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+        // var grid = new THREE.Mesh( geometry, material );
+        
+        // grid
+        var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+        var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+        var grid = new THREE.Mesh( geometry, material );
+        // grid.rotation.order = 'YXZ';
+        // grid.rotation.y = - Math.PI / 2;
+        // grid.rotation.x = - Math.PI / 2;
+        grid.position.z=-0.01
+        this.mapHolderObject.add( grid );
         return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
         })            
@@ -885,15 +885,15 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
     initialize(): Promise<void> {
         
         // const that = this;
-            this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
+        // this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
-            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
-            var geometry = helper.getGeometry();
-            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-            var grid = new THREE.Mesh( geometry, material );
-            grid.position.z=-0.01
-            
-            this.mapHolderObject.add( grid );
+        const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
+        var geometry = helper.getGeometry();
+        var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+        var grid = new THREE.Mesh( geometry, material );
+        grid.position.z=-0.01
+        
+        this.mapHolderObject.add( grid );
         return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
             this._createMapHelpers();
         })            

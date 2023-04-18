@@ -143,13 +143,8 @@ class GUIEngine {
 
 class App {
     constructor(emitter, mapCanvas) {
-        this.playground = {};
-        this.emitter = emitter
-        this.mapCanvas = mapCanvas
-
-        this.assets3DLoader = new THREE.GLTFLoader();
-        this.map = new gngine.MapSquare(2,3);
-        this.mapRenderer = {};
+        
+        this.emitter = emitter                    
         this.model = {
             game: {
                 player: {},
@@ -188,12 +183,17 @@ class App {
                 }
             },
             selected: {
+                tile: {
+                    data: {},
+                    renderable: {
+                        worldPosition: "",
+                        item: {}
+                    },
+                    asset: {}
+                },
                 unit: {},
                 unitData: {},
                 unitDataStr: {},
-                tile: {},
-                tileData: {},
-                tileDataStr: {},
             },
             assetsData: [],
             assets: {
@@ -203,224 +203,19 @@ class App {
             }
 
         }
-        this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
-        this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
+        // this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
+        // this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
         
     }
 
     static async getInstance(emitter, mapCanvas){
         const a = new App(emitter, mapCanvas)
-        // await a._start();
+        await a._start();
         return a;
     }
 
-    async _start(){
-
-        // this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
-        // this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
-        // this.emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
-
-
-        
-
-
-        let that = this;
-        let p = new gngine.PlaygroundThreeJs(this.mapCanvas,this.emitter);
-        p.initialize();
-        
-        let mapRenderer;
-
-        let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter); 
-
-        await p.attach(mainMapView);
-        
-        mainMapView._setupScene(); 
-        p.run();
-        
-
-        this.playground = p;
-        const mapRenderablesSpecification = {
-            main: {
-                name: "mapAssets",
-                url: "./assets/tiles.gltf",
-                pivotCorrection: "-0.5,-0.433012701892219,0"
-            },
-            helpers: {
-                name: "mapHelpers",
-                json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
-                pivotCorrection: "0,0,0.12"
-            }
-        }
-        let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
-
-        mapRenderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)
-        mapRenderer.setRenderablesFactory(mapTileFactory);
-        // map renderer will render map tiles into main map view
-        mapRenderer.setView(mainMapView);
-
-        // const l2 = new THREE.GLTFLoader()
-        // l2.load("./assets/i1.gltf",(item)=>{                
-        //     // console.log(""+JSON.stringify(item.scene.toJSON()));       
-        // })
-    
-        
-        const mapjson = await this.loadAsset("./assets/map.json", "JSON");
-        
-        that.map.fromTiles(mapjson);
-        
-            // now let's download 3d assets for renderer
-        await mapRenderer.initialize();
-        
-        that.map.theMap.forEach((val, _key) => {
-            mapRenderer.put(val, val.d);
-        });
-        
-        let hudView = new gngine.PlaygroundViewHudThreeJsDefault(this.emitter);
-        await p.attach(hudView);
-
-        const hudRenderer = new gngine.HudRendererThreeJs(this.emitter);
-        hudRenderer.setView(hudView);
-
-        const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
-        await navComp.build();
-        hudRenderer.addComponent(navComp); 
-
-        const unitsRenderablesSpecification = {
-            main: {
-                name: "unitsAssets",
-                url: "./assets/units.gltf",
-                pivotCorrection: "-0.3,-0.15,0.1"
-            }
-            // helpers: {
-            //     name: "mapHelpers",
-            //     json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
-            //     pivotCorrection: "0,0,0.12"
-            // }
-        }
-        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
-        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, new gngine.HexFlatTopOrientationProvider());
-        unitRenderer.setRenderablesFactory(unitFactory);
-        unitRenderer.setView(mainMapView);
-        await unitRenderer.initialize();
-        const tile = {
-            "id": "0,1",
-            "x": 1,
-            "y": 0,
-            "d": "S",
-            "t": "C_T_GRASS_1_TILE",
-            "loc": {
-              "n": "Grassland",
-              "g": "43.74650403587078,7.421766928360976"
-            },
-            "ext": {},
-            "nft": {
-              "v": 100,
-              "b": "ETHEREUM",
-              "i": "123",
-              "t": "0x123",
-              "o": "0x0022"
-            }
-        }
-        const tile2 = {
-            "id": "1,0",
-            "x": 0,
-            "y": 1,
-            "d": "S",
-            "t": "C_T_DIRT_1_TILE",
-            "loc": {
-              "n": "Bushland",
-              "g": "43.74650403587078,7.421766928360976"
-            },
-            "ext": {},
-            "nft": {
-              "v": 100,
-              "b": "ETHEREUM",
-              "i": "123",
-              "t": "0x123",
-              "o": "0x0022"
-            }
-          }
-          const tile3 = {
-            "id": "0,2",
-            "x": 2,
-            "y": 0,
-            "d": "S",
-            "t": "C_T_DIRT_1_TILE",
-            "loc": {
-              "n": "Bushland",
-              "g": "43.74650403587078,7.421766928360976"
-            },
-            "ext": {},
-            "nft": {
-              "v": 100,
-              "b": "ETHEREUM",
-              "i": "123",
-              "t": "0x123",
-              "o": "0x0022"
-            }
-          }
-        const unit = {
-            actionPoints: 1,
-            actionRunner: undefined,
-            actionsAllowed: [],
-            actionsQueue: [],
-            attackStrength: (_unit)=>{ return 1},
-            defendStrength: (_unit)=>{ return 1},
-            gainBattleExperience: ()=>{},
-            hitPoints: 5,
-            rangeStrength: 10,
-            strength: 10,
-            sight: 2,
-            uid: "",
-            unitSpecification: {
-                hitPoints: 10,
-                name: "Type",
-                tuid: "T34"
-            }
-        }
-        const unit2 = {
-            actionPoints: 1,
-            actionRunner: undefined,
-            actionsAllowed: [],
-            actionsQueue: [],
-            attackStrength: (_unit)=>{ return 1},
-            defendStrength: (_unit)=>{ return 1},
-            gainBattleExperience: ()=>{},
-            hitPoints: 1,
-            rangeStrength: 10,
-            strength: 10,
-            sight: 2,
-            uid: "u2",
-            unitSpecification: {
-                hitPoints: 10,
-                name: "Type",
-                tuid: "T34"
-            }
-        }
-        const unit3 = {
-            actionPoints: 1,
-            actionRunner: undefined,
-            actionsAllowed: [],
-            actionsQueue: [],
-            attackStrength: (_unit)=>{ return 1},
-            defendStrength: (_unit)=>{ return 1},
-            gainBattleExperience: ()=>{},
-            hitPoints: 10,
-            rangeStrength: 10,
-            strength: 10,
-            sight: 2,
-            uid: "u3",
-            unitSpecification: {
-                hitPoints: 10,
-                name: "Type",
-                tuid: "T34"
-            }
-        }
-        unitRenderer.put(unit, tile,"S");
-        unitRenderer.put(unit2, tile2,"NW");
-        // unitRenderer.put(unit3, tile3,"E");
-
-        this.mapRenderer = mapRenderer;
+    async _start(){     
+        const that = this;   
         this.emitter.on("interaction.*",(event)=>{
             if(event.originalEvent.type=="pointerdown") {
                 // console.log("Got both", event);
@@ -457,27 +252,81 @@ class App {
             
         });
 
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
+        this.emitter.on(gngine.Events.INTERACTIONS.TILE,async (event)=>{
             if(event.originalEvent.type=="pointerdown") {
                 // console.log('TILE', event)
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){
                     if(event.data.hierarchy[i].userData.tileData){                
                         const tileData = event.data.hierarchy[i].userData.tileData                    
                         window.mgr_tiles.push(tileData);
-                        that.model.selected.tileData = tileData
-                        that.model.selected.tileDataStr = JSON.stringify(tileData, null, "\t");
-                        that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+                        
+
+                        // that.model.selected.tileData = tileData
+                        // that.model.selected.tileDataStr = JSON.stringify(tileData, null, "\t");
+                        // that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+
+
+                        that.model.selected.tile.data = tileData;
+
                     //     output = JSON.stringify( output, null, '\t' );
 			        // output = output
                     }
                 }
-                that.model.selected.tile = event.interactingObject
-                that.model.selected.tile.worldPosition = event.worldPosition
-            };
-            
-            
-            // console.log('TILE',event.originalEvent.type)
+                // that.model.selected.tile = event.interactingObject
+                // that.model.selected.tile.worldPosition = event.worldPosition
+
+                that.model.selected.tile.renderable.item = event.interactingObject;
+                that.model.selected.tile.renderable.worldPosition = event.worldPosition;
+
+                console.log('TILE',that.model.selected.tile);
+
+                const assetSpecification = await that._findAssetSpecification(that.model.selected.tile.data.r);
+
+                that.model.selected.tile.asset = assetSpecification;
+            };                                    
         });
+    }
+
+    async _findAssetSpecification(renderableName){
+        // const assetsSpecs = []
+
+        const assetsSpecs = await this.loadAsset("./assets/assets.json", "JSON");
+
+        let result = {
+            item: {},
+            variant: {}
+        }
+
+        // export interface AssetVariantSpecs {        
+        //     fullName: string // variant name, this is used by renderer when selecting renderable for render
+        //     thumbnail: string // variant thumbnail image in data url format
+        //     created: number // creation timestamp
+        //     renderable: string  // json string representation that can be rendered by renderer    
+        // }
+        
+        // export interface AssetSpecs{
+        //     id: string      // unique id
+        //     name: string    // user readable name of asset
+        //     kind: "Unit" | "HexTile" | "QuadTile" // kind of asset
+        //     created: number // creation timestamp
+        //     variants: AssetVariantSpecs[]    // variants of the asset
+        //     tags: string[]  // tags associated with asset
+        // }
+        for(let i=0; i<assetsSpecs.length; i++){
+            const item = assetsSpecs[i];
+
+            const matching = item.variants.find((subitem)=>{
+                return subitem.fullName.trim().toLowerCase() == renderableName.trim().toLowerCase();
+            })
+            if(matching){
+                result.item = item;
+                result.variant = matching;
+                break;
+            }                
+        }
+
+        return result;
+        
     }
 
     async _handleStepChooseKind(e, that){

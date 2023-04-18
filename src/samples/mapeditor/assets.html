@@ -205,7 +205,11 @@
                             
                         </td>
                         <!-- <td><img rv-src="item.thumbnail" width="200" height="200"></img></td> -->
-                        <td><button class="button is-light" rv-on-click="item.that._handeAddTags" rv-data-id="item.name">Manage tags</button></td>
+                        <td>
+                            <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.name">Manage tags</button><br><br>
+                            <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.name">Export full asset</button>
+                        </td>
+                        
                     </tr>
                 </tbody>
             </table>            

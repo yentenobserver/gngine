@@ -341,7 +341,8 @@ class AddAssetModalController {
             })
             const screenshotDataUrl = await waitForScreenshot;
             // console.log(screenshotDataUrl)
-            assetsInfo.push({                
+            assetsInfo.push({   
+                id: Math.random().toString(36).substring(2, 24),             
                 name: name,
                 fullName: spawnableNames[j],
                 thumbnail: screenshotDataUrl,

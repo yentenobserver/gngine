@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
     <link rel="stylesheet" href="css/style.css">
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css" integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <script src="js/rivet.js"></script>
     <script src="js/rivet-ext.js"></script>
 
@@ -148,14 +150,114 @@
         </section>
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
             <div class="tile is-ancestor">
-                <div class="tile is-10 is-parent">
+                <div class="tile is-8 is-parent">
                     <div class="tile is-child" id="map-holder">
                         <!-- <canvas id="map" class="map playground"></canvas> -->
                     </div>
                 </div>
                 <div class="tile is-parent">
                     <div class="tile is-child">
-                        prawy
+                        <div class="box is-hidden" rv-class-is-hidden="model.selected.tile.data.id | empty">
+                            <article class="media my-2">
+                              <div class="media-left">
+                                <figure class="image is-64x64">
+                                  <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image">
+                                </figure>
+                              </div>
+                              <div class="media-content">
+                                <div class="content">
+                                  <p>
+                                    <strong>Asset</strong> 
+                                    <br>                                    
+                                    <small>{model.selected.tile.asset.item.name}
+                                        <a>
+                                            <span class="icon is-small">
+                                                <i class="fas fa-search"></i>
+                                            </span>
+                                            Change
+                                        </a>
+                                    </small>                                    
+                                    <br>
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1">{tag}</span></small>
+                                  </p>
+                                </div>                                
+                              </div>
+                            </article>
+                            <nav class="panel my-2">
+                                <p class="panel-heading">
+                                  Asset Repository
+                                </p>
+                                <div class="panel-block">
+                                  <p class="control has-icons-left">
+                                    <input class="input" type="text" placeholder="Search">
+                                    <span class="icon is-left">
+                                      <i class="fas fa-search" aria-hidden="true"></i>
+                                    </span>
+                                  </p>
+                                </div>
+                                <p class="panel-tabs">
+                                  <a class="is-active">All</a>
+                                  <!-- <a>Public</a>
+                                  <a>Private</a>
+                                  <a>Sources</a>
+                                  <a>Forks</a> -->
+                                </p>
+                                <a class="panel-block is-active">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{model.selected.tile.asset.item.name}</span>
+                                    </div>                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <a class="panel-block">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{model.selected.tile.asset.item.name}</span>
+                                    </div>                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <a class="panel-block">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{model.selected.tile.asset.item.name}</span>
+                                    </div>                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <a class="panel-block">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{model.selected.tile.asset.item.name}</span>
+                                    </div>                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <a class="panel-block">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{model.selected.tile.asset.item.name}</span>
+                                    </div>                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <a class="panel-block">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{model.selected.tile.asset.item.name}</span>
+                                    </div>                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <label class="panel-block">
+                                  <input type="checkbox">
+                                  remember me
+                                </label>
+                                <div class="panel-block">
+                                  <button class="button is-link is-outlined is-fullwidth">
+                                    Reset all filters
+                                  </button>
+                                </div>
+                            </nav>
+                        </div>
+                        <div class="box">
+                            I'm in a box.
+                        </div>
                     </div>
                 </div>           
             </div>
