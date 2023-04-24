@@ -41,7 +41,8 @@ class AddAssetModalController {
         const assetsByType = []
         Object.keys(assetsByTypeObject).forEach((item)=>{
             assetsByType.push({
-                name: item,
+                id: Math.random().toString(36).substring(2, 24),  
+                name: "",
                 kind: assetsByTypeObject[item][0].kind,
                 created: assetsByTypeObject[item][0].created,
                 variants: assetsByTypeObject[item],

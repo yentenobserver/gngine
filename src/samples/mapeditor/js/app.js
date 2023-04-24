@@ -273,7 +273,8 @@ class AppDemo {
             kind: asset.kind,
             name: asset.name,
             tags: asset.tags,
-            variants: asset.variants
+            variants: asset.variants,
+            description: asset.description
         }
 
         navigator.clipboard.writeText(JSON.stringify(data));

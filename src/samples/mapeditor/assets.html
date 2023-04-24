@@ -129,7 +129,7 @@
             </div>
         </section> -->
         
-            <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
+            <!-- <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
                 <div class="notification is-success" rv-each-item="model.notify.success">
                     <button class="delete" rv-on-click="model._handleNotifyClose"></button>
                     <strong>{item.title}</strong>
@@ -137,14 +137,14 @@
                     <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
                             details</a></span>
                 </div>
-                <div class="notification is-danger" rv-each-item="model.notify.error">
+                <div class="notification is-danger is-hidden" rv-class-is-hidden="model.notify.errors | sizeLt 1">
                     <button class="delete" rv-on-click="model._handleNotifyClose"></button>
-                    <strong>{item.title}</strong>
-                    {item.msg}
+                    <strong>Error</strong>
+                    There are errors in form
                     <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
                             details</a></span>
                 </div>
-            </div>
+            </div> -->
         
         <section class="section">
             <!-- Main container -->
@@ -178,8 +178,9 @@
             <h1 class="title">Asset Editor</h1>
             <table class="table is-fullwidth is-bordered is-striped">
                 <thead>
-                    <th>Kind</th>
-                    <th>Type Code</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Kind</th>                    
                     <th>Tags</th>
                     <th>Modified</th>
                     <th>Variants</th>                    
@@ -187,8 +188,10 @@
                 </thead>
                 <tbody>
                     <tr rv-each-item="model.assets.filtered">
-                        <td>{item.kind}</td>
                         <td>{item.name}</td>
+                        <td>{item.description}</td>
+                        <td>{item.kind}</td>
+                        
                         <td>
                             <span class="tag" rv-each-tag="item.tags" style="margin-right: 0.75em;">
                             {tag}
@@ -206,10 +209,9 @@
                         </td>
                         <!-- <td><img rv-src="item.thumbnail" width="200" height="200"></img></td> -->
                         <td>
-                            <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.name">Manage tags</button><br><br>
-                            <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.name">Export full asset</button>
-                        </td>
-                        
+                            <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.name">Annotate</button><br><br>
+                            <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.name">Copy to clipboard</button>
+                        </td>                        
                     </tr>
                 </tbody>
             </table>            
@@ -289,14 +291,36 @@
             <div class="modal-background"></div>
             <div class="modal-card">
                 <header class="modal-card-head">
-                    <p class="modal-card-title" rv-class-is-hidden="model.busy">Add tags</p>                                        
+                    <p class="modal-card-title" rv-class-is-hidden="model.busy">Manage annotations</p>                                        
                     <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
                 </header>
-                <section class="modal-card-body">                    
+                <section class="modal-card-body"> 
+                    <div class="notification is-danger is-hidden" rv-class-is-hidden="model.notify.errors | sizeLt 1">
+                        <button class="delete" rv-on-click="_handleNotifyClose"></button>
+                        <strong>Error</strong>
+                        There are errors in form 
+                        <!-- <span rv-class-is-hidden="item.url | empty"><br><a rv-href="item.url">Click here for more
+                                details</a></span> -->
+                    </div>                   
+                    <div class="field" rv-class-is-hidden="model.busy">
+                        <label class="label">Name</label>
+                        <div class="control">                            
+                            <input class="input" type="text" placeholder="i.e. Mountains with river" rv-class-is-danger="model.form.f1.error | notEmpty" rv-value="model.form.f1.value"></textarea>                            
+                        </div>
+                        <!-- <p class="help">Tags should be comma separated</p> -->
+                        <p class="help is-danger is-hidden" rv-class-is-hidden="model.form.f1.error | empty">{model.form.f1.error.message}</p>
+                    </div>
+                    <div class="field" rv-class-is-hidden="model.busy">
+                        <label class="label">Description</label>
+                        <div class="control">
+                            <textarea class="textarea" placeholder="paste asset description here" rows="2" rv-class-is-danger="model.form.f2.error | notEmpty" rv-value="model.form.f2.value"></textarea>                            
+                        </div>
+                        <p class="help is-danger is-hidden" rv-class-is-hidden="model.form.f2.error | empty">{model.form.f2.error.message}</p>
+                    </div>
                     <div class="field" rv-class-is-hidden="model.busy">
                         <label class="label">Tags</label>
                         <div class="control">
-                            <textarea class="textarea" placeholder="paste comma separated tags here" rows="2" rv-value="model.message"></textarea>                            
+                            <textarea class="textarea" placeholder="paste comma separated tags here" rows="2" rv-class-is-danger="model.form.f3.error | notEmpty" rv-value="model.form.f3.value"></textarea>                            
                         </div>
                         <p class="help">Tags should be comma separated</p>
                     </div>
@@ -316,6 +340,8 @@
             <!-- <button class="modal-close is-large" aria-label="close" rv-on-click="_handleConstructionCancel"></button> -->
         </div>
     </div>
+
+    
 
     <!-- Promo Display Modal -->
     <div id="promote">

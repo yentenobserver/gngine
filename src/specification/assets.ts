@@ -8,6 +8,7 @@ export interface AssetVariantSpecs {
 export interface AssetSpecs{
     id: string      // unique id
     name: string    // user readable name of asset
+    description: string
     kind: "Unit" | "HexTile" | "QuadTile" // kind of asset
     created: number // creation timestamp
     variants: AssetVariantSpecs[]    // variants of the asset

@@ -189,7 +189,7 @@
                                 </p>
                                 <div class="panel-block">
                                   <p class="control has-icons-left">
-                                    <input class="input" type="text" placeholder="Search">
+                                    <input class="input" type="text" placeholder="Search" rv-on-input="_handleFilter" rv-value="model.assets.filter">
                                     <span class="icon is-left">
                                       <i class="fas fa-search" aria-hidden="true"></i>
                                     </span>
@@ -202,11 +202,19 @@
                                   <a>Sources</a>
                                   <a>Forks</a> -->
                                 </p>
-                                <a class="panel-block is-active">
+                                <a class="panel-block" rv-each-item="model.assets.filtered">
                                     <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{model.selected.tile.asset.item.name}</span>
+                                        <img rv-src="item.variant.thumbnail" alt="Image" style="width: 10rem">                                  
+                                        <span>{item.item.name}</span>
                                     </div>                                    
+                                    <small><span rv-each-tag="item.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                </a>
+                                <!-- <a class="panel-block is-active">
+                                    <div>
+                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 5rem">                                  
+                                        
+                                    </div>                                    
+                                    <span style="display: block"><small>{model.selected.tile.asset.item.name}</small></span><br><br>
                                     <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
                                 </a>
                                 <a class="panel-block">
@@ -247,7 +255,7 @@
                                 <label class="panel-block">
                                   <input type="checkbox">
                                   remember me
-                                </label>
+                                </label> -->
                                 <div class="panel-block">
                                   <button class="button is-link is-outlined is-fullwidth">
                                     Reset all filters

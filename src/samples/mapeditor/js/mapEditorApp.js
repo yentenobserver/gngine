@@ -211,6 +211,8 @@ class App {
     static async getInstance(emitter, mapCanvas){
         const a = new App(emitter, mapCanvas)
         await a._start();
+        await a._loadAssetsSpecifications();
+        await a._applyAssetFilter();
         return a;
     }
 
@@ -287,6 +289,37 @@ class App {
         });
     }
 
+    async _loadAssetsSpecifications(){
+        this.model.assets.original = [];
+        this.model.assets.filtered = [];
+
+        const assetsSpecs = await this.loadAsset("./assets/assets.json", "JSON");
+        for(let i=0; i<assetsSpecs.length; i++){
+            const item = assetsSpecs[i];
+
+            const variant = item.variants[0];
+
+            this.model.assets.original.push({
+                item: item,
+                variant: variant
+            })                                                        
+        }        
+    }
+
+    async _applyAssetFilter(){
+        this.model.assets.filtered = [];
+
+        const searchPhrase = this.model.assets.filter.toLowerCase();
+
+        this.model.assets.filtered = this.model.assets.original.filter((item)=>{
+            return item.item.name.toLowerCase().includes(searchPhrase) 
+            || item.variant.fullName.toLowerCase().includes(searchPhrase) 
+            || item.item.id.toLowerCase().includes(searchPhrase) 
+            || item.item.tags.join(",").toLowerCase().includes(searchPhrase)
+        })
+    }
+
+
     async _findAssetSpecification(renderableName){
         // const assetsSpecs = []
 
@@ -307,6 +340,7 @@ class App {
         // export interface AssetSpecs{
         //     id: string      // unique id
         //     name: string    // user readable name of asset
+        //     description: string 
         //     kind: "Unit" | "HexTile" | "QuadTile" // kind of asset
         //     created: number // creation timestamp
         //     variants: AssetVariantSpecs[]    // variants of the asset
@@ -419,7 +453,9 @@ class App {
 
 
     async _handleFilter(e, that){        
-        that.model.assets.filtered = that.model.assets.original.filter((item)=>{return item.name.toLowerCase().includes(that.model.assets.filter) || item.tags.join(",").toLowerCase().includes(that.model.assets.filter) })
+        // that.model.assets.filtered = that.model.assets.original.filter((item)=>{return item.name.toLowerCase().includes(that.model.assets.filter) || item.tags.join(",").toLowerCase().includes(that.model.assets.filter) })
+        that._applyAssetFilter();
+
     }
 
     loadAsset(url, type){
