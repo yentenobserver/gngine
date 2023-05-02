@@ -15,4 +15,9 @@ export interface AssetSpecs{
     tags: string[]  // tags associated with asset
 }
 
+export interface Asset {
+    specs: AssetSpecs,
+    variant: AssetVariantSpecs
+}
+
 

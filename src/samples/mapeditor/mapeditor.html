@@ -169,8 +169,8 @@
                                   <p>
                                     <strong>Asset</strong> 
                                     <br>                                    
-                                    <small>{model.selected.tile.asset.item.name}
-                                        <a>
+                                    <small>{model.selected.tile.asset.specs.name}
+                                        <a rv-on-click="_handleShowAssetBrowser">
                                             <span class="icon is-small">
                                                 <i class="fas fa-search"></i>
                                             </span>
@@ -178,12 +178,12 @@
                                         </a>
                                     </small>                                    
                                     <br>
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1">{tag}</span></small>
+                                    <small><span rv-each-tag="model.selected.tile.asset.specs.tags" class="tag is-light mx-1">{tag}</span></small>
                                   </p>
                                 </div>                                
                               </div>
                             </article>
-                            <nav class="panel my-2">
+                            <nav class="panel my-2 is-hidden" rv-class-is-hidden="model.assets.hidden">
                                 <p class="panel-heading">
                                   Asset Repository
                                 </p>
@@ -202,12 +202,12 @@
                                   <a>Sources</a>
                                   <a>Forks</a> -->
                                 </p>
-                                <a class="panel-block" rv-each-item="model.assets.filtered">
+                                <a class="panel-block" rv-on-click="model.handlers._handleChangeAsset" rv-each-item="model.assets.filtered" >
                                     <div>
                                         <img rv-src="item.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{item.item.name}</span>
+                                        <span>{item.specs.name}</span>
                                     </div>                                    
-                                    <small><span rv-each-tag="item.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                    <small><span rv-each-tag="item.specs.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
                                 </a>
                                 <!-- <a class="panel-block is-active">
                                     <div>
@@ -257,8 +257,8 @@
                                   remember me
                                 </label> -->
                                 <div class="panel-block">
-                                  <button class="button is-link is-outlined is-fullwidth">
-                                    Reset all filters
+                                  <button class="button is-link is-outlined is-fullwidth" rv-on-click="_handleHideAssetBrowser">
+                                    Cancel
                                   </button>
                                 </div>
                             </nav>

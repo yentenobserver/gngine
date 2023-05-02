@@ -11,6 +11,10 @@ class GUIEngine {
             renderer: {}
         }
 
+        this.map = {
+            changeTile: this._mapChangeTile.bind(this)
+        }
+
     }
     static async getInstance(canvas, emitter, tileAssetsSpecificationJSON, kind, mapSize){
         const p = new GUIEngine();
@@ -38,7 +42,8 @@ class GUIEngine {
 
                 p._tiles.renderer.put(tile, tile.d);
             }
-        }                    
+        }    
+        return p;                
     }
 
     async _preparePlaygroundAndView(canvas, emitter){
@@ -139,6 +144,19 @@ class GUIEngine {
         return renderer;        
     }
 
+    async _mapChangeTile(tile, asset){
+        const theTile = JSON.parse(JSON.stringify(tile));
+        theTile.r = asset.variant.fullName;
+
+        const availableSpecificationsNames = this._tiles.assetFactory.spawnableRenderablesNames();
+        if(!availableSpecificationsNames.join(",").includes(theTile.r)){
+
+        }
+        
+        this._tiles.renderer.put(theTile, theTile.d);
+
+    }
+
 }
 
 class App {
@@ -146,6 +164,7 @@ class App {
         
         this.emitter = emitter                    
         this.model = {
+            parent: this,      
             game: {
                 player: {},
                 canvas: {}
@@ -199,10 +218,15 @@ class App {
             assets: {
                 original: [],
                 filtered: [],
-                filter: ""
+                filter: "",
+                hidden: true
+            },
+            handlers: {
+                _handleChangeAsset: this._handleChangeAsset.bind(this)
             }
 
-        }
+        }   
+        this.guiEngine = {}     
         // this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
         // this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
         
@@ -289,6 +313,22 @@ class App {
         });
     }
 
+    async _handleHideAssetBrowser(e, that){
+        that.model.assets.hidden = true;
+        that.model.assets.filter = ""
+    }
+
+    async _handleShowAssetBrowser(e, that){
+        that.model.assets.hidden = false;
+        that.model.assets.filter = ""
+    }
+
+    async _handleChangeAsset(e, that){          
+        console.log(that.item);
+        console.log(that.model.selected);
+        that.model.parent.guiEngine.map.changeTile(that.model.selected.tile.data, that.item);
+    }
+
     async _loadAssetsSpecifications(){
         this.model.assets.original = [];
         this.model.assets.filtered = [];
@@ -300,7 +340,7 @@ class App {
             const variant = item.variants[0];
 
             this.model.assets.original.push({
-                item: item,
+                specs: item,
                 variant: variant
             })                                                        
         }        
@@ -312,10 +352,10 @@ class App {
         const searchPhrase = this.model.assets.filter.toLowerCase();
 
         this.model.assets.filtered = this.model.assets.original.filter((item)=>{
-            return item.item.name.toLowerCase().includes(searchPhrase) 
+            return item.specs.name.toLowerCase().includes(searchPhrase) 
             || item.variant.fullName.toLowerCase().includes(searchPhrase) 
-            || item.item.id.toLowerCase().includes(searchPhrase) 
-            || item.item.tags.join(",").toLowerCase().includes(searchPhrase)
+            || item.specs.id.toLowerCase().includes(searchPhrase) 
+            || item.specs.tags.join(",").toLowerCase().includes(searchPhrase)
         })
     }
 
@@ -326,7 +366,7 @@ class App {
         const assetsSpecs = await this.loadAsset("./assets/assets.json", "JSON");
 
         let result = {
-            item: {},
+            specs: {},
             variant: {}
         }
 
@@ -346,6 +386,11 @@ class App {
         //     variants: AssetVariantSpecs[]    // variants of the asset
         //     tags: string[]  // tags associated with asset
         // }
+
+        // export interface Asset {
+        //     specs: AssetSpecs,
+        //     variant: AssetVariantSpecs
+        // }
         for(let i=0; i<assetsSpecs.length; i++){
             const item = assetsSpecs[i];
 
@@ -353,7 +398,7 @@ class App {
                 return subitem.fullName.trim().toLowerCase() == renderableName.trim().toLowerCase();
             })
             if(matching){
-                result.item = item;
+                result.specs = item;
                 result.variant = matching;
                 break;
             }                
@@ -442,6 +487,7 @@ class App {
 
         const guiEngine = await GUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecification, mapCharacteristics.kind, mapCharacteristics.size);
 
+        that.guiEngine = guiEngine;
 
 
     }
