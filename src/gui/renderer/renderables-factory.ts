@@ -127,7 +127,9 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             bbBox.setFromObject(object3D).getSize(sizeVector);                
             // console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
             
-            const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
+            // we do only take plane size, we do not take "z" size
+            // const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
+            const maxSize = Math.max(sizeVector.x, sizeVector.y);
             const scale = targetSize/maxSize
             // console.log(`Scale is: ${scale}`);
             object3D.scale.set(scale, scale, scale);                          

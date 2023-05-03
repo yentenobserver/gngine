@@ -53,7 +53,11 @@ class AppDemo {
                 name: "mapAssets",
                 url: "./assets/models-prod.gltf",
                 pivotCorrection: "-0.5,-0.5,0",
-                filterByNames: ["MAS"]  
+                filterByNames: ["MAS"],
+                scaleCorrection: {
+                    // byFactor: 1.2
+                    autoFitSize: 1
+                },  
         }
         const mapHelpersSpecification = {
                 name: "mapHelpers",
