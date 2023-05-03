@@ -99,7 +99,8 @@ class AppDemo {
             
                 name: "unitsAssets",
                 url: "./assets/units.gltf",
-                pivotCorrection: "0.15,-0.3,0.1"
+                // pivotCorrection: "0.15,-0.3,0.1"
+                autoPivotCorrection: true,
             
             // helpers: {
             //     name: "mapHelpers",
@@ -183,7 +184,7 @@ class AppDemo {
             rangeStrength: 10,
             strength: 10,
             sight: 2,
-            uid: "",
+            uid: "u1",
             unitSpecification: {
                 hitPoints: 10,
                 name: "Type",

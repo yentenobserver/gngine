@@ -58,22 +58,22 @@ class AddAssetModalController {
 
     async prepareFactory(assetJsonObject, kind){
         // Prepare Renderables Factory
-        const specification = {           
-            main: {
+        const specification = {
                 name: "main",
                 json: JSON.stringify(assetJsonObject),                    
                 // pivotCorrection: "0.15,-0.3,0.1",
-                autoPivotCorrection: true
-                // scaleCorrection: 0.01
-            }
+                autoPivotCorrection: true,
+                filterByNames: kind == "Unit"?["_UNIT"]:["MAS"]
+                // scaleCorrection: 0.01            
         }
         let factory = {};
         if(kind == "Unit"){
-            factory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
-            await factory.loadTemplates(["_UNIT"]);            
+            factory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+            await factory.setSpecifications([specification])
+            // await factory.loadTemplates(["_UNIT"]);            
         }else if (kind == "HexTile" || kind == "QuadTile"){
-            factory = new gngine.RenderablesThreeJSFactory(specification, new THREE.GLTFLoader());            
-            await factory.loadTemplates(["MAS"]);            
+            factory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());            
+            await factory.setSpecifications([specification]);            
         }
         // console.log(factory.spawnableRenderablesNames());
 
