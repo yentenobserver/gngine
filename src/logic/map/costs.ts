@@ -1,9 +1,9 @@
-import { TileBase } from "./common.notest";
+import { TileBase, TileTerrainLandModifications } from "./common.notest";
 
 export interface TerrainCost {
-    MOUNTAIN: number,
-    HILL: number,
-    PLAIN: number,
+    MOUNTAINS: number,
+    HILLS: number,
+    PLAINS: number,
     RIVER: number,
     IMPASSABLE: number
 }
@@ -37,7 +37,13 @@ export class CostCalculatorTerrain extends CostCalculator{
     }
 
     cost(_from: TileBase, _to: TileBase): number {
-        const s = _to.t as keyof TerrainCost;
+        let s = _to.t.kind as keyof TerrainCost;
+        
+        // also handle impassable terrain which is a modification of terrain
+        if(_to.t.modifications?.join(",").includes(TileTerrainLandModifications.IMPASSABLE)){
+            s = "IMPASSABLE" as keyof TerrainCost
+        };        
+        
         const cost: number = this.terrainCost[s];     
         if(!cost)
             throw new Error("Invalid arguments")   

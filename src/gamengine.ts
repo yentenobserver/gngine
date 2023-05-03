@@ -12,7 +12,7 @@ export { CostCalculatorConst, CostCalculatorTerrain } from "./logic/map/costs"
 export {Playground, PlaygroundInteractions, PlaygroundThreeJs, PlaygroundView, PlaygroundViewDefault, PlaygroundViewHudThreeJs, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJs, PlaygroundViewMainThreeJsDefault, PlaygroundViewThreeJS} from "./gui/playground/playground"
 
 export {RenderablesFactory, RenderablesThreeJSFactory} from './gui/renderer/renderables-factory';
-export type {Renderable, RenderableThreeJS, RenderablesSpecification, RenderablesSpecificationMap, RenderableSpecificationItem} from './gui/renderer/renderables-factory';
+export type {Renderable, RenderableThreeJS, RenderableSpecification} from './gui/renderer/renderables-factory';
 
 export {  Renderer } from './gui/renderer/renderers'
 export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, MapHexFlatTopOddRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator } from './gui/renderer/map-renderers'

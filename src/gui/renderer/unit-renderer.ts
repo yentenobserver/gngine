@@ -4,7 +4,7 @@ import { Actionable, SpecsBase, SpecsFlag, SpecsType, UnitBase } from "../../log
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
 import { DocumentCanvasContextProvider, MapPositionProvider, OrientationProvider } from "./providers";
-import { Renderable, RenderablesFactory, RenderablesSpecification, RenderablesThreeJSFactory, SpawnSpecification } from "./renderables-factory";
+import { Renderable, RenderablesFactory, RenderablesThreeJSFactory, SpawnSpecification } from "./renderables-factory";
 
 import { Renderer } from "./renderers";
 
@@ -67,8 +67,8 @@ export interface UnitRenderablesFactory extends RenderablesFactory{
  * 
  */
 export class UnitRenderablesThreeJSFactory extends RenderablesThreeJSFactory implements UnitRenderablesFactory {
-    constructor(specification: RenderablesSpecification, loader:any){
-        super(specification, loader);        
+    constructor(loader:any){
+        super(loader);        
     }
 
     /**
@@ -376,7 +376,8 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
     }
     initialize(): Promise<void> {
         // this.holderObject.add(new AxesHelper( 40 ) )
-        return this.renderablesFactory!.loadTemplates(["_UNIT"]);
+        // return this.renderablesFactory!.loadTemplates(["_UNIT"]);
+        return Promise.resolve();
     }
 
     /**

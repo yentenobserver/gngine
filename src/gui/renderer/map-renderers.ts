@@ -704,9 +704,10 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // grid.rotation.x = - Math.PI / 2;
         grid.position.z=-0.01
         this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
-            this._createMapHelpers();
-        })            
+        // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+        this._createMapHelpers();
+        // })            
+        return Promise.resolve();
     }
 
     remove(tile: TileBase): void {
@@ -894,9 +895,10 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
         grid.position.z=-0.01
         
         this.mapHolderObject.add( grid );
-        return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
-            this._createMapHelpers();
-        })            
+        // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
+        this._createMapHelpers();
+        // })            
+        return Promise.resolve();
     }
 
     yxToScenePosition(y: number, x:number){

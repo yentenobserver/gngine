@@ -49,19 +49,20 @@ class AppDemo {
 
         this.playground = p;
         const mapRenderablesSpecification = {
-            main: {
+            
                 name: "mapAssets",
                 url: "./assets/models-prod.gltf",
-                pivotCorrection: "-0.5,-0.5,0"
-            },
-            helpers: {
+                pivotCorrection: "-0.5,-0.5,0",
+                filterByNames: ["MAS"]  
+        }
+        const mapHelpersSpecification = {
                 name: "mapHelpers",
                 json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
-                pivotCorrection: "0,0,0.12"
-            }
+                pivotCorrection: "0,0,0.12",
+                filterByNames: ["MAP_HLPR_HIGHLIGHT"]
         }
-        let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
-
+        let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());
+        await mapTileFactory.setSpecifications([mapRenderablesSpecification, mapHelpersSpecification]);
         mapRenderer = new gngine.MapQuadRendererThreeJs(3,2, this.emitter)
         mapRenderer.setRenderablesFactory(mapTileFactory);
         // map renderer will render map tiles into main map view
@@ -95,18 +96,19 @@ class AppDemo {
         hudRenderer.addComponent(navComp); 
 
         const unitsRenderablesSpecification = {
-            main: {
+            
                 name: "unitsAssets",
                 url: "./assets/units.gltf",
                 pivotCorrection: "0.15,-0.3,0.1"
-            }
+            
             // helpers: {
             //     name: "mapHelpers",
             //     json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
             //     pivotCorrection: "0,0,0.12"
             // }
         }
-        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
+        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+        await unitFactory.setSpecifications([unitsRenderablesSpecification]);
         const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, mapRenderer);
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
@@ -116,7 +118,7 @@ class AppDemo {
             "x": 1,
             "y": 0,
             "d": "S",
-            "t": "C_T_GRASS_1_TILE",
+            "t": {"kind": "PLAINS"},
             "loc": {
               "n": "Grassland",
               "g": "43.74650403587078,7.421766928360976"
@@ -135,7 +137,7 @@ class AppDemo {
             "x": 0,
             "y": 1,
             "d": "S",
-            "t": "C_T_DIRT_1_TILE",
+            "t": {"kind": "PLAINS"},
             "loc": {
               "n": "Bushland",
               "g": "43.74650403587078,7.421766928360976"
@@ -154,7 +156,7 @@ class AppDemo {
             "x": 2,
             "y": 0,
             "d": "S",
-            "t": "C_T_DIRT_1_TILE",
+            "t": {"kind": "PLAINS"},
             "loc": {
               "n": "Bushland",
               "g": "43.74650403587078,7.421766928360976"

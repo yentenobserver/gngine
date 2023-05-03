@@ -5,7 +5,7 @@
       "y": 0,
       "d": "S",
       "r": "MAS_C_B_COMM_1",
-      "t": "PLAIN",
+      "t": {"kind": "PLAINS"},
       "loc": {
         "n": "Bushland",
         "g": "43.74650403587078,7.421766928360976"
@@ -25,7 +25,7 @@
       "y": 1,
       "d": "S",
       "r": "MAS_C_T_DIRT_1_TILE",
-      "t": "PLAIN",
+      "t": {"kind": "PLAINS"},
       "loc": {
         "n": "Bushland",
         "g": "43.74650403587078,7.421766928360976"
@@ -45,7 +45,7 @@
       "y": 0,
       "d": "S",
       "r": "MAS_C_T_GRASS_1_TILE",
-      "t": "PLAIN",
+      "t": {"kind": "PLAINS"},
       "loc": {
         "n": "Grassland",
         "g": "43.74650403587078,7.421766928360976"
@@ -65,7 +65,7 @@
       "y": 1,
       "d": "S",
       "r": "MAS_C_B_HRES_1",
-      "t": "PLAIN",
+      "t": {"kind": "PLAINS"},
       "loc": {
         "n": "Residential",
         "g": "43.74650403587078,7.421766928360976"
@@ -86,7 +86,7 @@
       "y": 0,
       "d": "S",
       "r": "MAS_C_T_GRASS_1_TILE",
-      "t": "PLAIN",
+      "t": {"kind": "PLAINS"},
       "loc": {
         "n": "Grassland",
         "g": "43.74650403587078,7.421766928360976"
@@ -106,7 +106,7 @@
       "y": 1,
       "d": "S",
       "r": "MAS_C_B_RES_1",
-      "t": "PLAIN",
+      "t": {"kind": "PLAINS"},
       "loc": {
         "n": "Residential",
         "g": "43.74650403587078,7.421766928360976"

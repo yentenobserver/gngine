@@ -8,21 +8,14 @@ export interface Renderable{
     hide?: ()=>void;
 }
 
-export interface RenderableSpecificationItem {
+export interface RenderableSpecification {
     name: string,
     url?: string,
     json?: string,
+    filterByNames?:string[],
     pivotCorrection?: string,
     scaleCorrection?: number,
     autoPivotCorrection?: boolean // important it is assumed that previous pivot point is in the "lower left (x,y)" position. 
-}
-
-export interface RenderablesSpecification {
-    main: RenderableSpecificationItem    
-}
-
-export interface RenderablesSpecificationMap extends RenderablesSpecification {
-    helpers: RenderableSpecificationItem
 }
 
 export interface SpawnSpecification{
@@ -30,10 +23,10 @@ export interface SpawnSpecification{
 }
 
 export abstract class RenderablesFactory{
-    specification: RenderablesSpecification;    
+    specifications: RenderableSpecification[];    
 
-    constructor(specification: RenderablesSpecification){
-        this.specification = specification;        
+    constructor(){
+        this.specifications = [];        
     }
 
     /**
@@ -42,17 +35,23 @@ export abstract class RenderablesFactory{
      * @param objectName name of the Renderable to be spawned
      */
     abstract spawnRenderableObject(objectName:string):Renderable;
-    /**
-     * Populates renderables' templates library from specification so new instances
-     * of Renderable can be created from template.    
-     * @param filterNames When provided only specifications that match (include) any of the names provided are returned
-     */
-    abstract loadTemplates(filterNames: string[]):Promise<void>;
+    // /**
+    //  * Populates renderables' templates library from specification so new instances
+    //  * of Renderable can be created from template.    
+    //  * @param filterNames When provided only specifications that match (include) any of the names provided are returned
+    //  */
+    // abstract loadTemplates(filterNames: string[]):Promise<void>;
 
     /**
      * Returns all renderables' names that can be spawned by this factory
      */
     abstract spawnableRenderablesNames():string[];
+
+    /**
+     * Populates factory specifications. Factory MUST be ready to spawn new instance of renderables when this method finishes.
+     * @param specifications adds/replaces specifications to factory, when empty array is provided then specifications are reset in factory
+     */
+    abstract setSpecifications(specifications: RenderableSpecification[]):Promise<void>;
 
     /**
      * Creates new instance of Renderable that can be drawn on view, it uses more
@@ -66,14 +65,17 @@ export abstract class RenderablesFactory{
 /* istanbul ignore next */
 export class RenderablesDefaultFactory extends RenderablesFactory{
     
+    
     spawnRenderableObject(_objectName: string): Renderable {
         throw new Error('Method not implemented.');
     }
-    loadTemplates(_filterNames: string[]): Promise<void> {
-        throw new Error('Method not implemented.');
-    }    
+  
     spawnableRenderablesNames():string[]{
         return [];
+    }
+
+    setSpecifications(_specifications: RenderableSpecification[]): Promise<void> {
+        throw new Error('Method not implemented.');
     }
 
     spawn(_specification: SpawnSpecification): Renderable {
@@ -88,7 +90,7 @@ export interface RenderableThreeJS extends Renderable{
 export interface RenderableTemplateThreeJS {
     name: string,
     object: THREE.Object3D,
-    specification: RenderableSpecificationItem
+    specification: RenderableSpecification
 }
 
 export class RenderablesThreeJSFactory extends RenderablesFactory {
@@ -98,31 +100,10 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
     templates:Map<string, RenderableTemplateThreeJS>;
     loader: any; // threejs objects loader
     
-    constructor(specification: RenderablesSpecification, loader:any){
-        super(specification);
+    constructor(loader:any){
+        super();
         this.loader = loader;
         this.templates = new Map<string, RenderableTemplateThreeJS>();        
-    }
-
-    /**
-     * Returns specification item from renderable specifcation that matches name criteria
-     * @param objectName target name
-     * @returns specification item that matches name, throws error when none is found
-     */
-    _findSpecificationItem(objectName: string):RenderableSpecificationItem{
-        let result:RenderableSpecificationItem|undefined;
-
-        Object.keys(this.specification).forEach((propName:string)=>{
-            const specification:RenderableSpecificationItem = <RenderableSpecificationItem>(<any>this.specification)[propName];
-            if(specification.name == objectName){                
-                result = specification
-            }            
-        })
-
-        if(!result){
-            throw Error(`Can't find renderable specification item for ${objectName}`);
-        }
-        return result;
     }
 
     /**
@@ -153,21 +134,23 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
 
             // first handle scale
             if(specification.scaleCorrection){
+                // manual scale correction
                 if(specification.scaleCorrection<=0)
                     throw new Error(`Can't apply scale correction for specification ${objectName}`)                
                 cloned.scale.set(specification.scaleCorrection, specification.scaleCorrection,specification.scaleCorrection);                                
             }else{
+                // automatic scale correction
                 const bbBox = new Box3();
                 const sizeVector = new Vector3();                
                 bbBox.setFromObject(cloned).getSize(sizeVector);                
-                console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
+                // console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
                 
                 const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
                 const scale = 1/maxSize
                 cloned.scale.set(scale, scale, scale);                          
 
                 bbBox.setFromObject(cloned).getSize(sizeVector);                      
-                console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
+                // console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
             }
 
             // then make pivot correction
@@ -203,11 +186,11 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 const sizeVector = new Vector3();                
                 bbBox.setFromObject(cloned).getSize(sizeVector);                
 
-                console.log(`${objectName} Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
+                // console.log(`${objectName} Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
 
                 // const correction:THREE.Vector3 = new THREE.Vector3(vectorXYZ[0], vectorXYZ[1], vectorXYZ[2])                                                      
                 cloned.position.set(-sizeVector.x/2,-sizeVector.y/2, cloned.position.z);                    
-                console.log(`${objectName}  Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
+                // console.log(`${objectName}  Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
 
             }
 
@@ -237,27 +220,80 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         return this.spawnRenderableObject(specification.name!);
     }
 
+    setSpecifications(specifications: RenderableSpecification[]): Promise<void> {
+        if(specifications.length==0){
+            // reset specifications to empty list
+            this.specifications = [];
+        }
+        
+        specifications.forEach((specification:RenderableSpecification)=>{            
+            // first we remove previous specification if any exists with the same name
+            if(specification.name != ""){            
+                this.specifications = this.specifications.filter((item:RenderableSpecification)=>{
+                    return item.name != specification.name
+                })
+            }
+
+            this.specifications.push(specification);                    
+        })
+
+        // now repopulate templates using new specifications                 
+        return this._loadTemplates()
+    }
+
+    _dispose(object3D:THREE.Mesh){
+        if(!object3D.geometry)
+            return;
+        object3D.geometry.dispose();
+        
+        if(Array.isArray(object3D.material)){
+            const materials = object3D.material as Material[];
+            materials.forEach((material)=>{
+                material.dispose();    
+            })
+        }else{
+            const material =  object3D.material as Material;
+            material.dispose()
+        }                
+        
+        // todo texture?
+    }
+
+    _freeTemplatesMemory():void{
+        // release memory for templates
+        this.templates.forEach((value, _key)=>{
+            const object3D = value.object;
+            object3D.traverse((child)=>{                
+                this._dispose(child as THREE.Mesh)
+            })
+        })
+    }
+
     /**
      * Populates renderables' templates library from specification so new instances
      * of Renderable can be created from template. When specification
      * contains renderable in json format that template is created by parsing the json. Otherwise
-     * it is assumed that asset is hosted at place pointed out by the url.
-     * @param filterNames when provided only 3d objects that match name will be added as template
+     * it is assumed that asset is hosted at place pointed out by the url.     
      * @returns resolves on success
      */
-    loadTemplates(filterNames: string[]):Promise<void>{
+    _loadTemplates():Promise<void>{
+        
+        // clear previous templates
+        this._freeTemplatesMemory();        
+        this.templates = new Map<string, RenderableTemplateThreeJS>();
+
+        // load new templates
         const templatesToLoad:Promise<void>[] = [];
-        // here we get all specification items from specification object
-        Object.keys(this.specification).forEach((propName:string)=>{
-            const specification:RenderableSpecificationItem = <RenderableSpecificationItem>(<any>this.specification)[propName];
+
+        this.specifications.forEach((specification:RenderableSpecification)=>{
             if(specification.json){                
-                templatesToLoad.push(this._parseRenderablesObjectsTemplate(specification.json,filterNames, specification));
+                templatesToLoad.push(this._parseRenderablesObjectsTemplate(specification.json,specification.filterByNames||[], specification));
             }
             if(specification.url){
-                templatesToLoad.push(this._loadRenderablesObjectsTemplate(specification.url!,filterNames, specification))
-            }                        
+                templatesToLoad.push(this._loadRenderablesObjectsTemplate(specification.url!,specification.filterByNames||[], specification))
+            }
         })
-        return Promise.all(templatesToLoad).then(()=>{});
+        return Promise.all(templatesToLoad).then(()=>{});        
     }
 
     /**
@@ -266,7 +302,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
      * @param path Path to the template file with 3D template objects
      * @param filterNames When provided only specifications that match (include) any of the names provided are returned
      */
-    _loadRenderablesObjectsTemplate(path: string, filterNames: string[], specification: RenderableSpecificationItem): Promise<void> {
+    _loadRenderablesObjectsTemplate(path: string, filterNames: string[], specification: RenderableSpecification): Promise<void> {
         const that = this;
         
 
@@ -305,7 +341,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
      * @param filterNames When provided only specifications that match (include) any of the names provided are returned
      * @returns resolves on success
      */
-    _parseRenderablesObjectsTemplate(objectsStringRepresentation: string, filterNames: string[], specification: RenderableSpecificationItem): Promise<void> {
+    _parseRenderablesObjectsTemplate(objectsStringRepresentation: string, filterNames: string[], specification: RenderableSpecification): Promise<void> {
         const that = this;
         return new Promise((resolve, reject)=>{
             let json:any;
@@ -359,7 +395,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
      * Selects objects which name includes any of the provided filter names (case insensitive).
      * @param children array of objects to be checked
      * @param filterNames optional - when provided only obects which name includes any of names are returned
-     * @returns array of objects which name matches filter or is equal to OBJECT3D
+     * @returns array of objects which name matches filter or type is equal to OBJECT3D
      */
     _matchingChildren(children:any[], filterNames: string[]):any[]{
         return children.filter((item:any)=>{
@@ -401,10 +437,8 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             that._cloneMaterials(child as THREE.Mesh);
         }
     }
-    
 
-
-    _addTemplate(name:string, object3D:THREE.Object3D, specification: RenderableSpecificationItem){
+    _addTemplate(name:string, object3D:THREE.Object3D, specification: RenderableSpecification){
         const template:RenderableTemplateThreeJS = {
             name: name,
             object: object3D,

@@ -18,7 +18,6 @@ import * as THREE from 'three'
 import {TileBase} from '../src/logic/map/common.notest'
 import {MapBase, MapHexOddQ, MapSquare, Neighbour, Path, Paths,} from '../src/logic/map/map'
 import {MapsMocks, TerrainMocks, AppEventsMocks, MapEventMocks, UnitsMocks} from './data.mock'
-import { UNIT_RENDERABLES } from './data/units-test.notest'
 import {CostCalculator, CostCalculatorConst, CostCalculatorTerrain} from "../src/logic/map/costs"
 import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, ActionUnitFortify, ActionUnitLandFieldOfView, ActionUnitMove} from "../src/logic/units/actions/action"
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
@@ -33,7 +32,7 @@ import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, QuadPositionProv
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Material, Mesh, Vector2, Vector3 } from 'three';
-import { Renderable, RenderablesDefaultFactory, RenderablesSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
+import { Renderable, RenderablesDefaultFactory, RenderableSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
 
 
 
@@ -190,11 +189,11 @@ describe('Gamengine', () => {
             });
 
             it('upper left', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}});
                 return expect(neighbours).length(3);                
             }) 
             it('upper left #1', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}});
                 const E = neighbours.find((item:Neighbour)=>{
                     return item.direction == "E"
                 })
@@ -207,11 +206,11 @@ describe('Gamengine', () => {
                 return expect(E?.direction+S?.direction+SE?.direction).eq("ESSE")
             }) 
             it('upper right', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,4", x: 4, y:0, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,4", x: 4, y:0, t: {kind: "PLAINS"}});
                 return expect(neighbours).length(3);                
             }) 
             it('upper right #1', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,4", x: 4, y:0, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,4", x: 4, y:0, t: {kind: "PLAINS"}});
                 const nW = neighbours.find((item:Neighbour)=>{
                     return item.direction == "W"
                 })
@@ -224,11 +223,11 @@ describe('Gamengine', () => {
                 return expect(nW?.direction+nSW?.direction+nS?.direction).eq("WSWS")
             })
             it('middle', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t: {kind: "PLAINS"}});
                 return expect(neighbours).length(8);                
             })
             it('middle #1', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t: {kind: "PLAINS"}});
                 const N = neighbours.find((item:Neighbour)=>{
                     return item.direction == "N"
                 })
@@ -389,15 +388,15 @@ describe('Gamengine', () => {
                 const paths = mappyTerrainHeavy.paths(calculatorTerrain, from, to); 
                 const path = paths.paths.get(to);      
                 const expectedPath = [
-                    { id: '0,0', y: 0, x: 0, t: 'PLAIN' },
-                    { id: '1,0', y: 1, x: 0, t: 'PLAIN' },
-                    { id: '2,0', y: 2, x: 0, t: 'MOUNTAIN' },
-                    { id: '3,0', y: 3, x: 0, t: 'MOUNTAIN' },
-                    { id: '4,0', y: 4, x: 0, t: 'MOUNTAIN' },
-                    { id: '5,1', y: 5, x: 1, t: 'PLAIN' },
-                    { id: '5,2', y: 5, x: 2, t: 'PLAIN' },
-                    { id: '5,3', y: 5, x: 3, t: 'PLAIN' },
-                    { id: '5,4', y: 5, x: 4, t: 'PLAIN' }
+                    { id: '0,0', y: 0, x: 0, t: {kind: "PLAINS"} },
+                    { id: '1,0', y: 1, x: 0, t: {kind: "PLAINS"} },
+                    { id: '2,0', y: 2, x: 0, t: {kind: "MOUNTAINS"} },
+                    { id: '3,0', y: 3, x: 0, t: {kind: "MOUNTAINS"} },
+                    { id: '4,0', y: 4, x: 0, t: {kind: "MOUNTAINS"} },
+                    { id: '5,1', y: 5, x: 1, t: {kind: "PLAINS"} },
+                    { id: '5,2', y: 5, x: 2, t: {kind: "PLAINS"} },
+                    { id: '5,3', y: 5, x: 3, t: {kind: "PLAINS"} },
+                    { id: '5,4', y: 5, x: 4, t: {kind: "PLAINS"} }
                   ]                
                 return expect(JSON.stringify(path!.steps)).eq(JSON.stringify(expectedPath));             
             })
@@ -524,40 +523,40 @@ describe('Gamengine', () => {
                 });
 
                 it('N', () => {    
-                    const direction:string = mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},0,1); 
+                    const direction:string = mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},0,1); 
                     return expect(direction).eq("N")
                     
                 })
                 it('S', () => {    
-                    const direction:string = mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},0,-1); 
+                    const direction:string = mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},0,-1); 
                     return expect(direction).eq("S")
                     
                 })
                 it('NE', () => {    
-                    const direction:string = mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},-1,1); 
+                    const direction:string = mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},-1,1); 
                     return expect(direction).eq("NE")
                     
                 })
                 it('SE', () => {    
-                    const direction:string = mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},-1,0); 
+                    const direction:string = mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},-1,0); 
                     return expect(direction).eq("SE")
                     
                 })
                 it('SW', () => {    
-                    const direction:string = mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},1,0); 
+                    const direction:string = mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},1,0); 
                     return expect(direction).eq("SW")
                     
                 })
                 it('NW', () => {    
-                    const direction:string = mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},1,1); 
+                    const direction:string = mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},1,1); 
                     return expect(direction).eq("NW")
                     
                 })
                 it('Illegal args #1', () => {    
-                    return expect(()=>{mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},3,-9)}).to.throw('Invalid arguments');                                                      
+                    return expect(()=>{mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},3,-9)}).to.throw('Invalid arguments');                                                      
                 })
                 it('Illegal args #2' , () => {    
-                    return expect(()=>{mappy._direction({id: "2,2", t: "PLAIN", y:2, x: 2},0,0)}).to.throw('Invalid arguments');                                      
+                    return expect(()=>{mappy._direction({id: "2,2", t: {kind: "PLAINS"}, y:2, x: 2},0,0)}).to.throw('Invalid arguments');                                      
                 })
             })
             describe('odd', () => {
@@ -572,40 +571,40 @@ describe('Gamengine', () => {
                 });
 
                 it('N', () => {    
-                    const direction:string = mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},0,1); 
+                    const direction:string = mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},0,1); 
                     return expect(direction).eq("N")
                     
                 })
                 it('S', () => {    
-                    const direction:string = mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},0,-1); 
+                    const direction:string = mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},0,-1); 
                     return expect(direction).eq("S")
                     
                 })
                 it('NE', () => {    
-                    const direction:string = mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},-1,0); 
+                    const direction:string = mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},-1,0); 
                     return expect(direction).eq("NE")
                     
                 })
                 it('SE', () => {    
-                    const direction:string = mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},-1,-1); 
+                    const direction:string = mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},-1,-1); 
                     return expect(direction).eq("SE")
                     
                 })
                 it('SW', () => {    
-                    const direction:string = mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},1,-1); 
+                    const direction:string = mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},1,-1); 
                     return expect(direction).eq("SW")
                     
                 })
                 it('NW', () => {    
-                    const direction:string = mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},1,0); 
+                    const direction:string = mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},1,0); 
                     return expect(direction).eq("NW")
                     
                 })
                 it('Illegal args #1', () => {    
-                    return expect(()=>{mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},1,1)}).to.throw('Invalid arguments');                                                      
+                    return expect(()=>{mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},1,1)}).to.throw('Invalid arguments');                                                      
                 })
                 it('Illegal args #2' , () => {    
-                    return expect(()=>{mappy._direction({id: "3,2", t: "PLAIN", y:3, x: 2},0,0)}).to.throw('Invalid arguments');                                      
+                    return expect(()=>{mappy._direction({id: "3,2", t: {kind: "PLAINS"}, y:3, x: 2},0,0)}).to.throw('Invalid arguments');                                      
                 })
             })
             
@@ -625,11 +624,11 @@ describe('Gamengine', () => {
             });
 
             it('upper left', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});                
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}});                
                 return expect(neighbours).length(2);                
             }) 
             it('upper left #1', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}});
                 const S = neighbours.find((item:Neighbour)=>{
                     return item.direction == "S"
                 })
@@ -639,11 +638,11 @@ describe('Gamengine', () => {
                 return expect(S?.direction+SE?.direction).eq("SSE")
             }) 
             it('upper right', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "5,0", x: 0, y:5, t:"PLAIN"});                
+                const neighbours: Neighbour[] = mappy.neighbours({id: "5,0", x: 0, y:5, t: {kind: "PLAINS"}});                
                 return expect(neighbours).length(3);                
             }) 
             it('upper right #1', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "5,0", x: 0, y:5, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "5,0", x: 0, y:5, t: {kind: "PLAINS"}});
                 const nNW = neighbours.find((item:Neighbour)=>{
                     return item.direction == "NW"
                 })
@@ -656,18 +655,18 @@ describe('Gamengine', () => {
                 return expect(nNW?.direction+nSW?.direction+nS?.direction).eq("NWSWS")
             })
             it('middle even', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "2,2", x: 2, y:2, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "2,2", x: 2, y:2, t: {kind: "PLAINS"}});
                 console.log(neighbours);
                 return expect(neighbours).length(6);                
             })
 
             it('middle odd', () => {    
-                const neighbours: Neighbour[] = mappy.neighbours({id: "3,2", x: 2, y:3, t:"PLAIN"});
+                const neighbours: Neighbour[] = mappy.neighbours({id: "3,2", x: 2, y:3, t: {kind: "PLAINS"}});
                 console.log(neighbours);
                 return expect(neighbours).length(6);                
             })
             // it('middle #1', () => {    
-            //     const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t:"PLAIN"});
+            //     const neighbours: Neighbour[] = mappy.neighbours({id: "2,4", x: 2, y:2, t: {kind: "PLAINS"}});
             //     const N = neighbours.find((item:Neighbour)=>{
             //         return item.direction == "N"
             //     })
@@ -714,7 +713,7 @@ describe('Gamengine', () => {
             it('const cost', () => {  
                 const calculator = new CostCalculatorConst(CONST_COST);
                   
-                const cost = calculator.cost({id: "0,0", x: 0, y:0, t:"PLAIN"}, {id: "1,1", x: 1, y:1, t:"PLAIN"});
+                const cost = calculator.cost({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}}, {id: "1,1", x: 1, y:1, t: {kind: "PLAINS"}});
                 return expect(cost).eq(CONST_COST);
                 
             })
@@ -735,23 +734,23 @@ describe('Gamengine', () => {
                 const terrainCost = TerrainMocks.terrain_1;
                 const calculator = new CostCalculatorTerrain(terrainCost);
                   
-                const cost = calculator.cost({id: "0,0", x: 0, y:0, t:"PLAIN"}, {id: "1,1", x: 1, y:1, t:"PLAIN"});
-                return expect(cost).eq(terrainCost.PLAIN);
+                const cost = calculator.cost({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}}, {id: "1,1", x: 1, y:1, t: {kind: "PLAINS"}});
+                return expect(cost).eq(terrainCost.PLAINS);
                 
             })
             it('mountain cost', () => {  
                 const terrainCost = TerrainMocks.terrain_1;
                 const calculator = new CostCalculatorTerrain(terrainCost);
                   
-                const cost = calculator.cost({id: "0,0", x: 0, y:0, t:"PLAIN"}, {id: "1,1", x: 1, y:1, t:"MOUNTAIN"});
-                return expect(cost).eq(terrainCost.MOUNTAIN);
+                const cost = calculator.cost({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}}, {id: "1,1", x: 1, y:1, t: {kind: "MOUNTAINS"}});
+                return expect(cost).eq(terrainCost.MOUNTAINS);
                 
             })
 
             it('undefined cost', () => {  
                 const terrainCost = TerrainMocks.terrain_1;
                 const calculator = new CostCalculatorTerrain(terrainCost);                
-                return expect(()=>{calculator.cost({id: "0,0", x: 0, y:0, t:"PLAIN"}, {id: "1,1", x: 1, y:1, t:"SOME UNDEFINED"})}).to.throw('Invalid arguments');                 
+                return expect(()=>{calculator.cost({id: "0,0", x: 0, y:0, t: {kind: "PLAINS"}}, {id: "1,1", x: 1, y:1, t: {kind: "UNDEFINED"}})}).to.throw('Invalid arguments');                 
             })
 
             
@@ -771,14 +770,14 @@ describe('Gamengine', () => {
                 
             const tile: TileBase = {
                 id: "t_1",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 0,
                 y: 0
             }
 
             const tile2: TileBase = {
                 id: "t_2",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 2,
                 y: 2
             }
@@ -891,7 +890,7 @@ describe('Gamengine', () => {
                 
             const tile: TileBase = {
                 id: "t_1",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 0,
                 y: 0
             }
@@ -1027,19 +1026,19 @@ describe('Gamengine', () => {
                 
             const tile: TileBase = {
                 id: "t_1",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 0,
                 y: 0
             }
             const tile2: TileBase = {
                 id: "t_2",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 2,
                 y: 2
             }
             const tile3: TileBase = {
                 id: "t_3",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 1,
                 y: 1
             }
@@ -1197,19 +1196,19 @@ describe('Gamengine', () => {
                 
             const tile: TileBase = {
                 id: "t_1",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 0,
                 y: 0
             }
             const tile2: TileBase = {
                 id: "t_2",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 2,
                 y: 2
             }
             const tile3: TileBase = {
                 id: "t_3",
-                t:"type",
+                t: {kind: "UNDEFINED"},
                 x: 1,
                 y: 1
             }
@@ -1407,13 +1406,14 @@ describe('Playground', () => {
             })
             it('adds view', () => {                                
                 return playground.attach(view1).then(()=>{
-                    return expect(playground.views[1]).eq(view1);
+                    // hud view always first
+                    return expect(playground.views[0]).eq(view1);
                 })
             })
             it('replaces view', () => {  
                 playground.views.unshift(view1);                              
                 return playground.attach(view1).then(()=>{
-                    return expect(playground.views[1]).eq(view1);
+                    return expect(playground.views[0]).eq(view1);
                 })
             })
             it('unsets autoclear for hud view', () => {  
@@ -2022,11 +2022,11 @@ describe('Playground', () => {
             })
             it("sets proper camera up vector",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.up.y).eq(1);
+                return expect(playgroundView.camera!.up.y).eq(0);
             })
             it("sets proper camera up vector",()=>{
                 playgroundView._setupScene();
-                return expect(playgroundView.camera!.up.z).eq(0);
+                return expect(playgroundView.camera!.up.z).eq(1);
             })
 
             it("sets proper scene name",()=>{
@@ -2309,9 +2309,7 @@ describe("Renderers",()=>{
         let view: PlaygroundViewDefault;
         let rf: RenderablesDefaultFactory;
         const width = 40;
-        const height = 20;         
-
-        let specification: RenderablesSpecification;
+        const height = 20;                 
 
         describe("MapRendererThreeJs", ()=>{
             beforeEach(()=>{
@@ -2345,8 +2343,8 @@ describe("Renderers",()=>{
             let tile2: TileBase;
             let object3D: THREE.Object3D;
             beforeEach(()=>{
-                tile = {id: "", t: "", x:0, y: 0};
-                tile2 = {id: "", t: "", x:50, y: 50};
+                tile = {id: "", t: {kind: "UNDEFINED"}, x:0, y: 0};
+                tile2 = {id: "", t: {kind: "UNDEFINED"}, x:50, y: 50};
                 object3D = new THREE.Object3D();
 
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
@@ -2361,15 +2359,7 @@ describe("Renderers",()=>{
                 s1.restore();
                 s2.restore();
             })
-            describe("no tile yet selected",()=>{
-                it("sets camera position",()=>{
-                    map.goToTile(tile, object3D);
-                    return expect(JSON.stringify(view.camera.position)).eq(JSON.stringify({"x":10,"y":5,"z":0}));
-                });
-                it("sets camera look at",()=>{
-                    map.goToTile(tile, object3D);
-                    return expect(s1.callCount).eq(1);
-                });
+            describe("no tile yet selected",()=>{                
                 it("stores clicked tile as current tile",()=>{
                     map.goToTile(tile, object3D);
                     return expect(map.state.current.tile).eq(tile);
@@ -2392,15 +2382,7 @@ describe("Renderers",()=>{
                     prevLookAt = new THREE.Vector3(3,3,3);
                     map.state.lookAt = prevLookAt;
                     map.state.current.tileWorldPos = new THREE.Vector3(20,20,0);
-                })
-                it("sets camera position",()=>{
-                    map.goToTile(tile, object3D);
-                    return expect(JSON.stringify(view.camera.position)).eq(JSON.stringify({"x":-20,"y":-20,"z":0}));
-                });
-                it("should not set camera look at",()=>{
-                    map.goToTile(tile, object3D);
-                    return expect(s1.callCount).eq(0);
-                });
+                })                
                 it("stores clicked tile as current tile",()=>{
                     map.goToTile(tile, object3D);
                     return expect(map.state.current.tile).eq(tile);
@@ -2464,11 +2446,11 @@ describe("Renderers",()=>{
             })
             it("increases zoom",()=>{
                 map.zoom(1);
-                return expect(map.state.zoomLevel).eq(14);
+                return expect(map.state.zoomLevel).eq(11);
             })
             it("decreases zoom",()=>{
                 map.zoom(-1);
-                return expect(map.state.zoomLevel).eq(12);
+                return expect(map.state.zoomLevel).eq(9);
             })
             it("preserves max zoom",()=>{
                 map.state.zoomLevel = 16
@@ -2491,23 +2473,65 @@ describe("Renderers",()=>{
                 view = new PlaygroundViewDefault("name", messageBusMocked);
                 view.scene = new THREE.Scene;
                 map.setView(view);  
-                s1 = sinon.stub(map.mapHolderObject,"rotateZ")                                              
+                s1 = sinon.stub(map,"_rotateCameraAroundPoint")                                              
             })
             afterEach(()=>{
                 s1.restore();
             })
-            it("throws error when there is no map in scene",()=>{                
-                map.mapHolderObject.name = "some other"
-                return expect(()=>{map.rotate.bind(map)(1)}).to.throw("Can't rotate. No map object in scene.");  
-            });
-
-            it("updates rotation state",()=>{
-                map.rotate(1);
-                return expect(map.state.sceneRotation).not.eq(0);
-            })
-            it("rotates map along z-axis",()=>{
+            it("call rotate function accordingly",()=>{                
                 map.rotate(1);
                 return expect(s1.callCount).eq(1);
+            });
+        })
+
+        describe("_rotateCameraAroundPoint",()=>{
+            let camera: THREE.Camera;
+            let sx1: SinonSpy;
+            let sx2: SinonSpy;
+
+            beforeEach(()=>{
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);                
+                camera = new THREE.PerspectiveCamera(1,1,1,1);
+                sx1 = sinon.spy(map, "_getCameraDirectionFromPoint");
+                sx2 = sinon.stub(camera, "lookAt");
+            });
+            afterEach(()=>{
+                sx1.restore();
+                sx2.restore();
+            });
+
+            it("calculates camera direction from point",()=>{
+                //_getCameraDirectionFromPoint
+                
+                camera.position.set(1,1,1);
+                const point = new Vector3(0,0,0);
+                map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(90));
+                return expect(sx1.callCount).eq(1);
+            })
+            it("sets camera position accordingly - turn left 90 degs",()=>{                
+                camera.position.set(0,1,0);
+                const point = new Vector3(0,0,0);
+                map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(90));
+                return expect(JSON.stringify(camera.position)).eq(JSON.stringify({x: -1, y:1.2246467991473532e-16, z:0}))
+            })
+            it("sets camera position accordingly - turn right 90 degs",()=>{                
+                camera.position.set(0,1,0);
+                const point = new Vector3(0,0,0);
+                map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(-90));
+                return expect(JSON.stringify(camera.position)).eq(JSON.stringify({x: 1, y:0, z:0}))
+            })
+            it("sets camera position accordingly - turn right 180 degs",()=>{                
+                camera.position.set(0,1,0);
+                const point = new Vector3(0,0,0);
+                map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(-180));
+                return expect(JSON.stringify(camera.position)).eq(JSON.stringify({x: 6.123233995736766e-17, y:-1, z:0}))
+            })
+            it("sets camera look at accordingly", ()=>{
+                camera.position.set(1,1,1);
+                const point = new Vector3(0,0,0);
+                map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(90));
+                return expect(sx2.getCall(0).args[0]).eq(point);
+
             })
         })
         describe("highlightTiles",()=>{
@@ -2600,41 +2624,26 @@ describe("Renderers",()=>{
         describe("initialize",()=>{
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
-                }
-                rf = new RenderablesDefaultFactory(specification);
-                map.setRenderablesFactory(rf);
-                s1 = sinon.stub(rf,"loadTemplates").resolves();
+                
+                rf = new RenderablesDefaultFactory();
+                map.setRenderablesFactory(rf);                
                 s2 = sinon.stub(map,"_createMapHelpers");
             })
-            afterEach(()=>{
-                s1.restore();
+            afterEach(()=>{                
                 s2.restore();
             })
-            it("loads templates",()=>{
+            it("load highlighter",()=>{
                 return map.initialize().then(()=>{
-                    return expect(s1.callCount).eq(1);
+                    return expect(s2.callCount).eq(1);
                 })
                 
-            })  
-            it("loads 'MAS' or 'MAP_HLPR_HIGHLIGHT' named templates",()=>{
-                return map.initialize().then(()=>{
-                    return expect(JSON.stringify(s1.getCall(0).args[0])).eq(JSON.stringify(["MAS","MAP_HLPR_HIGHLIGHT"]));
-                })
-            })          
+            })              
         })
         describe("onTileChanged",()=>{
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
-                }
-                rf = new RenderablesDefaultFactory(specification);
+                
+                rf = new RenderablesDefaultFactory();
                 map.setRenderablesFactory(rf);
                 s1 = sinon.stub(map,"replace");
             })
@@ -2643,7 +2652,7 @@ describe("Renderers",()=>{
             })
             it("replaces tile",()=>{
                 
-                map.onTileChanged({id: "id", t: "t", x:1, y: 1},"W");
+                map.onTileChanged({id: "id", t: {kind: "UNDEFINED"}, x:1, y: 1},"W");
                 return expect(s1.callCount).eq(1);
             })
         })
@@ -2658,11 +2667,11 @@ describe("Renderers",()=>{
                 s2.restore();
             })
             it("removes",()=>{
-                map.replace({id: "id", t: "t", x:1, y: 1},"W");
+                map.replace({id: "id", t: {kind: "UNDEFINED"}, x:1, y: 1},"W");
                 return expect(s1.callCount).eq(1);
             })
             it("adds",()=>{
-                map.replace({id: "id", t: "t", x:1, y: 1},"W");
+                map.replace({id: "id", t: {kind: "UNDEFINED"}, x:1, y: 1},"W");
                 return expect(s2.callCount).eq(1);
             })
         })
@@ -2708,27 +2717,22 @@ describe("Renderers",()=>{
                 s2.restore();
             })
             it("removes when object exists",()=>{
-                map.remove({id: "id", t: "t", x:1, y: 1});
+                map.remove({id: "id", t: {kind: "UNDEFINED"}, x:1, y: 1});
                 return expect(s1.callCount).eq(1);
             })
             it("disposes memory for object and it's children",()=>{
-                map.remove({id: "id", t: "t", x:1, y: 1});
+                map.remove({id: "id", t: {kind: "UNDEFINED"}, x:1, y: 1});
                 return expect(s2.callCount).eq(2);
             })
             it("does nothing when object does not exist",()=>{
-                map.remove({id: "id", t: "t", x:4, y: 4});
+                map.remove({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4});
                 return expect(s1.callCount).eq(0);
             })
         })
         describe("put",()=>{
             beforeEach(()=>{
-                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
-                }
-                rf = new RenderablesDefaultFactory(specification);
+                map = new MapQuadRendererThreeJs(width, height, messageBusMocked);                
+                rf = new RenderablesDefaultFactory();
                 map.setRenderablesFactory(rf);
 
                 s1 = sinon.stub(map,"yxToScenePosition").returns({
@@ -2748,31 +2752,31 @@ describe("Renderers",()=>{
                 s4.restore();
             })
             it("spawns proper tile 3d object",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4},"W");
                 return expect(s4.callCount).eq(1);
             })
             it("calculates 3d object position on scene accordingly to its tile x,y",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4},"W");
                 return expect(s1.callCount).eq(1);
             })
             it("add tile to map holder",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4},"W");
                 return expect(s10.callCount).eq(1);
             })
             it("positions the object on scene",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4},"W");                
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4},"W");                
                 return expect(map.mapHolderObject.children[0].position.x).eq(100);
             })
             it("rotates object on scene",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4},"W");
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4},"W");
                 return expect(s3.callCount).eq(1);
             })
             it("annotates object with tile data",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4},"W");                
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4},"W");                
                 return expect(map.mapHolderObject.children[0].userData.tileData.id).eq("id");
             })
             it("defaults to S-south when none provided",()=>{
-                map.put({id: "id", t: "t", x:4, y: 4});                
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4});                
                 return expect(s3.getCall(0).args[1]).eq("S");
             })
         })
@@ -3197,6 +3201,9 @@ describe("Renderers",()=>{
         let s4:SinonStub;
         let s5:SinonStub;
         let s6:SinonStub;
+        let s7:SinonStub;
+        let s8:SinonStub;
+        let s9:SinonStub;
         let s10:SinonSpy;
 
         let rf: RenderablesThreeJSFactory;
@@ -3211,9 +3218,9 @@ describe("Renderers",()=>{
         let o2: THREE.Object3D;
         let o3: THREE.Object3D;
 
-        let specification: RenderablesSpecification;        
-        let specification2: RenderablesSpecification;   
-        let specification3: RenderablesSpecification;        
+        let specification: RenderableSpecification;        
+        let specification2: RenderableSpecification;   
+        let specification3: RenderableSpecification;        
         describe("spawnRenderableObject",()=>{
             beforeEach(()=>{
                 l = {
@@ -3222,29 +3229,29 @@ describe("Renderers",()=>{
                 o1 = new THREE.Object3D();
                 o2 = new THREE.Object3D();
                 specification = {
-                    main: {
+                    
                         name: T1,
                         pivotCorrection: "0.1,0.1,0.1",
                         scaleCorrection: 2.0
-                    },
+                    
                 }
                 specification2 = {
-                    main: {
+                    
                         name: T1,
                         
-                    },
+                    
                 }
-                rf = new RenderablesThreeJSFactory(specification, l);
+                rf = new RenderablesThreeJSFactory(l);
                 
                 const template1:RenderableTemplateThreeJS = {
                     name: T1,
                     object: o1,
-                    specification: specification.main
+                    specification: specification
                 };
                 const template2:RenderableTemplateThreeJS = {
                     name: T2,
                     object: o2,
-                    specification: specification.main
+                    specification: specification
                 };
 
                 (<RenderablesThreeJSFactory>rf).templates.set(T1,template1);
@@ -3252,16 +3259,16 @@ describe("Renderers",()=>{
                 s1 = sinon.stub(o1,"clone").returns(o1);  
                 s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_cloneMaterials");      
 
-                rf2 = new RenderablesThreeJSFactory(specification2, l);
+                rf2 = new RenderablesThreeJSFactory(l);
                 const template3:RenderableTemplateThreeJS = {
                     name: T1,
                     object: o1,
-                    specification: specification2.main
+                    specification: specification2
                 };
                 const template4:RenderableTemplateThreeJS = {
                     name: T2,
                     object: o2,
-                    specification: specification2.main
+                    specification: specification2
                 };
                 (<RenderablesThreeJSFactory>rf2).templates.set(T1,template3);
                 (<RenderablesThreeJSFactory>rf2).templates.set(T2,template4);
@@ -3304,22 +3311,25 @@ describe("Renderers",()=>{
             it("applies scale correction when requested in specification",()=>{                
                 rf.spawnRenderableObject(T1);
                 const call = s4.getCall(0);
-                return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: specification.main.scaleCorrection, y: specification.main.scaleCorrection, z: specification.main.scaleCorrection}));
+                return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: specification.scaleCorrection, y: specification.scaleCorrection, z: specification.scaleCorrection}));
             })
             it("not applies pivot correction when not specified",()=>{
                 const spawned = rf2.spawnRenderableObject(T1);
                 return expect((<THREE.Object3D>spawned.data).position.x).eq(0);
             })
-            it("not applies scale correction when not specified",()=>{
+            xit("applies automatic pivot correction when requested", ()=>{
+
+            })
+            it("applies automatic scale correction when scale correction not specified",()=>{
                 rf2.spawnRenderableObject(T1);
-                return expect(s4.callCount).eq(0);
+                return expect(s4.callCount).eq(1);
             })
             it("throws error on invalid pivot specification",()=>{
-                specification.main.pivotCorrection = "abc"
+                specification.pivotCorrection = "abc"
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply pivot correction for specification");                    
             })  
             it("throws error on invalid scale specification (scale must be positive)",()=>{
-                specification.main.scaleCorrection = -1
+                specification.scaleCorrection = -1
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply scale correction for specification");                    
             })  
             it("spawns renderable that can be hidden",()=>{
@@ -3334,35 +3344,125 @@ describe("Renderers",()=>{
                 return expect(spawned.data.visible).is.true;
             })          
         })
-        describe("loadTemplates",()=>{
+        describe("setSpecifications", ()=>{
+            let s1: SinonStub;
+
             beforeEach(()=>{
                 l = {
                     load(_a1:any,a2:any,_a3:any,_a4:any){
                         a2({scene:s})
                     }
                 }
-                specification = {
-                    main: {
+                rf = new RenderablesThreeJSFactory(l);
+                s1 = sinon.stub(rf, "_loadTemplates");
+            })
+            afterEach(()=>{
+                s1.restore();
+            })
+            it("adds all specifications provided",()=>{
+                rf.setSpecifications([<RenderableSpecification>{name: "name1"},<RenderableSpecification>{name: "name2"}]);
+                return expect(rf.specifications[1].name).eq("name2");
+            });
+            it("replaces previous specification with given name when name provided",()=>{
+                rf.specifications.push(<RenderableSpecification>{name: "existing", url: "existingUrl"});
+
+                rf.setSpecifications([<RenderableSpecification>{name: "name1"},<RenderableSpecification>{name: "existing", url:"newurl"}]);
+                return expect(rf.specifications[1].url).eq("newurl");
+
+            });
+            it("loads templates for all specifications provided", ()=>{
+                rf.setSpecifications([<RenderableSpecification>{name: "name1"},<RenderableSpecification>{name: "name2"}]);
+                return expect(s1.callCount).eq(1);
+            });
+            it("resets specifications to empty array when empty array provided", ()=>{
+                rf.specifications.push(<RenderableSpecification>{name: "existing", url: "existingUrl"});
+
+                rf.setSpecifications([]);
+                return expect(rf.specifications.length).eq(0);
+            });
+        })
+        describe("spawnableRenderablesNames",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(_a1:any,a2:any,_a3:any,_a4:any){
+                        a2({scene:s})
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(l);
+                rf.templates.set("name1",<RenderableTemplateThreeJS>{});
+                rf.templates.set("name2",<RenderableTemplateThreeJS>{});
+            })
+            it("names are retrieved accordingly",()=>{
+                return expect(rf.spawnableRenderablesNames().join(",")).eq("name1,name2");
+            })
+        })
+        describe("_freeTemplatesMemory",()=>{
+            let object3D: THREE.Object3D;
+            let geometry: THREE.BoxGeometry;
+            let mesh: Mesh;
+            let sx1: SinonSpy;
+            let s2: SinonStub;
+
+            beforeEach(()=>{
+                object3D = new THREE.Object3D();
+                geometry = new THREE.BoxGeometry();
+                mesh = new Mesh(geometry);
+                object3D.add(mesh);
+
+                l = {
+                    load(_a1:any,a2:any,_a3:any,_a4:any){
+                        a2({scene:s})
+                    }
+                }
+                rf = new RenderablesThreeJSFactory(l);
+                rf.templates.set("name1",<RenderableTemplateThreeJS>{object: object3D});                
+                sx1 = sinon.spy(object3D, "traverse");
+                s2 = sinon.stub(geometry, "dispose");
+            })
+            afterEach(()=>{
+                sx1.restore();
+                s2.restore();
+            })
+            it("traverses all objects from templates",()=>{
+                rf._freeTemplatesMemory();
+                return expect(sx1.callCount).eq(1);
+            })
+            it("disposes all objects from templates",()=>{
+                rf._freeTemplatesMemory();
+                return expect(s2.callCount).eq(1);
+            })
+        })
+        describe("_loadTemplates",()=>{
+            beforeEach(()=>{
+                l = {
+                    load(_a1:any,a2:any,_a3:any,_a4:any){
+                        a2({scene:s})
+                    }
+                }
+                specification = {                    
                         name: "someName",
                         json: '{"metadata":{"version":4.5,"type":"Object","generator":"Object3D.toJSON"},"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}',
-                        url: 'https://someurl'
-                    }
+                        url: 'https://someurl'                    
                 }
                 specification2 = {
-                    main: {
+                    
                         name: "someName",
                         url: 'https://someurl'
-                    }
+                    
                 }
                 specification3 = {
-                    main: {
+                    
                         name: "someName",
                         json: '{"metadata":{"version":4.5,"type":"Object","generator":"Object3D.toJSON"},"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}',                 
-                    }
+                    
                 }
-                rf = new RenderablesThreeJSFactory(specification, l);
-                rf2 = new RenderablesThreeJSFactory(specification2, l);
-                rf3 = new RenderablesThreeJSFactory(specification3, l);
+                rf = new RenderablesThreeJSFactory(l);
+                rf.specifications = [specification];
+                rf2 = new RenderablesThreeJSFactory(l);
+                rf2.specifications = [specification2];
+                rf3 = new RenderablesThreeJSFactory(l);
+                rf3.specifications = [specification3];
+                
                 
                 s1 = sinon.stub(rf,"_loadRenderablesObjectsTemplate").resolves();
                 s2 = sinon.stub(rf,"_parseRenderablesObjectsTemplate").resolves();
@@ -3373,7 +3473,9 @@ describe("Renderers",()=>{
                 s5 = sinon.stub(rf3,"_loadRenderablesObjectsTemplate").resolves();
                 s6 = sinon.stub(rf3,"_parseRenderablesObjectsTemplate").resolves();
 
-                
+                s7 = sinon.stub(rf, "_freeTemplatesMemory").returns();
+                s8 = sinon.stub(rf2, "_freeTemplatesMemory").returns();
+                s9 = sinon.stub(rf3, "_freeTemplatesMemory").returns();
                 
             })
             afterEach(()=>{
@@ -3383,31 +3485,48 @@ describe("Renderers",()=>{
                 s4.restore();
                 s5.restore();
                 s6.restore();
+                s7.restore();
+                s8.restore();
+                s9.restore();
             })
+            xit("name filtering from specification is used when provided");
+            xit("no name filtering is used when not provided provided");
+            it("memory is cleared", ()=>{
+                return rf._loadTemplates().then(()=>{
+                    return expect(s7.callCount).eq(1);
+                })
+            })
+            it("templates are cleared", ()=>{
+                rf.templates.set("someDummyThatShouldBeCleared",<RenderableTemplateThreeJS>{});
+                return rf._loadTemplates().then(()=>{
+                    return expect(rf.templates.get("someDummyThatShouldBeCleared")).is.undefined
+                })
+            })
+
             it("when json is provided then template is parsed from json",()=>{
-                return rf.loadTemplates([]).then(()=>{                    
+                return rf._loadTemplates().then(()=>{                    
                     return expect(s2.callCount).eq(1);
                 })
             })
             it("when url is provided then template is loaded from url",()=>{
-                return rf.loadTemplates([]).then(()=>{
+                return rf._loadTemplates().then(()=>{
                     return expect(s1.callCount).eq(1);
                 })
             })
             it("when url and json are provided then template is loaded both from url and json",()=>{
-                return rf.loadTemplates([]).then(()=>{
+                return rf._loadTemplates().then(()=>{
                     const result = s1.callCount==1 && s2.callCount==1;
                     return expect(result).is.true;
                 })
                 
             })
             it("when url is not provided then template is not loaded from url",()=>{
-                return rf3.loadTemplates([]).then(()=>{
+                return rf3._loadTemplates().then(()=>{
                     return expect(s5.callCount).eq(0);
                 })
             })
             it("when json is not provided then template is not parsed from json",()=>{
-                return rf2.loadTemplates([]).then(()=>{
+                return rf2._loadTemplates().then(()=>{
                     return expect(s4.callCount).eq(0);
                 })
             })
@@ -3427,13 +3546,11 @@ describe("Renderers",()=>{
                         a2(s)
                     }
                 }
-                specification = {
-                    main: {
-                        name: "someName",
-                        json: '{"metadata":{"version":4.5,"type":"Object","generator":"Object3D.toJSON"},"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}',                 
-                    }
+                specification = {                
+                    name: "someName",
+                    json: '{"metadata":{"version":4.5,"type":"Object","generator":"Object3D.toJSON"},"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}',                                     
                 }
-                rf = new RenderablesThreeJSFactory(specification, l);
+                rf = new RenderablesThreeJSFactory(l);
                 s1 = sinon.stub((<RenderablesThreeJSFactory>rf),"_matchingChildren").returns([o1]);
                 s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_addTemplate")
             })
@@ -3442,23 +3559,23 @@ describe("Renderers",()=>{
                 s2.restore();
             })
             it("throws an error on invalid json",()=>{
-                specification.main.json = 'some random string not json';
+                specification.json = 'some random string not json';
                 
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).should.be.rejected;
+                return rf._parseRenderablesObjectsTemplate(specification.json!,["SomeName"],  specification).should.be.rejected;
             })
             it("throws an error on invalid json metadata",()=>{
-                specification.main.json = '{"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}';
+                specification.json = '{"geometries":[{"uuid":"7B7DCBBE-210E-4841-A123-374E00054D8F","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[1,0,0,1,0,0,1,0,0,1,0,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.9604513645172119,0.9604513645172119,0,0.9604513645172119,0,0.010000000707805157,0.9604513645172119,0,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0.9604513645172119,0,0.025808125734329224,0.9346432089805603,0,0,0,0,0.9604513645172119,0.9604513645172119,0,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9604513645172119,0,0,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0.9604513645172119,0,0,0.9604513645172119,0,0.9604513645172119,0.9604513645172119,0.010000000707805157,0,0,0.010000000707805157,0.025808125734329224,0.025808125734329224,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9604513645172119,0.9604513645172119,0.010000000707805157,0.9604513645172119,0,0.010000000707805157,0,0,0,0.9604513645172119,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0.010000000707805157,0,0,0,0,0,0.010000000707805157,0,0.9604513645172119,0],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,5,7,8,8,7,9,6,10,11,10,6,5,11,10,9,11,9,7,12,13,14,13,12,15,16,17,18,17,16,19,17,19,20,20,19,21,18,22,23,22,18,17,23,22,21,23,21,19,24,25,26,25,24,27,28,29,30,29,28,31]},"boundingSphere":{"center":[0.480225682258606,0.480225682258606,0.005000000353902578],"radius":0.6791600781885124}}},{"uuid":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","type":"BufferGeometry","data":{"attributes":{"normal":{"itemSize":3,"type":"Float32Array","array":[0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0,0,0,-1,0,0,-1,0,0,-1,0,0,-1,0],"normalized":false},"position":{"itemSize":3,"type":"Float32Array","array":[0.025808125734329224,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.025808125734329224,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.025808125734329224,0.025808125734329224,0.010000000707805157,0.025808125734329224,0.025808125734329224,0,0.025808125734329224,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.9346432089805603,0.025808125734329224,0,0.9346432089805603,0.025808125734329224,0.010000000707805157,0.9346432089805603,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0.010000000707805157,0.025808125734329224,0.9346432089805603,0,0.9346432089805603,0.9346432089805603,0,0.025808125734329224,0.9346432089805603,0.010000000707805157],"normalized":false}},"index":{"type":"Uint16Array","array":[0,1,2,1,0,3,4,5,6,5,4,7,8,9,10,9,8,11,12,13,14,13,12,15]},"boundingSphere":{"center":[0.4802256673574448,0.4802256673574448,0.005000000353902578],"radius":0.6426629009621848}}}],"materials":[{"uuid":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":16448826,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680},{"uuid":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5","type":"MeshStandardMaterial","name":"ID6","color":16449290,"roughness":1,"metalness":0,"emissive":0,"envMapIntensity":1,"depthFunc":3,"depthTest":true,"depthWrite":true,"colorWrite":true,"stencilWrite":false,"stencilWriteMask":255,"stencilFunc":519,"stencilRef":0,"stencilFuncMask":255,"stencilFail":7680,"stencilZFail":7680,"stencilZPass":7680}],"object":{"uuid":"607E1503-3267-4004-ABE6-8F12DA6CBC7B","type":"Mesh","name":"group_0","userData":{"name":"group_0"},"layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"7B7DCBBE-210E-4841-A123-374E00054D8F","material":"21197550-28CA-4BCB-ACBC-17ADF0ED6D9E","children":[{"uuid":"DD9FCF85-C337-4BB1-89FA-451115008139","type":"Mesh","name":"ID12","layers":1,"matrix":[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],"geometry":"06749F6A-A287-44C0-91CF-B562B1D0DCFA","material":"11E3BC10-5006-49C2-9A00-7BBF5045B5D5"}]}}';
                 
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).should.be.rejectedWith("Invalid threejs objects metadata")
+                return rf._parseRenderablesObjectsTemplate(specification.json!,["SomeName"],  specification).should.be.rejectedWith("Invalid threejs objects metadata")
 
             })
             it("checks children",()=>{
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).then(()=>{
+                return rf._parseRenderablesObjectsTemplate(specification.json!,["SomeName"],  specification).then(()=>{
                     return expect(s1.callCount).eq(1);
                 });
             })
             it("adds template",()=>{
-                return rf._parseRenderablesObjectsTemplate(specification.main.json!,["SomeName"],  specification.main).then(()=>{
+                return rf._parseRenderablesObjectsTemplate(specification.json!,["SomeName"],  specification).then(()=>{
                     return expect(s2.callCount).eq(1);
                 });
             })
@@ -3479,12 +3596,10 @@ describe("Renderers",()=>{
                         a2({scene:s})
                     }
                 }
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
+                specification = {                    
+                    name: "someName"                    
                 }
-                rf = new RenderablesThreeJSFactory(specification, l);
+                rf = new RenderablesThreeJSFactory(l);
                 s1 = sinon.stub((<RenderablesThreeJSFactory>rf),"_matchingChildren").returns([o1]);
                 s2 = sinon.stub((<RenderablesThreeJSFactory>rf),"_addTemplate")
 
@@ -3493,7 +3608,7 @@ describe("Renderers",()=>{
                         a4("Some error occured")
                     }
                 }
-                rf2 = new RenderablesThreeJSFactory(specification, l2);
+                rf2 = new RenderablesThreeJSFactory(l2);
 
             })
             afterEach(()=>{
@@ -3501,24 +3616,24 @@ describe("Renderers",()=>{
                 s2.restore();
             })
             it("applies name test on objects",()=>{
-                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification).then(()=>{
                     return expect(s1.callCount).eq(1);
                 })
 
             })
             it("applies name test on scene and all scene descendant objects",()=>{
-                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification).then(()=>{
                     return expect(s1.getCall(0).args[0].length).eq(3);
                 })
 
             })
             it("adds template from matching objects",()=>{
-                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).then(()=>{
+                return (<RenderablesThreeJSFactory>rf)._loadRenderablesObjectsTemplate("",["SomeName"], specification).then(()=>{
                     return expect(s2.getCall(0).args[1]).eq(o1);
                 })
             })
             it("rejects on error",()=>{
-                return (<RenderablesThreeJSFactory>rf2)._loadRenderablesObjectsTemplate("",["SomeName"], specification.main).should.be.rejectedWith("Some error")
+                return (<RenderablesThreeJSFactory>rf2)._loadRenderablesObjectsTemplate("",["SomeName"], specification).should.be.rejectedWith("Some error")
             })
         })
         describe("_matchingChildren",()=>{
@@ -3536,13 +3651,11 @@ describe("Renderers",()=>{
                 o3.type = "Object3D"
                 o3.name = "My other name is"
 
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
+                specification = {                    
+                    name: "someName"                    
                 }
 
-                rf = new RenderablesThreeJSFactory(specification, l);
+                rf = new RenderablesThreeJSFactory(l);
             })
             it("returns items of type Object3D when no names provided",()=>{
                 const result = (<RenderablesThreeJSFactory>rf)._matchingChildren([o1,o2,o3],[]);
@@ -3564,11 +3677,9 @@ describe("Renderers",()=>{
                     load(){}
                 }
                 specification = {
-                    main: {
-                        name: "someName"
-                    }
+                    name: "someName"
                 }
-                rf = new RenderablesThreeJSFactory(specification, l);
+                rf = new RenderablesThreeJSFactory(l);
 
                 const geometry = new THREE.BoxGeometry( 1, 1, 1 );
                 material  = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
@@ -3616,40 +3727,18 @@ describe("Renderers",()=>{
                 l = {
                     load(){}
                 }
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
+                specification = {                    
+                    name: "someName"                    
                 }
-                rf = new RenderablesThreeJSFactory(specification, l);
+                rf = new RenderablesThreeJSFactory(l);
                 o1 = new THREE.Object3D();
             })
             it("adds template",()=>{
-                (<RenderablesThreeJSFactory>rf)._addTemplate("somename",o1, specification.main);
+                (<RenderablesThreeJSFactory>rf)._addTemplate("somename",o1, specification);
 
                 return expect( (<RenderablesThreeJSFactory>rf).templates.get("somename")!.object).eq(o1);
             })
-        })
-        describe("_findSpecificationItem",()=>{
-            beforeEach(()=>{
-                l = {
-                    load(){}
-                }
-                specification = {
-                    main: {
-                        name: "someName"
-                    }
-                }
-                rf = new RenderablesThreeJSFactory(specification, l);
-            })
-            it("finds matching",()=>{
-                const item = (<RenderablesThreeJSFactory>rf)._findSpecificationItem("someName");
-                return expect(item).is.not.undefined;
-            });
-            it("throws error when none found",()=>{
-                return expect(()=>{(<RenderablesThreeJSFactory>rf)._findSpecificationItem("otherName")}).to.throw("Can't find renderable specification item for");      
-            });
-        })
+        })        
     })
     describe("MapIndicator",()=>{
         let s1:SinonSpy;
@@ -3708,15 +3797,15 @@ describe("Renderers",()=>{
                     hide: ()=>{},
                     show: ()=>{}
                 }
-                tile = {id: "", t: "", x:0, y: 0};
-                tile2 = {id: "", t: "", x:10, y: 10};
-                tile3 = {id: "", t: "", x:20, y: 20};
+                tile = {id: "", t: {kind: "UNDEFINED"}, x:0, y: 0};
+                tile2 = {id: "", t: {kind: "UNDEFINED"}, x:10, y: 10};
+                tile3 = {id: "", t: {kind: "UNDEFINED"}, x:20, y: 20};
                 mapProvider = {
                     add: ()=>{},
                     scenePositionToYX: (_sceneX: number, _sceneY: number) => <TilePosition>{},
                     yxToScenePosition: (_y: number, _x: number)=><ScenePosition>{}                    
                 }
-                rf = new RenderablesDefaultFactory(<RenderablesSpecification>{});
+                rf = new RenderablesDefaultFactory();
                 indicator = new AreaMapIndicatorThreeJs(mapProvider, rf, "key");
                 s1 = sinon.spy(indicator,"hide");
                 s2 = sinon.stub(indicator,"render");
@@ -3842,24 +3931,12 @@ describe("Renderers",()=>{
     describe("UnitRenderablesThreeJSFactory", ()=>{
         describe("_generateNames",()=>{
             let l:any;
-            let unitsRenderablesSpecification:any;
+            
             
             beforeEach(()=>{
                 l = {
                     load(){}
-                }
-                unitsRenderablesSpecification = {
-                    // main: {
-                    //     name: "unitsAssets",
-                    //     url: "./assets/models-prod.gltf",
-                    //     pivotCorrection: "-0.5,-0.5,0"
-                    // }
-                    main: {
-                        name: "units",
-                        json: JSON.stringify(UNIT_RENDERABLES)                    
-                        // pivotCorrection: "0,0,0.12"
-                    }
-                }                
+                }            
             })
             afterEach(()=>{
 
@@ -3867,31 +3944,30 @@ describe("Renderers",()=>{
             it("prefers type with proper state and hitpoints",()=>{
                 
                 
-                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                let factory = new UnitRenderablesThreeJSFactory(l);
                 const names = factory._generateNames(UnitsMocks.unit3);                
                 return expect(names[0]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_${UnitsMocks.unit3.actionRunner.code}_${UnitsMocks.unit3.hitPoints}_UNIT`);
                 
             })
             it("prefers type with proper state and closest hitpoints when no matching hitpoints",()=>{
-                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                let factory = new UnitRenderablesThreeJSFactory(l);
                 const names = factory._generateNames(UnitsMocks.unit3);                
                 return expect(names[1]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_${UnitsMocks.unit3.actionRunner.code}_${UnitsMocks.unit3.hitPoints+1}_UNIT`);
             })
             it("prefers type with DEFAULT and hitpoints when no matching state",()=>{
-                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                let factory = new UnitRenderablesThreeJSFactory(l);
                 const names = factory._generateNames(UnitsMocks.unit3);                
                 return expect(names[10]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_DEFAULT_${UnitsMocks.unit3.hitPoints}_UNIT`);
             })
             it("prefers type with DEFAULT and closes hitpoints when no matching state and no matching hitpoints",()=>{
-                let factory = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                let factory = new UnitRenderablesThreeJSFactory(l);
                 const names = factory._generateNames(UnitsMocks.unit3);                
                 return expect(names[11]).eq(`${UnitsMocks.unit3.unitSpecification.tuid}_DEFAULT_${UnitsMocks.unit3.hitPoints+1}_UNIT`);
             })
             it("throws an error when no match at all is found",()=>{})
         })
         describe("spawn",()=>{
-            let l:any;
-            let unitsRenderablesSpecification:any;
+            let l:any;            
             let factory1:UnitRenderablesThreeJSFactory;
             let s1:SinonStub;
             let s2:SinonStub;
@@ -3908,28 +3984,16 @@ describe("Renderers",()=>{
             beforeEach(()=>{
                 l = {
                     load(){}
-                }
-                unitsRenderablesSpecification = {
-                    // main: {
-                    //     name: "unitsAssets",
-                    //     url: "./assets/models-prod.gltf",
-                    //     pivotCorrection: "-0.5,-0.5,0"
-                    // }
-                    main: {
-                        name: "units",
-                        json: JSON.stringify(UNIT_RENDERABLES)                    
-                        // pivotCorrection: "0,0,0.12"
-                    }
-                }  
+                }                 
                 names = ["somename","othername"];
-                factory1 = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                factory1 = new UnitRenderablesThreeJSFactory(l);
                 s1 = sinon.stub(factory1, "spawnRenderableObject");
                 s1.onFirstCall().throws("Some error");
                 s1.onSecondCall().returns(<any>{});
                 s2 = sinon.stub(factory1, "_generateNames").returns(names);
                 
 
-                factory2 = new UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, l);
+                factory2 = new UnitRenderablesThreeJSFactory(l);
                 s3 = sinon.stub(factory2, "spawnRenderableObject").throws("Some error");                
                 s4 = sinon.stub(factory2, "_generateNames").returns(names);
 

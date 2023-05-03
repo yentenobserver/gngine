@@ -64,23 +64,21 @@ class AppDemo {
 
         this.playground = p;
         const mapRenderablesSpecification = {
-            main: {
                 name: "mapAssets",
                 url: "./assets/tiles.gltf",
-                pivotCorrection: "-0.5,-0.433012701892219,0"
-            },
-            helpers: {
-                name: "mapHelpers",
-                json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
-                pivotCorrection: "0,0,0.12"
-            }
+                pivotCorrection: "-0.5,-0.433012701892219,0",
+                filterByNames: ["MAS"]                       
         }
-        let mapTileFactory = new gngine.RenderablesThreeJSFactory(mapRenderablesSpecification, new THREE.GLTFLoader());
+        const mapHelpersSpecification = {
+            name: "mapHelpers",
+            json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
+            pivotCorrection: "0,0,0.12",
+            filterByNames: ["MAP_HLPR_HIGHLIGHT"]
+        }
 
-        
-        
-        
-
+        let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());
+        await mapTileFactory.setSpecifications([mapRenderablesSpecification, mapHelpersSpecification])
+                        
         await p.attach(mainMapView);
         
         mainMapView._setupScene(); 
@@ -119,18 +117,15 @@ class AppDemo {
         hudRenderer.addComponent(navComp); 
 
         const unitsRenderablesSpecification = {
-            main: {
+            
                 name: "unitsAssets",
                 url: "./assets/units.gltf",
-                pivotCorrection: "0.15,-0.3,0.1"
-            }
-            // helpers: {
-            //     name: "mapHelpers",
-            //     json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
-            //     pivotCorrection: "0,0,0.12"
-            // }
+                pivotCorrection: "0.15,-0.3,0.1",
+                filterByNames:["_UNIT"]
+            
         }
-        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(unitsRenderablesSpecification, new THREE.GLTFLoader());
+        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+        await unitFactory.setSpecifications([unitsRenderablesSpecification]);
         const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, new gngine.HexFlatTopOrientationProviderThreeJs());
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
@@ -140,7 +135,7 @@ class AppDemo {
             "x": 1,
             "y": 0,
             "d": "S",
-            "t": "MAS_C_T_GRASS_1_TILE",
+            "t": {kind: "GRASSLANDS"},
             "r": "MAS_C_T_GRASS_1_TILE",
             "loc": {
               "n": "Grassland",
@@ -160,7 +155,7 @@ class AppDemo {
             "x": 0,
             "y": 1,
             "d": "S",
-            "t": "MAS_C_T_DIRT_1_TILE",
+            "t": {kind: "DIRTS"},
             "r": "MAS_C_T_DIRT_1_TILE",
             "loc": {
               "n": "Bushland",
@@ -180,7 +175,7 @@ class AppDemo {
             "x": 2,
             "y": 0,
             "d": "S",
-            "t": "MAS_C_T_DIRT_1_TILE",
+            "t": {kind: "DIRTS"},
             "r": "MAS_C_T_DIRT_1_TILE",
             "loc": {
               "n": "Bushland",

@@ -13,32 +13,36 @@ export enum TileTerrainWaterModifications{
 }
 
 export enum TileTerrainWaterKind {
-    SEA = "SEA",
-    OCEAN = "OCEAN",
-    LAKE = "LAKE",
+    UNDEFINED = "UNDEFINED",
+    SEAS = "SEAS",
+    OCEANS = "OCEANS",
+    LAKES = "LAKES",
     COASTAL = "COASTAL"    
 }
 
 export interface TileTerrainWater extends TileTerrain{
     kind: TileTerrainWaterKind
-    modifications: TileTerrainWaterModifications[]
+    modifications?: TileTerrainWaterModifications[]
 }
 
 export enum TileTerrainLandKind {
+    UNDEFINED = "UNDEFINED",
     MOUNTAINS = "MOUNTAINS",
     PLAINS = "PLAINS",
-    HILL = "HILL",
-    DESERT = "DESERT",
+    GRASSLANDS = "GRASSLANDS",
+    DIRTS = "DIRTS",
+    HILLS = "HILLS",
+    DESERTS = "DESERTS",
 }
 
 export interface TileTerrainLand extends TileTerrain{
     kind: TileTerrainLandKind,
-    modifications: TileTerrainLandModifications[]
+    modifications?: TileTerrainLandModifications[]
 }
 
 export interface TileTerrain{
     kind: any,
-    modifications: any[]
+    modifications?: any[]
 }
 
 export interface TileBase {
