@@ -101,6 +101,11 @@ class AppDemo {
                 url: "./assets/units.gltf",
                 // pivotCorrection: "0.15,-0.3,0.1"
                 autoPivotCorrection: true,
+                scaleCorrection: {
+                    // byFactor: 1.2
+                    autoFitSize: 0.45
+                },
+                groundLevel: 0.11
             
             // helpers: {
             //     name: "mapHelpers",

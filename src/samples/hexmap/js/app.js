@@ -122,7 +122,12 @@ class AppDemo {
                 url: "./assets/units.gltf",
                 // pivotCorrection: "0.15,-0.3,0.1",
                 autoPivotCorrection: true,
-                filterByNames:["_UNIT"]
+                filterByNames:["_UNIT"],
+                scaleCorrection: {
+                    // byFactor: 1.2
+                    autoFitSize: 0.33
+                },
+                groundLevel: 0.11
             
         }
         const unitFactory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());

@@ -7,14 +7,18 @@ export interface Renderable{
     show?: ()=>void;
     hide?: ()=>void;
 }
-
+export interface RenderableSpecificationScale{
+    byFactor: number, // scale by this factor, >1 enlarge, <1 make smaller
+    autoFitSize: number // size to fit for largest dimension, will be scalled accordingly
+}
 export interface RenderableSpecification {
     name: string,
     url?: string,
     json?: string,
     filterByNames?:string[],
     pivotCorrection?: string,
-    scaleCorrection?: number,
+    groundLevel?: number,
+    scaleCorrection?: RenderableSpecificationScale,
     autoPivotCorrection?: boolean // important it is assumed that previous pivot point is in the "lower left (x,y)" position. 
 }
 
@@ -94,9 +98,10 @@ export interface RenderableTemplateThreeJS {
 }
 
 export class RenderablesThreeJSFactory extends RenderablesFactory {
+    readonly DEFAULT_SCALE_TARGET_SIZE:number = 1;
+    readonly DEFAULT_GROUND_LEVEL:number = 0.1;
     
-    
-    // templates:Map<string, THREE.Object3D>;
+    // template:Map<string, THREE.Object3D>;
     templates:Map<string, RenderableTemplateThreeJS>;
     loader: any; // threejs objects loader
     
@@ -104,6 +109,32 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         super();
         this.loader = loader;
         this.templates = new Map<string, RenderableTemplateThreeJS>();        
+    }
+
+    _scale(objectName: string, object3D:Object3D, scaleSpecs?:RenderableSpecificationScale){
+        // first handle scale
+        if(scaleSpecs&&scaleSpecs.byFactor){
+            // manual scale correction
+            if(scaleSpecs.byFactor<=0)
+                throw new Error(`Can't apply scale correction for specification ${objectName}`)                
+                object3D.scale.set(scaleSpecs.byFactor, scaleSpecs.byFactor, scaleSpecs.byFactor);                                
+        }else{
+            // when no auto scale provided then autoscale to 1, otherwise scale as provided
+            let targetSize = scaleSpecs&&scaleSpecs.autoFitSize?scaleSpecs.autoFitSize:this.DEFAULT_SCALE_TARGET_SIZE;
+
+            const bbBox = new Box3();
+            const sizeVector = new Vector3();                
+            bbBox.setFromObject(object3D).getSize(sizeVector);                
+            console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
+            
+            const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
+            const scale = targetSize/maxSize
+            console.log(`Scale is: ${scale}`);
+            object3D.scale.set(scale, scale, scale);                          
+
+            bbBox.setFromObject(object3D).getSize(sizeVector);                      
+            console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
+        } 
     }
 
     /**
@@ -133,26 +164,42 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             wrap.receiveShadow = true;
 
             // first handle scale
-            if(specification.scaleCorrection){
-                // manual scale correction
-                if(specification.scaleCorrection<=0)
-                    throw new Error(`Can't apply scale correction for specification ${objectName}`)                
-                cloned.scale.set(specification.scaleCorrection, specification.scaleCorrection,specification.scaleCorrection);                                
-            }else{
-                // automatic scale correction
-                const bbBox = new Box3();
-                const sizeVector = new Vector3();                
-                bbBox.setFromObject(cloned).getSize(sizeVector);                
-                console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
-                
-                const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
-                const scale = 1/maxSize
-                console.log(`Scale is: ${scale}`);
-                cloned.scale.set(scale, scale, scale);                          
+            this._scale(objectName, cloned, specification.scaleCorrection);
 
-                bbBox.setFromObject(cloned).getSize(sizeVector);                      
-                console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
-            }
+            // if(specification.scaleCorrection&&specification.scaleCorrection.byFactor){
+            //     // manual scale correction
+            //     if(specification.scaleCorrection.byFactor<=0)
+            //         throw new Error(`Can't apply scale correction for specification ${objectName}`)                
+            //     cloned.scale.set(specification.scaleCorrection.byFactor, specification.scaleCorrection.byFactor,specification.scaleCorrection.byFactor);                                
+            // }else if(specification.scaleCorrection&&specification.scaleCorrection.autoFitSize){
+            //     const bbBox = new Box3();
+            //     const sizeVector = new Vector3();                
+            //     bbBox.setFromObject(cloned).getSize(sizeVector);                
+            //     console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
+                
+            //     const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
+            //     const scale = specification.scaleCorrection.autoFitSize/maxSize
+            //     console.log(`Scale is: ${scale}`);
+            //     cloned.scale.set(scale, scale, scale);                          
+
+            //     bbBox.setFromObject(cloned).getSize(sizeVector);                      
+            //     console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
+            // }
+            // else{
+            //     // automatic scale correction with max size 1
+            //     const bbBox = new Box3();
+            //     const sizeVector = new Vector3();                
+            //     bbBox.setFromObject(cloned).getSize(sizeVector);                
+            //     console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
+                
+            //     const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
+            //     const scale = 1/maxSize
+            //     console.log(`Scale is: ${scale}`);
+            //     cloned.scale.set(scale, scale, scale);                          
+
+            //     bbBox.setFromObject(cloned).getSize(sizeVector);                      
+            //     console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
+            // }
 
             // then make pivot correction
 
@@ -195,9 +242,11 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
 
             }
 
-            // else{
-            //     result = cloned
-            // }
+            if(!isNaN(specification.groundLevel!)){
+                cloned.position.setZ(specification.groundLevel!)
+            }
+
+            
             
             wrap.add(cloned);
             result = wrap;
