@@ -125,15 +125,15 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             const bbBox = new Box3();
             const sizeVector = new Vector3();                
             bbBox.setFromObject(object3D).getSize(sizeVector);                
-            console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
+            // console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
             
             const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
             const scale = targetSize/maxSize
-            console.log(`Scale is: ${scale}`);
+            // console.log(`Scale is: ${scale}`);
             object3D.scale.set(scale, scale, scale);                          
 
             bbBox.setFromObject(object3D).getSize(sizeVector);                      
-            console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
+            // console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
         } 
     }
 
@@ -234,11 +234,11 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 const sizeVector = new Vector3();                
                 bbBox.setFromObject(cloned).getSize(sizeVector);   
                                 
-                console.log(`${objectName} Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
+                // console.log(`${objectName} Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
 
                 // const correction:THREE.Vector3 = new THREE.Vector3(vectorXYZ[0], vectorXYZ[1], vectorXYZ[2])                                                      
                 cloned.position.set(-sizeVector.x/2,-sizeVector.y/2, cloned.position.z);                    
-                console.log(`${objectName}  Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
+                // console.log(`${objectName}  Auto Pivot Correction - after pos ${JSON.stringify(cloned.position)}`)
 
             }
 
@@ -254,7 +254,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             const sizeVector = new Vector3();                
             bbBox.setFromObject(wrap).getSize(sizeVector);   
 
-            console.log(`${objectName} Final renderable data. Position object: ${JSON.stringify(cloned.position)} Position wrap: ${JSON.stringify(wrap.position)}. Size: ${JSON.stringify(sizeVector)}`)
+            // console.log(`${objectName} Final renderable data. Position object: ${JSON.stringify(cloned.position)} Position wrap: ${JSON.stringify(wrap.position)}. Size: ${JSON.stringify(sizeVector)}`)
             return {
                 name: objectName,
                 data: result,                

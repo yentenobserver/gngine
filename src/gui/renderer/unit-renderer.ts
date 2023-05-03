@@ -464,8 +464,8 @@ export class UnitsRendererThreeJS extends UnitsRenderer {
 
         this.holderObject.add(object3D);
         object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)
-        console.log(`Putting unit ${unit.uid}(${unit.unitSpecification.name}) at tile ${_at?.id}`)
-        console.log(`Position is ${JSON.stringify(object3D.position)}`)
+        // console.log(`Putting unit ${unit.uid}(${unit.unitSpecification.name}) at tile ${_at?.id}`)
+        // console.log(`Position is ${JSON.stringify(object3D.position)}`)
         // this._directionRotate(object3D, cDirection)
         this.orientationProvider.orientate(object3D, unitDirection);
         
