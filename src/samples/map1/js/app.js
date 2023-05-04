@@ -162,9 +162,9 @@ class AppDemo {
             }
           }
           const tile3 = {
-            "id": "0,2",
+            "id": "2,1",
             "x": 2,
-            "y": 0,
+            "y": 1,
             "d": "S",
             "t": {"kind": "PLAINS"},
             "loc": {
