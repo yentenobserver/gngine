@@ -16,7 +16,7 @@ class GUIEngine {
         }
 
     }
-    static async getInstance(canvas, emitter, tileAssetsSpecificationJSON, kind, mapSize){
+    static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize){
         const p = new GUIEngine();
 
         const playgroundAndView = await p._preparePlaygroundAndView(canvas, emitter);
@@ -24,7 +24,7 @@ class GUIEngine {
         p._playground = playgroundAndView.playground;
         p._map.hudView = playgroundAndView.hudView;
 
-        p._tiles.assetFactory = await p._prepareFactory(tileAssetsSpecificationJSON, kind);     
+        p._tiles.assetFactory = await p._prepareFactory(tileAssetsSpecificationsJSON, kind);     
         p._tiles.renderer = await p._prepareRenderer(mapSize, kind, p._tiles.assetFactory, p._map.mainView, emitter);
 
         const widthHeight = mapSize.split("x").map((item)=>{return item.trim()});
@@ -98,26 +98,30 @@ class GUIEngine {
 
         if(assetJsonObject&&assetJsonObject.metadata&&assetJsonObject.metadata.type){
             // Prepare Renderables Factory
-            specification = {           
-                main: {
+            specification = [{           
+                
                     name: "main",
                     json: JSON.stringify(assetJsonObject),                    
                     // pivotCorrection: "0.15,-0.3,0.1",
-                    autoPivotCorrection: true
+                    autoPivotCorrection: true,
                     // scaleCorrection: 0.01
-                }
-            }
+                    scaleCorrection: {
+                        // byFactor: 1.2
+                        autoFitSize: 1                
+                    },
+                    filterByNames: kind == "Unit"?["_UNIT"]:["MAS"]
+            }]
         }else{
             specification = assetJsonObject
         }
         
         let factory = {};
         if(kind == "Unit"){
-            factory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
-            await factory.loadTemplates(["_UNIT"]);            
+            factory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+            await factory.setSpecifications(specification);
         }else if (kind == "HexTile" || kind == "QuadTile"){
-            factory = new gngine.RenderablesThreeJSFactory(specification, new THREE.GLTFLoader());            
-            await factory.loadTemplates(["MAS"]);            
+            factory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());            
+            await factory.setSpecifications(specification);
         }
         // console.log(factory.spawnableRenderablesNames());
 
@@ -146,11 +150,24 @@ class GUIEngine {
 
     async _mapChangeTile(tile, asset){
         const theTile = JSON.parse(JSON.stringify(tile));
-        theTile.r = asset.variant.fullName;
+        theTile.r = asset.variant.fullName;        
 
         const availableSpecificationsNames = this._tiles.assetFactory.spawnableRenderablesNames();
         if(!availableSpecificationsNames.join(",").includes(theTile.r)){
-
+            // load specification as it's missing from the factory
+            const specs = {
+                name: `${asset.specs.name}_${asset.specs.id}`,
+                json: JSON.stringify(asset.variant.renderableJSON),                    
+                // pivotCorrection: "0.15,-0.3,0.1",
+                autoPivotCorrection: true,
+                // scaleCorrection: 0.01
+                scaleCorrection: {
+                    // byFactor: 1.2
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAS_"]
+            }
+            await this._tiles.assetFactory.setSpecifications([specs]);
         }
         
         this._tiles.renderer.put(theTile, theTile.d);
@@ -471,21 +488,31 @@ class App {
         
         that.model.game.canvas = canvas;
 
-        const mapRenderablesSpecification = {
-            placeholder: {
+        const mapRenderablesSpecifications = [
+            {         
                 name: "mapPlaceholder",
                 json: mapCharacteristics.kind == "HexTile" ? JSON.stringify(gngine.RENDERABLES.MAP.HEX.placeholder):JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.placeholder),                    
-                autoPivotCorrection: true
+                autoPivotCorrection: true,                                
+                scaleCorrection: {
+                    // byFactor: 1.2
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAS_PLACEHOLDER_TILE"]
             },
-            helpers: {
+            {
                 name: "mapHelpers",
                 json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
-                pivotCorrection: "0,0,0.12"
+                pivotCorrection: "0,0,0.12",
+                scaleCorrection: {
+                    // byFactor: 1.2
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAP_HLPR_HIGHLIGHT"]
             }
-        }
+        ]
 
 
-        const guiEngine = await GUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecification, mapCharacteristics.kind, mapCharacteristics.size);
+        const guiEngine = await GUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size);
 
         that.guiEngine = guiEngine;
 
