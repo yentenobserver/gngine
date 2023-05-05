@@ -168,25 +168,31 @@
                                 <div class="content">
                                   <p>
                                     <strong>Asset</strong> 
+                                    <br>{model.selected.tile.asset.specs.name}<small><a class="mx-1" rv-on-click="_handleShowAssetBrowser">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                        Change
+                                    </a></small><br>                                     
+                                    
+                                    <small>
+                                        <strong>Code: </strong>{model.selected.tile.asset.variant.fullName}                                        
+                                    </small><br>                                    
+                                    <small><strong>Location: </strong>({model.selected.tile.data.id})</small>
+                                    <small>[col-xq: {model.selected.tile.data.x}, row-yr: {model.selected.tile.data.y}]</small> 
                                     <br>                                    
-                                    <small>{model.selected.tile.asset.specs.name}
-                                        <a rv-on-click="_handleShowAssetBrowser">
-                                            <span class="icon is-small">
-                                                <i class="fas fa-search"></i>
-                                            </span>
-                                            Change
-                                        </a>
-                                    </small>                                    
-                                    <br>
+                                    
+                                    
                                     <small><span rv-each-tag="model.selected.tile.asset.specs.tags" class="tag is-light mx-1">{tag}</span></small>
                                   </p>
                                 </div>                                
                               </div>
                             </article>
                             <nav class="panel my-2 is-hidden" rv-class-is-hidden="model.assets.hidden">
-                                <p class="panel-heading">
-                                  Asset Repository
-                                </p>
+                                <div class="panel-heading">
+                                  Asset Repository<button class="delete mx-1" rv-on-click="_handleHideAssetBrowser"></button>
+                                </div>
+                                
                                 <div class="panel-block">
                                   <p class="control has-icons-left">
                                     <input class="input" type="text" placeholder="Search" rv-on-input="_handleFilter" rv-value="model.assets.filter">
@@ -258,14 +264,11 @@
                                 </label> -->
                                 <div class="panel-block">
                                   <button class="button is-link is-outlined is-fullwidth" rv-on-click="_handleHideAssetBrowser">
-                                    Cancel
+                                    Close
                                   </button>
                                 </div>
                             </nav>
-                        </div>
-                        <div class="box">
-                            I'm in a box.
-                        </div>
+                        </div>                        
                     </div>
                 </div>           
             </div>
