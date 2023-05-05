@@ -8,8 +8,8 @@ export interface Renderable{
     hide?: ()=>void;
 }
 export interface RenderableSpecificationScale{
-    byFactor: number, // scale by this factor, >1 enlarge, <1 make smaller
-    autoFitSize: number // size to fit for largest dimension, will be scalled accordingly
+    byFactor?: number, // scale by this factor, >1 enlarge, <1 make smaller
+    autoFitSize?: number // size to fit for largest dimension, will be scalled accordingly
 }
 export interface RenderableSpecification {
     name: string,

@@ -2730,6 +2730,7 @@ describe("Renderers",()=>{
             })
         })
         describe("put",()=>{
+            let sx1:SinonSpy;
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);                
                 rf = new RenderablesDefaultFactory();
@@ -2744,6 +2745,7 @@ describe("Renderers",()=>{
                     data: new THREE.Object3D(),
                     name:"name"
                 });
+                sx1 = sinon.spy(map, "remove");
             })
             afterEach(()=>{
                 s1.restore();
@@ -2778,6 +2780,10 @@ describe("Renderers",()=>{
             it("defaults to S-south when none provided",()=>{
                 map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4});                
                 return expect(s3.getCall(0).args[1]).eq("S");
+            })
+            it("tries to remove existing tile",()=>{
+                map.put({id: "id", t: {kind: "UNDEFINED"}, x:4, y: 4});                
+                return expect(sx1.callCount).eq(1);
             })
         })
         describe("scenePositionToXY",()=>{
@@ -3232,7 +3238,9 @@ describe("Renderers",()=>{
                     
                         name: T1,
                         pivotCorrection: "0.1,0.1,0.1",
-                        scaleCorrection: 2.0
+                        scaleCorrection: {
+                            byFactor: 2.0
+                        }
                     
                 }
                 specification2 = {
@@ -3311,7 +3319,7 @@ describe("Renderers",()=>{
             it("applies scale correction when requested in specification",()=>{                
                 rf.spawnRenderableObject(T1);
                 const call = s4.getCall(0);
-                return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: specification.scaleCorrection, y: specification.scaleCorrection, z: specification.scaleCorrection}));
+                return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: specification.scaleCorrection?.byFactor, y: specification.scaleCorrection?.byFactor, z: specification.scaleCorrection?.byFactor}));
             })
             it("not applies pivot correction when not specified",()=>{
                 const spawned = rf2.spawnRenderableObject(T1);
@@ -3329,7 +3337,7 @@ describe("Renderers",()=>{
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply pivot correction for specification");                    
             })  
             it("throws error on invalid scale specification (scale must be positive)",()=>{
-                specification.scaleCorrection = -1
+                specification.scaleCorrection!.byFactor = -1
                 return expect(()=>{rf.spawnRenderableObject.bind(rf)(T1)}).to.throw("Can't apply scale correction for specification");                    
             })  
             it("spawns renderable that can be hidden",()=>{
