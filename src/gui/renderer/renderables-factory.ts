@@ -112,6 +112,13 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
     }
 
     _scale(objectName: string, object3D:Object3D, scaleSpecs?:RenderableSpecificationScale){
+        const bbBox = new Box3();
+        const sizeVector = new Vector3();                
+        bbBox.setFromObject(object3D).getSize(sizeVector);                
+        // console.log(`${objectName}  Auto Scale Correction - initial size ${JSON.stringify(sizeVector)}`)
+        // console.log(`Initial scale: ${JSON.stringify(object3D.scale)}`)
+        // first preset scale to 1
+        object3D.scale.set(1, 1, 1);                          
         // first handle scale
         if(scaleSpecs&&scaleSpecs.byFactor){
             // manual scale correction
@@ -122,8 +129,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             // when no auto scale provided then autoscale to 1, otherwise scale as provided
             let targetSize = scaleSpecs&&scaleSpecs.autoFitSize?scaleSpecs.autoFitSize:this.DEFAULT_SCALE_TARGET_SIZE;
 
-            const bbBox = new Box3();
-            const sizeVector = new Vector3();                
+            
             bbBox.setFromObject(object3D).getSize(sizeVector);                
             // console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
             
@@ -167,42 +173,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
 
             // first handle scale
             this._scale(objectName, cloned, specification.scaleCorrection);
-
-            // if(specification.scaleCorrection&&specification.scaleCorrection.byFactor){
-            //     // manual scale correction
-            //     if(specification.scaleCorrection.byFactor<=0)
-            //         throw new Error(`Can't apply scale correction for specification ${objectName}`)                
-            //     cloned.scale.set(specification.scaleCorrection.byFactor, specification.scaleCorrection.byFactor,specification.scaleCorrection.byFactor);                                
-            // }else if(specification.scaleCorrection&&specification.scaleCorrection.autoFitSize){
-            //     const bbBox = new Box3();
-            //     const sizeVector = new Vector3();                
-            //     bbBox.setFromObject(cloned).getSize(sizeVector);                
-            //     console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
-                
-            //     const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
-            //     const scale = specification.scaleCorrection.autoFitSize/maxSize
-            //     console.log(`Scale is: ${scale}`);
-            //     cloned.scale.set(scale, scale, scale);                          
-
-            //     bbBox.setFromObject(cloned).getSize(sizeVector);                      
-            //     console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
-            // }
-            // else{
-            //     // automatic scale correction with max size 1
-            //     const bbBox = new Box3();
-            //     const sizeVector = new Vector3();                
-            //     bbBox.setFromObject(cloned).getSize(sizeVector);                
-            //     console.log(`${objectName}  Auto Scale Correction - before size ${JSON.stringify(sizeVector)}`)
-                
-            //     const maxSize = Math.max(Math.max(sizeVector.x, sizeVector.y),sizeVector.z);
-            //     const scale = 1/maxSize
-            //     console.log(`Scale is: ${scale}`);
-            //     cloned.scale.set(scale, scale, scale);                          
-
-            //     bbBox.setFromObject(cloned).getSize(sizeVector);                      
-            //     console.log(`${objectName}  Auto Scale Correction - after size ${JSON.stringify(sizeVector)}`)
-            // }
-
+        
             // then make pivot correction
 
             if(specification.pivotCorrection){

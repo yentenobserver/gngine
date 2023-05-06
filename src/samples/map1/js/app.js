@@ -323,5 +323,31 @@ class AppDemo {
         const result = JSON.stringify(that.model.selected.unit.toJSON());
         console.log(result);
     }
+
+    downloadJson(object, name) {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(object));
+        if(document && document.body){
+            var element = document.createElement('a');
+            element.setAttribute("href", dataStr);
+            element.setAttribute("download", name + ".json");
+            document.body.appendChild(element); // required for firefox
+            element.click();
+            element.remove();
+        }
+        
+    }
+
+    // download(filename, text) {
+    //     var element = document.createElement('a');
+    //     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    //     element.setAttribute('download', filename);
+    
+    //     element.style.display = 'none';
+    //     document.body.appendChild(element);
+    
+    //     element.click();
+    
+    //     document.body.removeChild(element);
+    // }
 }
 

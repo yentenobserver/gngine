@@ -1,3 +1,17 @@
+class MapEngine {
+    constructor(){
+        this._engine = {}
+    }
+
+    static async getInstance(kind, mapSize, tiles){
+        const widthHeight = mapSize.split("x").map((item)=>{return item.trim()});
+
+        const r = new MapEngine();
+        r._engine = kind == "HexTile"?new gngine.MapHexOddQ(widthHeight[0],widthHeight[1]):new gngine.MapSquare(widthHeight[0],widthHeight[1]);
+        r._engine.fromTiles(tiles);
+        return r;
+    }        
+}
 class GUIEngine {
 
     constructor(){
@@ -12,11 +26,12 @@ class GUIEngine {
         }
 
         this.map = {
-            changeTile: this._mapChangeTile.bind(this)
+            changeTile: this._mapChangeTile.bind(this),
+            
         }
 
     }
-    static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize){
+    static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize, tiles){
         const p = new GUIEngine();
 
         const playgroundAndView = await p._preparePlaygroundAndView(canvas, emitter);
@@ -27,24 +42,27 @@ class GUIEngine {
         p._tiles.assetFactory = await p._prepareFactory(tileAssetsSpecificationsJSON, kind);     
         p._tiles.renderer = await p._prepareRenderer(mapSize, kind, p._tiles.assetFactory, p._map.mainView, emitter);
 
-        const widthHeight = mapSize.split("x").map((item)=>{return item.trim()});
+        // const widthHeight = mapSize.split("x").map((item)=>{return item.trim()});
+        
+        for(let i=0; i<tiles.length; i++){
+            const tile = tiles[i];
+            p._tiles.renderer.put(tile, tile.d);
+        }
+        // for(let c = 0; c<widthHeight[0];c++){
+        //     for(let r = 0; r<widthHeight[1]; r++){
+        //         const tile = tiles[]
 
-        for(let c = 0; c<widthHeight[0];c++){
-            for(let r = 0; r<widthHeight[1]; r++){
-                const tile = {
-                    "id": `${c},${r}`,
-                    "x": `${c}`,
-                    "y": `${r}`,
-                    "d": "S",
-                    "r": "MAS_PLACEHOLDER_TILE",
-                    "t": "PLAIN"                    
-                }
-
-                p._tiles.renderer.put(tile, tile.d);
-            }
-        }    
+        //         p._tiles.renderer.put(tile, tile.d);
+        //     }
+        // }    
+    
         return p;                
     }
+
+    async addTileSpecifications(specifications){
+        await this._tiles.assetFactory.setSpecifications(specifications);
+    }
+    
 
     async _preparePlaygroundAndView(canvas, emitter){
         const playgroundOptions = {
@@ -189,6 +207,14 @@ class App {
             process: {
                 step: "ChooseKind" //
             },
+            stepUseJson: {
+                form: {
+                    contents: {
+                        value: "",
+                        error: ""
+                    },
+                }
+            },
             stepUseWizard: {
                 form:{
                     name: {
@@ -240,20 +266,26 @@ class App {
             },
             handlers: {
                 _handleChangeAsset: this._handleChangeAsset.bind(this)
+            },
+            mapCharacteristics: {
+                name: "",
+                kind: "",
+                size: "",
+                tags: [],
+                address: "",
+                latlon: []
             }
 
         }   
-        this.guiEngine = {}     
-        // this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
-        // this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
+        this.guiEngine = {}  
+        this.mapEngine = {}   
+        
         
     }
 
     static async getInstance(emitter, mapCanvas){
         const a = new App(emitter, mapCanvas)
-        await a._start();
-        await a._loadAssetsSpecifications();
-        await a._applyAssetFilter();
+        await a._start();        
         return a;
     }
 
@@ -273,61 +305,7 @@ class App {
             }            
         })
 
-        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
-            if(event.originalEvent.type=="pointerdown") {
-                
 
-                // console.log('UNIT', event)
-                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
-                    if(event.data.hierarchy[i].userData.unitData){                
-                        const unitData = event.data.hierarchy[i].userData.unitData                                            
-                        that.model.selected.unitData = unitData
-                        that.model.selected.unitDataStr = JSON.stringify(unitData, null, "\t");
-                        that.model.selected.unitDataStr = that.model.selected.unitDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
-                    //     output = JSON.stringify( output, null, '\t' );
-			        // output = output
-                    }
-                }
-                that.model.selected.unit = event.interactingObject;
-                that.model.selected.unit.worldPosition = event.worldPosition;
-                // console.log(that.model.selected.unit);
-            }
-            
-        });
-
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE,async (event)=>{
-            if(event.originalEvent.type=="pointerdown") {
-                // console.log('TILE', event)
-                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
-                    if(event.data.hierarchy[i].userData.tileData){                
-                        const tileData = event.data.hierarchy[i].userData.tileData                    
-                        window.mgr_tiles.push(tileData);
-                        
-
-                        // that.model.selected.tileData = tileData
-                        // that.model.selected.tileDataStr = JSON.stringify(tileData, null, "\t");
-                        // that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
-
-
-                        that.model.selected.tile.data = tileData;
-
-                    //     output = JSON.stringify( output, null, '\t' );
-			        // output = output
-                    }
-                }
-                // that.model.selected.tile = event.interactingObject
-                // that.model.selected.tile.worldPosition = event.worldPosition
-
-                that.model.selected.tile.renderable.item = event.interactingObject;
-                that.model.selected.tile.renderable.worldPosition = event.worldPosition;
-
-                console.log('TILE',that.model.selected.tile);
-
-                const assetSpecification = await that._findAssetSpecification(that.model.selected.tile.data.r);
-
-                that.model.selected.tile.asset = assetSpecification;
-            };                                    
-        });
     }
 
     async _handleHideAssetBrowser(e, that){
@@ -344,13 +322,16 @@ class App {
         console.log(that.item);
         console.log(that.model.selected);
         that.model.parent.guiEngine.map.changeTile(that.model.selected.tile.data, that.item);
+        const newTile = JSON.parse(JSON.stringify(that.model.selected.tile.data));
+        newTile.r = that.item.variant.fullName;        
+        that.model.parent.mapEngine._engine.put(newTile);
     }
 
-    async _loadAssetsSpecifications(){
+    async _loadAssets(kind){
         this.model.assets.original = [];
         this.model.assets.filtered = [];
 
-        const assetsSpecs = await this.loadAsset("./assets/assets.json", "JSON");
+        const assetsSpecs = await this.loadAsset(`./assets/${kind =="HexTile"?"hex":"quad"}/assets.json`, "JSON");
         for(let i=0; i<assetsSpecs.length; i++){
             const item = assetsSpecs[i];
 
@@ -377,10 +358,12 @@ class App {
     }
 
 
-    async _findAssetSpecification(renderableName){
+    async _findAsset(renderableName){
         // const assetsSpecs = []
 
-        const assetsSpecs = await this.loadAsset("./assets/assets.json", "JSON");
+        // const assetsSpecs = await this.loadAsset(`./assets/${kind =="HexTile"?"hex":"quad"}/assets.json`, "JSON");
+
+        const assetsSpecs = this.model.assets.original;
 
         let result = {
             specs: {},
@@ -411,18 +394,13 @@ class App {
         for(let i=0; i<assetsSpecs.length; i++){
             const item = assetsSpecs[i];
 
-            const matching = item.variants.find((subitem)=>{
-                return subitem.fullName.trim().toLowerCase() == renderableName.trim().toLowerCase();
-            })
-            if(matching){
-                result.specs = item;
-                result.variant = matching;
+            if(item.variant.fullName.trim().toLowerCase() == renderableName.trim().toLowerCase()){
+                result = item
                 break;
-            }                
-        }
+            }
 
-        return result;
-        
+        }
+        return result;        
     }
 
     async _handleStepChooseKind(e, that){
@@ -475,8 +453,102 @@ class App {
         }
     }
 
-    async _startMap(mapCharacteristics){
+    async _handleStepUseJson(e, that){
+        that.model.process.step =  e.target.dataset.nextStep;
+
+        if(that.model.process.step == "ChooseKind"){
+            //clear form
+            that.model.stepUseJson.form = {
+                contents: {
+                    value: "",
+                    error: ""
+                }                
+            }
+            return
+        }
+
+        let map;
+
+        try{
+            map = JSON.parse(that.model.stepUseJson.form.contents.value)
+
+            if(!map.specs)
+                throw new Error(`Incorrect specification. "specs" element is missing`)
+            if(!map.tiles)
+                throw new Error(`Incorrect specification. "tiles" array is missing`)
+        }catch(error){
+            that.model.stepUseJson.form.contents.error = new Error(`Invalid map file contents: ${error.message}`)
+            that.model.process.step = "UseJson"
+            return;
+        }
+
+        if(that.model.process.step == "MapEdit"){
+            that._startMap(map.specs, map.tiles)
+        }
+    }
+
+    async _startMap(mapCharacteristics, tiles){
+
         const that = this;
+        this.model.mapCharacteristics = mapCharacteristics;
+        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
+            if(event.originalEvent.type=="pointerdown") {
+                
+
+                // console.log('UNIT', event)
+                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                    if(event.data.hierarchy[i].userData.unitData){                
+                        const unitData = event.data.hierarchy[i].userData.unitData                                            
+                        that.model.selected.unitData = unitData
+                        that.model.selected.unitDataStr = JSON.stringify(unitData, null, "\t");
+                        that.model.selected.unitDataStr = that.model.selected.unitDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+                    //     output = JSON.stringify( output, null, '\t' );
+			        // output = output
+                    }
+                }
+                that.model.selected.unit = event.interactingObject;
+                that.model.selected.unit.worldPosition = event.worldPosition;
+                // console.log(that.model.selected.unit);
+            }
+            
+        });
+
+        this.emitter.on(gngine.Events.INTERACTIONS.TILE,async (event)=>{
+            if(event.originalEvent.type=="pointerdown") {
+                // console.log('TILE', event)
+                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+                    if(event.data.hierarchy[i].userData.tileData){                
+                        const tileData = event.data.hierarchy[i].userData.tileData                    
+                        window.mgr_tiles.push(tileData);
+                        
+
+                        // that.model.selected.tileData = tileData
+                        // that.model.selected.tileDataStr = JSON.stringify(tileData, null, "\t");
+                        // that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+
+
+                        that.model.selected.tile.data = tileData;
+
+                    //     output = JSON.stringify( output, null, '\t' );
+			        // output = output
+                    }
+                }
+                // that.model.selected.tile = event.interactingObject
+                // that.model.selected.tile.worldPosition = event.worldPosition
+
+                that.model.selected.tile.renderable.item = event.interactingObject;
+                that.model.selected.tile.renderable.worldPosition = event.worldPosition;
+
+                console.log('TILE',that.model.selected.tile);
+
+                const assetSpecification = await that._findAsset(that.model.selected.tile.data.r);
+
+                that.model.selected.tile.asset = assetSpecification;
+            };                                    
+        });
+
+        await this._loadAssets(mapCharacteristics.kind);
+        await this._applyAssetFilter();
         // remove previously instantiated map
         if(that.model.game.canvas && that.model.game.canvas.nodeName && that.model.game.canvas.nodeName.toLowerCase() == "canvas"){
             document.getElementById("map-holder").removeChild(that.model.game.canvas);
@@ -510,18 +582,106 @@ class App {
                 filterByNames: ["MAP_HLPR_HIGHLIGHT"]
             }
         ]
+        if(!tiles){
+            tiles = [];
+            const widthHeight = mapCharacteristics.size.split("x").map((item)=>{return item.trim()});
 
+            for(let c = 0; c<widthHeight[0];c++){
+                for(let r = 0; r<widthHeight[1]; r++){
+                    const tile = {
+                        "id": `${c},${r}`,
+                        "x": `${c}`,
+                        "y": `${r}`,
+                        "d": "S",
+                        "r": "MAS_PLACEHOLDER_TILE",
+                        "t": {"kind": "UNDEFINED"}                 
+                    }
+                    tiles.push(tile);
+                }
+            }
+        }
 
-        const guiEngine = await GUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size);
+        //this.model.assets.original
 
+        // get all unique "r" renderable keys for map items
+        let map = new Map();
+        tiles.forEach((item)=>{
+            map.set(item.r,item);
+        })
+
+        const uniqueRs = Array.from(map.keys());
+
+        for(let i=0; i< uniqueRs.length; i++){
+            
+            const asset = await that._findAsset(uniqueRs[i]);
+
+            const specs = {         
+                name: `${asset.specs.name}_${asset.specs.id}`,
+                json: JSON.stringify(asset.variant.renderableJSON),                                    
+                autoPivotCorrection: true,                
+                scaleCorrection: {                    
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAS_"]
+            }
+            // add additional specifications required by map
+            mapRenderablesSpecifications.push(specs);
+        }
+                
+
+            
+        
+                
+        const guiEngine = await GUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles);
+        const mapEngine = await MapEngine.getInstance(mapCharacteristics.kind, mapCharacteristics.size, tiles)
         that.guiEngine = guiEngine;
+        that.mapEngine = mapEngine;
 
+    }
+
+    async _handleExportMap(e, that){
+        // export interface TileSpecs {
+        //     tile: TileBase,
+        //     asset: AssetSpecs
+        // }
+        // export interface MapSpecs {
+        //     name: string,
+        //     kind: string,
+        //     size: string,
+        //     tags: string[],
+        //     address: string,
+        //     latlon: string[]
+        // }
+        // export interface Map {
+        //     specs: MapSpecs,
+        //     tiles: TileSpecs[]
+        // }
+        const result = {
+            specs: {},
+            tiles: []
+        }
+        result.specs = that.model.mapCharacteristics
+        result.tiles = Array.from(that.mapEngine._engine.theMap.values());
+
+        navigator.clipboard.writeText(JSON.stringify(result));
+
+        that._downloadJson(result, result.specs.name)
 
     }
 
 
-
-
+    async _downloadJson(object, name) {
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(object));
+        if(document && document.body){
+            var element = document.createElement('a');
+            element.setAttribute("href", dataStr);
+            element.setAttribute("download", name + ".json");
+            document.body.appendChild(element); // required for firefox
+            element.click();
+            element.remove();
+        }
+        
+    }
 
 
 
@@ -541,300 +701,6 @@ class App {
         })
     }
 
-
-
-    // async processAddAsset(assetJsonObject){
-    //     let that = this;
-
-    //     const specification = {           
-    //         main: {
-    //             name: "main",
-    //             json: JSON.stringify(assetJsonObject),                    
-    //             pivotCorrection: "0.15,-0.3,0.1",
-    //             // scaleCorrection: 0.01
-    //         }
-    //     }
-    //     // const specification = {           
-    //     //     main: {
-    //     //         name: "main",
-    //     //         url: "../hexmap/assets/units.gltf",
-    //     //         pivotCorrection: "0.15,-0.3,0.1"
-    //     //     }
-    //     // }
-    //     const unitFactory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
-    //     await unitFactory.loadTemplates(["_UNIT"]);
-    //     console.log(unitFactory.spawnableRenderablesNames());
-        
-    //     // canvas for thumbnail generation
-    //     var canvas = document.createElement('canvas');
-    //     canvas.id = "temporaryCanvas"
-    //     canvas.style.display = 'none';
-    //     canvas.width = 400;
-    //     canvas.height = 400;
-        
-    //     document.body.appendChild(canvas)
-        
-
-    //     const playgroundOptions = {
-    //         enableScreenshots: true
-    //     }
-        
-    //     // let p = new gngine.PlaygroundThreeJs(document.getElementById("unitCanvas"),this.emitter, playgroundOptions);
-    //     let p = new gngine.PlaygroundThreeJs(canvas,this.emitter, playgroundOptions);
-    //     p.initialize();    
-    //     let viewOptions = {
-    //         cameraParams: {                
-    //             fov: 50,
-    //             near: 0.1,
-    //             far: 1000                             
-    //         },
-    //         cameraPosition: new THREE.Vector3(0,-1,0.75)
-    //     }           
-    //     let mainView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
-    //     await p.attach(mainView);        
-    //     mainView._setupScene(); 
-    //     p.run();
-    //     const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());
-    //     unitRenderer.setRenderablesFactory(unitFactory);
-    //     unitRenderer.setView(mainView);
-    //     await unitRenderer.initialize();
-
-    //     const tile = {
-    //         "id": "0,0",
-    //         "x": 0,
-    //         "y": 0,
-    //         "d": "S",
-    //         "t": "C_T_GRASS_1_TILE",
-    //         "loc": {
-    //           "n": "Grassland",
-    //           "g": "43.74650403587078,7.421766928360976"
-    //         },
-    //         "ext": {},
-    //         "nft": {
-    //           "v": 100,
-    //           "b": "ETHEREUM",
-    //           "i": "123",
-    //           "t": "0x123",
-    //           "o": "0x0022"
-    //         }
-    //     }
-
-    //     const spawnableNames = unitFactory.spawnableRenderablesNames();                
-
-    //     for(let j=0; j<spawnableNames.length; j++){
-    //     // for(let j=0; j<1; j++){
-    //         let unit = {
-    //             actionPoints: 1,
-    //             actionRunner: undefined,
-    //             actionsAllowed: [],
-    //             actionsQueue: [],
-    //             attackStrength: (_unit)=>{ return 1},
-    //             defendStrength: (_unit)=>{ return 1},
-    //             gainBattleExperience: ()=>{},
-    //             hitPoints: 5,
-    //             rangeStrength: 10,
-    //             strength: 10,
-    //             sight: 2,
-    //             uid: Math.random().toString(36).substring(2, 8),
-    //             unitSpecification: {
-    //                 hitPoints: 10,
-    //                 name: "Type",
-    //                 tuid: spawnableNames[j].split("_")[0]
-    //             }
-    //         }
-            
-    //         unitRenderer.put(unit, tile,"SW");            
-    //         const waitForScreenshot = new Promise((resolve, reject)=>{
-    //             setTimeout(()=>{                                        
-    //                 resolve(p.takeScreenShot())
-    //             },2000);
-    //         })
-    //         const screenshotDataUrl = await waitForScreenshot;
-
-    //         // const screenshotDataUrl = p.takeScreenShot();
-    //         // const screenshotDataUrl1 = p.takeScreenShot();
-    //         // const screenshotDataUrl2 = p.takeScreenShot();
-    //         // const screenshotDataUrl3 = p.takeScreenShot();
-    //         console.log(j, screenshotDataUrl);
-    //         that.model.assetsData.push({
-    //             id: unit.uid,
-    //             name: unit.unitSpecification.tuid,
-    //             fullName: spawnableNames[j],
-    //             thumbnail: screenshotDataUrl
-
-    //         });
-    //         unitRenderer.remove(unit);
-    //     }
-       
-
-    //     window.playground = p;
-
-    //     // let j = 0;
-    //     // let unit = {
-    //     //     actionPoints: 1,
-    //     //     actionRunner: undefined,
-    //     //     actionsAllowed: [],
-    //     //     actionsQueue: [],
-    //     //     attackStrength: (_unit)=>{ return 1},
-    //     //     defendStrength: (_unit)=>{ return 1},
-    //     //     gainBattleExperience: ()=>{},
-    //     //     hitPoints: 5,
-    //     //     rangeStrength: 10,
-    //     //     strength: 10,
-    //     //     sight: 2,
-    //     //     uid: Math.random().toString(36).substring(2, 8),
-    //     //     unitSpecification: {
-    //     //         hitPoints: 10,
-    //     //         name: "Type",
-    //     //         tuid: spawnableNames[j].split("_")[0]
-    //     //     }
-    //     // }
-    //     // unitRenderer.put(unit, tile,"SW");            
-    //     // this.emitter.emit("playground:screenshot");
-
-        
-    //     // this.emitter.on("playground:screenshot:data",(dataUrl)=>{
-    //     //     // console.log("Got screenshot")
-    //     //     // console.log(dataUrl)
-    //     //     // document.getElementById("preview").src = dataUrl;
-
-    //     //     assetsData.push({
-    //     //         name: unit.unitSpecification.tuid,
-    //     //         fullName: spawnableNames[j],
-    //     //         thumbnail: dataUrl
-
-    //     //     });
-
-    //     //     unitRenderer.remove(unit);
-
-    //     //     if(j<spawnableNames.length-1){
-    //     //         j++;
-    //     //         unit = {
-    //     //             actionPoints: 1,
-    //     //             actionRunner: undefined,
-    //     //             actionsAllowed: [],
-    //     //             actionsQueue: [],
-    //     //             attackStrength: (_unit)=>{ return 1},
-    //     //             defendStrength: (_unit)=>{ return 1},
-    //     //             gainBattleExperience: ()=>{},
-    //     //             hitPoints: 5,
-    //     //             rangeStrength: 10,
-    //     //             strength: 10,
-    //     //             sight: 2,
-    //     //             uid: Math.random().toString(36).substring(2, 8),
-    //     //             unitSpecification: {
-    //     //                 hitPoints: 10,
-    //     //                 name: "Type",
-    //     //                 tuid: spawnableNames[j].split("_")[0]
-    //     //             }
-    //     //         }
-    //     //         unitRenderer.put(unit, tile,"SW");            
-    //     //         this.emitter.emit("playground:screenshot", unit.uid);
-    //     //     }                
-    //     // })
-
-    //     // console.log(assetsData);
-        
-    // }
-
-    async _handeAddTags(e, that){
-        console.log(e);
-        
-        const asset = that.model.assets.original.find((item)=>{return item.name.toLowerCase() == e.target.dataset.id.toLowerCase()})
-        that.emitter.emit("showModal:addTags",asset);
-
-    }
-
-    
-    async processAddTags(asset){
-        const item = this.model.assets.original.find((item)=>{return item.name == asset.name})
-        item.tags = asset.tags;
-
-        this._handleFilter({}, this);
-    }
-
-    async processAddAsset(assetsInfo){
-        assetsInfo.forEach((item)=>{item.that = this})
-
-        // first remove objects that are in the new assetsInfo array
-        // this.model.assetsData = this.model.assetsData.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.fullName == item.fullName }) == -1 })
-        // this.model.assetsData = this.model.assetsData.concat(assetsInfo);
-
-
-        this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.name == item.name && item.kind == item2.kind }) == -1 })
-        this.model.assets.original = this.model.assets.original.concat(assetsInfo);
-
-        this.model.assets.filtered = this.model.assets.original 
-
-
-
-        // let j = 0;
-        // let unit = {
-        //     actionPoints: 1,
-        //     actionRunner: undefined,
-        //     actionsAllowed: [],
-        //     actionsQueue: [],
-        //     attackStrength: (_unit)=>{ return 1},
-        //     defendStrength: (_unit)=>{ return 1},
-        //     gainBattleExperience: ()=>{},
-        //     hitPoints: 5,
-        //     rangeStrength: 10,
-        //     strength: 10,
-        //     sight: 2,
-        //     uid: Math.random().toString(36).substring(2, 8),
-        //     unitSpecification: {
-        //         hitPoints: 10,
-        //         name: "Type",
-        //         tuid: spawnableNames[j].split("_")[0]
-        //     }
-        // }
-        // unitRenderer.put(unit, tile,"SW");            
-        // this.emitter.emit("playground:screenshot");
-
-        
-        // this.emitter.on("playground:screenshot:data",(dataUrl)=>{
-        //     // console.log("Got screenshot")
-        //     // console.log(dataUrl)
-        //     // document.getElementById("preview").src = dataUrl;
-
-        //     assetsData.push({
-        //         name: unit.unitSpecification.tuid,
-        //         fullName: spawnableNames[j],
-        //         thumbnail: dataUrl
-
-        //     });
-
-        //     unitRenderer.remove(unit);
-
-        //     if(j<spawnableNames.length-1){
-        //         j++;
-        //         unit = {
-        //             actionPoints: 1,
-        //             actionRunner: undefined,
-        //             actionsAllowed: [],
-        //             actionsQueue: [],
-        //             attackStrength: (_unit)=>{ return 1},
-        //             defendStrength: (_unit)=>{ return 1},
-        //             gainBattleExperience: ()=>{},
-        //             hitPoints: 5,
-        //             rangeStrength: 10,
-        //             strength: 10,
-        //             sight: 2,
-        //             uid: Math.random().toString(36).substring(2, 8),
-        //             unitSpecification: {
-        //                 hitPoints: 10,
-        //                 name: "Type",
-        //                 tuid: spawnableNames[j].split("_")[0]
-        //             }
-        //         }
-        //         unitRenderer.put(unit, tile,"SW");            
-        //         this.emitter.emit("playground:screenshot", unit.uid);
-        //     }                
-        // })
-
-        // console.log(assetsData);
-        
-    }
     handleDebugDumpTile(e, that){
         const result = JSON.stringify(that.model.selected.tile.toJSON());
         console.log(result);
@@ -843,10 +709,6 @@ class App {
     handleDebugDumpUnit(e, that){
         const result = JSON.stringify(that.model.selected.unit.toJSON());
         console.log(result);
-    }
-
-    handleAddAsset(e, that){
-        that.emitter.emit("showModal:addAsset",{});
     }
 }
 

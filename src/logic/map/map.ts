@@ -74,6 +74,17 @@ export abstract class MapBase {
         
     }
 
+    put(tile: TileBase):void{
+        
+        if(!this.theMap.has(tile.id)){
+            if(this.theMap.values.length == this.height*this.width)
+                throw new Error(`Can't add tile ${tile.id} as size exceeded.`)
+        }else{
+            // when key exists simply replace
+            this.theMap.set(tile.id, tile);
+        }    
+    }
+
     abstract neighbours(origin: TileBase):Neighbour[];
 
     pathFind(calculator: CostCalculator, from:TileBase, to?: TileBase,  costLimit?: number):PathResult{

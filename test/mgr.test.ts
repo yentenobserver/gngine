@@ -3316,9 +3316,14 @@ describe("Renderers",()=>{
                 const spawned = rf.spawnRenderableObject(T1);
                 return expect((<THREE.Object3D>spawned.data).children[0].position.x).eq(0.1);
             })
-            it("applies scale correction when requested in specification",()=>{                
+            it("resets scale to 1 before scale operations",()=>{
                 rf.spawnRenderableObject(T1);
                 const call = s4.getCall(0);
+                return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: 1, y: 1, z: 1}));
+            })
+            it("applies scale correction when requested in specification",()=>{                
+                rf.spawnRenderableObject(T1);
+                const call = s4.getCall(1);
                 return expect(JSON.stringify({x: call.args[0], y: call.args[1], z: call.args[2]})).eq(JSON.stringify({x: specification.scaleCorrection?.byFactor, y: specification.scaleCorrection?.byFactor, z: specification.scaleCorrection?.byFactor}));
             })
             it("not applies pivot correction when not specified",()=>{
@@ -3330,7 +3335,7 @@ describe("Renderers",()=>{
             })
             it("applies automatic scale correction when scale correction not specified",()=>{
                 rf2.spawnRenderableObject(T1);
-                return expect(s4.callCount).eq(1);
+                return expect(s4.callCount).eq(2);
             })
             it("throws error on invalid pivot specification",()=>{
                 specification.pivotCorrection = "abc"

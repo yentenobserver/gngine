@@ -84,6 +84,26 @@
                 </p>
             </div>              
         </section>
+        <!-- load json section -->
+        <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'UseJson'">
+            <div class="field">
+                <label class="label">Map Data</label>
+                <div class="control">
+                    <textarea class="textarea" placeholder="map json contents go here..." rows="10" rv-value="model.stepUseJson.form.contents.value" rv-class-is-danger="model.stepUseJson.form.contents.error | notEmpty"></textarea>
+                               
+                </div>
+                <p class="help" rv-class-is-hidden="model.stepUseJson.form.contents.error | notEmpty">Paste map json contents here</p>
+                <p class="help is-hidden is-danger" rv-class-is-hidden="model.stepUseJson.form.contents.error | empty">{model.stepUseJson.form.contents.error.message}</p>
+            </div>
+            <div class="field is-grouped">
+                <div class="control">
+                  <button class="button is-link" rv-on-click="_handleStepUseJson" data-next-step="MapEdit">Load</button>
+                </div>
+                <div class="control">
+                  <button class="button is-link is-light" rv-on-click="_handleStepUseJson" data-next-step="ChooseKind">Cancel</button>
+                </div>
+            </div>
+        </section>
         <!-- wizard section -->
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'UseWizard'">
             <div class="field">
@@ -110,6 +130,7 @@
                 <div class="control">
                     <div class="select" >
                       <select rv-value="model.stepUseWizard.form.size.value">                        
+                        <option value="1x1">1x1</option>
                         <option value="16x10">16x10</option>
                         <option value="16x16">16x16</option>
                         <option value="32x20">32x20</option>
@@ -148,7 +169,30 @@
                 </div>
             </div>
         </section>
+        <!-- Map Edit Section -->
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
+            <nav class="level">
+                <!-- Left side -->
+                <div class="level-left">
+                <div class="level-item">
+                    <p class="subtitle is-5">
+                    <strong>{model.mapCharacteristics.name}</strong> 
+                    </p>
+                    <small>{model.mapCharacteristics.size}</small>
+                </div>
+                <div class="level-item">
+                    <span rv-each-tag="model.mapCharacteristics.tags" class="tag is-light mx-1">{tag}</span>
+                </div>
+                </div>
+            
+                <!-- Right side -->
+                <div class="level-right">
+                <!-- <p class="level-item"><strong>All</strong></p> -->
+                <p class="level-item"><a rv-on-click="_handleExportMap">Export</a></p>
+                
+                <!-- <p class="level-item"><a class="button is-success">New</a></p> -->
+                </div>
+            </nav>
             <div class="tile is-ancestor">
                 <div class="tile is-8 is-parent">
                     <div class="tile is-child" id="map-holder">
@@ -158,7 +202,7 @@
                 <div class="tile is-parent">
                     <div class="tile is-child">
                         <div class="box is-hidden" rv-class-is-hidden="model.selected.tile.data.id | empty">
-                            <article class="media my-2">
+                            <article class="media my-6">
                               <div class="media-left">
                                 <figure class="image is-64x64">
                                   <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image">
@@ -174,7 +218,9 @@
                                         </span>
                                         Change
                                     </a></small><br>                                     
-                                    
+                                    <small>
+                                        {model.selected.tile.asset.specs.description}                                       
+                                    </small><br>
                                     <small>
                                         <strong>Code: </strong>{model.selected.tile.asset.variant.fullName}                                        
                                     </small><br>                                    
@@ -210,10 +256,15 @@
                                 </p>
                                 <a class="panel-block" rv-on-click="model.handlers._handleChangeAsset" rv-each-item="model.assets.filtered" >
                                     <div>
-                                        <img rv-src="item.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{item.specs.name}</span>
-                                    </div>                                    
-                                    <small><span rv-each-tag="item.specs.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
+                                        <img rv-src="item.variant.thumbnail" alt="Image" style="width: 10rem">                                                                          
+                                    </div>     
+                                    <div>
+                                        <div class="block">
+                                            <strong>{item.specs.name}</strong>
+                                            <br><small>{item.specs.description}</small>
+                                        </div>                                        
+                                        <div class="block"><small><span rv-each-tag="item.specs.tags" class="tag is-light mx-1 my-1">{tag}</span></small></div>                                                                                                                        
+                                    </div>                               
                                 </a>
                                 <!-- <a class="panel-block is-active">
                                     <div>
@@ -274,6 +325,7 @@
             </div>
             
         </section>
+
         <div class="is-hidden" rv-class-is-hidden="model.loading.done | eq false">
             <div class="notification is-success" rv-each-item="model.notify.success">
                 <button class="delete" rv-on-click="model._handleNotifyClose"></button>
