@@ -446,7 +446,7 @@ class App {
                 name: that.model.stepUseWizard.form.name.value,
                 kind: that.model.stepUseWizard.form.kind.value,
                 size: that.model.stepUseWizard.form.size.value,
-                tags: that.model.stepUseWizard.form.tags.value.split(",").map((item)=>{return item.trim()}),
+                tags: that.model.stepUseWizard.form.tags.value.split(",").map((item)=>{return item.trim()}).filter((item)=>{return item.length>0}),
                 address: that.model.stepUseWizard.form.address.value.trim(),
                 latlon: that.model.stepUseWizard.form.latlon.value.split(",").map((item)=>{return item.trim()})
             });
