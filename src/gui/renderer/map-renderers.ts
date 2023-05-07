@@ -422,74 +422,35 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         this.view!.camera.lookAt(npoint);        
     } 
 
-    goToTile(tile: TileBase, object: THREE.Object3D){
-        
-        const objectWorldPosition = new THREE.Vector3();        
-        object.getWorldPosition(objectWorldPosition);
+    goToTile(tile: TileBase, _object: THREE.Object3D){
 
-        // const localPosition = object.position;
-        const localPosition = objectWorldPosition;
+        // this.yxToScenePosition(tile.y, tile.x);
+        
+        // const objectWorldPosition = new THREE.Vector3();        
+        // object.getWorldPosition(objectWorldPosition);
+
+        // // const localPosition = object.position;
+        // const localPosition = objectWorldPosition;
+        const pos = this.yxToScenePosition(tile.y, tile.x);
+        const worldPosition = new Vector3(pos.x, pos.y, pos.z)
 
         // console.log(">>>>>>>>>>>")
         // console.log("tile", localPosition)
 
-        const from = this.state.current.tileLocalPos?.clone();
+        const from = this.state.current.tileWorldPos?.clone();
         from!.z = 0;
 
-        const to = localPosition.clone();
+        const to = worldPosition.clone();
         to.z = 0;
-
-        // console.log("from", from);
-        // console.log("to", to);
-
-        // const length = 3;
 
         const translation = new Vector3();
         translation.subVectors(to, from!)
-        // console.log("trans", translation);
-
-        // const map = this._getMapObject();
-        // console.log("map before", map.position.clone());
-        // map.position.sub(translation);
-        // console.log("map after", map.position);
 
         this.view!.camera.position.add(translation)
 
-        // if(this.state.current.tile){
-        //     // const currentScenePos = {y: this.state.current.tileWorldPos!.y ,x: this.state.current.tileWorldPos!.x }
-        //     // const targetScenePos = {x: objectWorldPosition.x, y: objectWorldPosition.y};            
-            
-        //     // const deltaCurrent = new THREE.Vector2(this.view!.camera.position.x, this.view!.camera.position.y).sub(new THREE.Vector2(currentScenePos.x, currentScenePos.y));
-        //     // const delta =  new THREE.Vector2(this.view!.camera.position.x, this.view!.camera.position.y).sub(new THREE.Vector2(targetScenePos.x, targetScenePos.y));
-        //     // const deltadelta =  deltaCurrent.sub(delta);
-
-        //     // this.view!.camera.position.x += deltadelta.x;
-        //     // this.view!.camera.position.y += deltadelta.y;
-
-        //     this.view!.camera.position.sub(objectWorldPosition).setLength(length).add(objectWorldPosition);
-        //     // console.log(`Camera pos after: ${JSON.stringify(this.view!.camera.position)}`);
-        //     this.view!.camera.lookAt(objectWorldPosition.x, objectWorldPosition.y, 0);
-        //     // this.state.lookAt = new Vector3(object.position.x, object.position.y, 0);
-
-        // }
-        // else{
-        //     // const sceneXY = this.yxToScenePosition(tile.y, tile.x);
-        //     // this.view!.camera.position.x = sceneXY.x;
-        //     // this.view!.camera.position.y = sceneXY.y-5;
-        //     // this.view!.camera.lookAt(sceneXY.x, sceneXY.y, 0);            
-        //     // this.state.lookAt = new Vector3(sceneXY.x, sceneXY.y, 0);
-
-        //     this.view!.camera.position.sub(objectWorldPosition).setLength(length).add(objectWorldPosition);
-        //     this.view!.camera.lookAt(objectWorldPosition.x, objectWorldPosition.y, 0);
-        // }
-        
-        // get new world position (after translation)
-        // const objectWorldPosition = new THREE.Vector3();        
-        // object.getWorldPosition(objectWorldPosition);
 
         this.state.current.tile = tile;
-        this.state.current.tileWorldPos = objectWorldPosition;        
-        this.state.current.tileLocalPos = localPosition;        
+        this.state.current.tileWorldPos = worldPosition;        
     }     
 }
 
