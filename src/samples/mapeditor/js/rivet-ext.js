@@ -141,6 +141,24 @@ function initializeRivetFormatters() {
         return value.length >= arg;
     }
 
+    rivets.formatters.arrayJoin = function (value, arg) {
+        if (!Array.isArray(value))
+            return;        
+        return value.join(arg||", ");
+    }
+
+    rivets.formatters.arrayContains = function (value, arg) {
+        if (!Array.isArray(value))
+            return false;        
+        return value.join(",").includes(arg);
+    }
+
+    rivets.formatters.arrayNotContains = function (value, arg) {
+        if (!Array.isArray(value))
+            return true;        
+        return !value.join(",").includes(arg);
+    }
+
     rivets.formatters.sizeLt = function (value, arg) {
         if (!value)
             return false;

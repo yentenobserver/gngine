@@ -10,7 +10,11 @@ class MapEngine {
         r._engine = kind == "HexTile"?new gngine.MapHexOddQ(widthHeight[0],widthHeight[1]):new gngine.MapSquare(widthHeight[0],widthHeight[1]);
         r._engine.fromTiles(tiles);
         return r;
-    }        
+    }  
+    
+    async put(tileBase){
+        this._engine.put(tileBase);
+    }
 }
 class GUIEngine {
 
@@ -207,6 +211,26 @@ class App {
             process: {
                 step: "ChooseKind" //
             },
+            stepMapEdit: {
+                terrainForm: {
+                    terrainDict: {
+                        value: "",
+                        error: ""
+                    },
+                    terrainCustom: {
+                        value: "",
+                        error: ""
+                    },
+                    modificationsDict: {
+                        value: "",
+                        error: ""
+                    },
+                    modificationsCustom: {
+                        value: "",
+                        error: ""
+                    },
+                }
+            },
             stepUseJson: {
                 form: {
                     contents: {
@@ -264,6 +288,9 @@ class App {
                 filter: "",
                 hidden: true
             },
+            terrain: {
+                hidden: true
+            },
             handlers: {
                 _handleChangeAsset: this._handleChangeAsset.bind(this)
             },
@@ -318,13 +345,66 @@ class App {
         that.model.assets.filter = ""
     }
 
+    async _handleShowTerrainEditor(e, that){
+        that.model.terrain.hidden = false;
+    }
+
+    async _handleTerrainChanged(e, that){
+        
+        that.model.stepMapEdit.terrainForm.terrainCustom.value = that.model.stepMapEdit.terrainForm.terrainCustom.value.toUpperCase();
+        
+        if(that.model.stepMapEdit.terrainForm.terrainDict.value == "CUSTOM"){
+            that.model.selected.tile.data.t.kind = that.model.stepMapEdit.terrainForm.terrainCustom.value.replace(/\s/g,'');
+        }else{
+            that.model.selected.tile.data.t.kind = that.model.stepMapEdit.terrainForm.terrainDict.value
+        }
+
+
+        that.mapEngine.put(that.model.selected.tile.data);
+        // console.log("Terrain: ", that.model.selected.tile.data.t.kind);
+        console.log("changed tile", that.model.selected.tile.data);
+    }
+
+    async _handleModifiersChanged(e, that){
+        
+        that.model.stepMapEdit.terrainForm.modificationsCustom.value = that.model.stepMapEdit.terrainForm.modificationsCustom.value.toUpperCase();
+
+        if(e.target.nodeName == "SELECT" && that.model.stepMapEdit.terrainForm.modificationsDict.value.join(",").includes("CUSTOM")){
+
+            const customAlready = that.model.stepMapEdit.terrainForm.modificationsCustom.value.split(",").map((item)=>{return item.trim()});
+
+            let result = customAlready.concat(that.model.stepMapEdit.terrainForm.modificationsDict.value);
+            
+            result = result.filter((item, pos)=>{
+                return result.indexOf(item) == pos;
+            })
+            that.model.stepMapEdit.terrainForm.modificationsCustom.value = result.filter((item)=>{return item != "CUSTOM" && item!=""}).join(", ");
+        }
+        if(e.target.nodeName == "SELECT" && !that.model.stepMapEdit.terrainForm.modificationsDict.value.join(",").includes("CUSTOM")){
+            that.model.stepMapEdit.terrainForm.modificationsCustom.value = ""
+        }
+        
+        if(that.model.stepMapEdit.terrainForm.modificationsDict.value.join(",").includes("CUSTOM")){
+            that.model.selected.tile.data.t.modifications = that.model.stepMapEdit.terrainForm.modificationsCustom.value.replace(/\s/g,'').split(",");
+        }else{
+            that.model.selected.tile.data.t.modifications = that.model.stepMapEdit.terrainForm.modificationsDict.value
+        }
+        
+        // console.log("Modifications: ", that.model.selected.tile.data.t.modifications);
+        that.mapEngine.put(that.model.selected.tile.data);
+        console.log("changed tile", that.model.selected.tile.data);
+    }
+
     async _handleChangeAsset(e, that){          
-        console.log(that.item);
-        console.log(that.model.selected);
-        that.model.parent.guiEngine.map.changeTile(that.model.selected.tile.data, that.item);
         const newTile = JSON.parse(JSON.stringify(that.model.selected.tile.data));
         newTile.r = that.item.variant.fullName;        
+
+        that.model.parent.guiEngine.map.changeTile(newTile, that.item);
+                
+        that.model.selected.tile.data = newTile;
         that.model.parent.mapEngine._engine.put(newTile);
+
+        console.log("changed tile", that.model.selected.tile.data);
     }
 
     async _loadAssets(kind){
@@ -519,7 +599,7 @@ class App {
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){
                     if(event.data.hierarchy[i].userData.tileData){                
                         const tileData = event.data.hierarchy[i].userData.tileData                    
-                        window.mgr_tiles.push(tileData);
+                        
                         
 
                         // that.model.selected.tileData = tileData
@@ -527,7 +607,34 @@ class App {
                         // that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
 
 
+                        
                         that.model.selected.tile.data = tileData;
+
+                        // reset prior setting
+                        that.model.stepMapEdit.terrainForm.terrainDict.value = "";
+                        that.model.stepMapEdit.terrainForm.terrainCustom.value = "";
+                        that.model.stepMapEdit.terrainForm.modificationsDict.value = "";
+                        that.model.stepMapEdit.terrainForm.modificationsCustom.value = "";
+
+                        if(["UNDEFINED","MOUNTAINS","PLAINS","GRASSLANDS","DIRTS","HILLS","DESERTS","SEAS","OCEANS","LAKES","COASTAL"].includes(tileData.t.kind)){
+                            that.model.stepMapEdit.terrainForm.terrainDict.value = tileData.t.kind
+                        }else{
+                            that.model.stepMapEdit.terrainForm.terrainDict.value = "CUSTOM"
+                            that.model.stepMapEdit.terrainForm.terrainCustom.value = tileData.t.kind
+                        }
+
+                        // const found = tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))
+
+                        if(tileData.t.modifications&&tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))){
+                            that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications
+                        }else if(tileData.t.modifications){
+                            that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications;
+                            that.model.stepMapEdit.terrainForm.modificationsCustom.value = tileData.t.modifications.join(",")
+                            that.model.stepMapEdit.terrainForm.modificationsDict.value.push("CUSTOM");
+                            
+                        }
+                        
+                        
 
                     //     output = JSON.stringify( output, null, '\t' );
 			        // output = output
@@ -663,10 +770,34 @@ class App {
         result.specs = that.model.mapCharacteristics
         result.tiles = Array.from(that.mapEngine._engine.theMap.values());
 
-        navigator.clipboard.writeText(JSON.stringify(result));
+        navigator.clipboard.writeText(JSON.stringify(result));        
+    }
+    async _handleDownloadMap(e, that){
+        // export interface TileSpecs {
+        //     tile: TileBase,
+        //     asset: AssetSpecs
+        // }
+        // export interface MapSpecs {
+        //     name: string,
+        //     kind: string,
+        //     size: string,
+        //     tags: string[],
+        //     address: string,
+        //     latlon: string[]
+        // }
+        // export interface Map {
+        //     specs: MapSpecs,
+        //     tiles: TileSpecs[]
+        // }
+        const result = {
+            specs: {},
+            tiles: []
+        }
+        result.specs = that.model.mapCharacteristics
+        result.tiles = Array.from(that.mapEngine._engine.theMap.values());
+        
 
         that._downloadJson(result, result.specs.name)
-
     }
 
 

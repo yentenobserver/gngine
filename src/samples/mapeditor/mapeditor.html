@@ -131,6 +131,8 @@
                     <div class="select" >
                       <select rv-value="model.stepUseWizard.form.size.value">                        
                         <option value="1x1">1x1</option>
+                        <option value="8x5">8x5</option>
+                        <option value="8x8">8x8</option>
                         <option value="16x10">16x10</option>
                         <option value="16x16">16x16</option>
                         <option value="32x20">32x20</option>
@@ -188,7 +190,8 @@
                 <!-- Right side -->
                 <div class="level-right">
                 <!-- <p class="level-item"><strong>All</strong></p> -->
-                <p class="level-item"><a rv-on-click="_handleExportMap">Export</a></p>
+                <p class="level-item"><a rv-on-click="_handleDownloadMap">Download as file</a></p>
+                <p class="level-item"><a rv-on-click="_handleExportMap">Export to clipboard</a></p>
                 
                 <!-- <p class="level-item"><a class="button is-success">New</a></p> -->
                 </div>
@@ -231,10 +234,83 @@
                                     
                                     <small><span rv-each-tag="model.selected.tile.asset.specs.tags" class="tag is-light mx-1">{tag}</span></small>
                                   </p>
-                                </div>                                
+                                </div> 
+                                <div class="content">
+                                    <strong>Terrain</strong><small><a class="mx-1" rv-on-click="_handleShowTerrainEditor">
+                                        <span class="icon is-small">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                        Change
+                                    </a></small>
+                                    <br>{model.selected.tile.data.t.kind}<br>
+                                    <small><strong>Modifiers: </strong>{model.selected.tile.data.t.modifications | arrayJoin " "}</small>
+                                </div>                               
                               </div>
                             </article>
-                            <nav class="panel my-2 is-hidden" rv-class-is-hidden="model.assets.hidden">
+                            
+                        </div> 
+                        <div class="box is-hidden" rv-class-is-hidden="model.terrain.hidden">
+                            <h1 class="title">Terrain</h1>
+                            <div class="field">
+                                <label class="label">Standard Terrain</label>
+                                <div class="control">
+                                    <div class="select" >
+                                      <select rv-value="model.stepMapEdit.terrainForm.terrainDict.value" rv-on-change="_handleTerrainChanged">                                                
+                                        <option value="UNDEFINED">UNDEFINED</option>
+                                        <option value="MOUNTAINS">MOUNTAINS</option>
+                                        <option value="PLAINS">PLAINS</option>
+                                        <option value="GRASSLANDS">GRASSLANDS</option>
+                                        <option value="DIRTS">DIRTS</option>
+                                        <option value="HILLS">HILLS</option>
+                                        <option value="DESERTS">DESERTS</option>
+                                        <option value="SEAS">SEAS</option>
+                                        <option value="OCEANS">OCEANS</option>
+                                        <option value="LAKES">LAKES</option>
+                                        <option value="COASTAL">COASTAL</option>
+                                        <option value="">--------------</option>
+                                        <option value="CUSTOM">CUSTOM</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                <p class="help">Type of terrain (standard, from dictionary)</p>
+                            </div>
+                            <div class="field is-hidden" rv-class-is-hidden="model.stepMapEdit.terrainForm.terrainDict.value | neq 'CUSTOM'">
+                                <label class="label">Custom Terrain</label>
+                                <div class="control">
+                                  <input class="input" style="text-transform: uppercase" type="text" placeholder="i.e. FLOODPLAINS" rv-value="model.stepMapEdit.terrainForm.terrainCustom.value" rv-on-input="_handleTerrainChanged">                  
+                                </div>                                        
+                                <p class="help">uppercase letters, no whitespace, plural form</p>
+                            </div>
+                            <div class="field">
+                                <label class="label">Standard Modifiers</label>
+                                <div class="control">
+                                    <div class="select is-multiple" >
+                                        
+                                      <select multiple size="4" rv-value="model.stepMapEdit.terrainForm.modificationsDict.value" rv-on-change="_handleModifiersChanged">                                               
+                                        <option value="RAILWAY">RAILWAY</option>
+                                        <option value="ROAD">ROAD</option>
+                                        <option value="FORREST">FORREST</option>
+                                        <option value="BUILDING">BUILDING</option>
+                                        <option value="RIVER">RIVER</option>
+                                        <option value="GLACIER">GLACIER</option>                                                
+                                        <option value="IMPASSABLE">IMPASSABLE</option>                                                
+                                        <option value="">--------------</option>
+                                        <option value="CUSTOM">CUSTOM</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                <p class="help">Terrain modifiers (standard, from dictionary)</p>
+                            </div>
+                            <div class="field is-hidden" rv-class-is-hidden="model.stepMapEdit.terrainForm.modificationsDict.value | arrayNotContains 'CUSTOM'">
+                                <label class="label">Custom Modifiers</label>
+                                <div class="control">
+                                  <input class="input" style="text-transform: uppercase" type="text" placeholder="i.e. JUNGLE, DIAMONDS" rv-value="model.stepMapEdit.terrainForm.modificationsCustom.value" rv-on-input="_handleModifiersChanged">                  
+                                </div>                                        
+                                <p class="help">uppercase letters, no whitespaces, singular form,can be multiple comma separated</p>
+                            </div>  
+                        </div>  
+                        <div class="box is-hidden" rv-class-is-hidden="model.assets.hidden">
+                            <nav class="panel my-2">
                                 <div class="panel-heading">
                                   Asset Repository<button class="delete mx-1" rv-on-click="_handleHideAssetBrowser"></button>
                                 </div>
@@ -265,61 +341,14 @@
                                         </div>                                        
                                         <div class="block"><small><span rv-each-tag="item.specs.tags" class="tag is-light mx-1 my-1">{tag}</span></small></div>                                                                                                                        
                                     </div>                               
-                                </a>
-                                <!-- <a class="panel-block is-active">
-                                    <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 5rem">                                  
-                                        
-                                    </div>                                    
-                                    <span style="display: block"><small>{model.selected.tile.asset.item.name}</small></span><br><br>
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
-                                </a>
-                                <a class="panel-block">
-                                    <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{model.selected.tile.asset.item.name}</span>
-                                    </div>                                    
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
-                                </a>
-                                <a class="panel-block">
-                                    <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{model.selected.tile.asset.item.name}</span>
-                                    </div>                                    
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
-                                </a>
-                                <a class="panel-block">
-                                    <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{model.selected.tile.asset.item.name}</span>
-                                    </div>                                    
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
-                                </a>
-                                <a class="panel-block">
-                                    <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{model.selected.tile.asset.item.name}</span>
-                                    </div>                                    
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
-                                </a>
-                                <a class="panel-block">
-                                    <div>
-                                        <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image" style="width: 10rem">                                  
-                                        <span>{model.selected.tile.asset.item.name}</span>
-                                    </div>                                    
-                                    <small><span rv-each-tag="model.selected.tile.asset.item.tags" class="tag is-light mx-1 my-1">{tag}</span></small>
-                                </a>
-                                <label class="panel-block">
-                                  <input type="checkbox">
-                                  remember me
-                                </label> -->
+                                </a>                                
                                 <div class="panel-block">
                                   <button class="button is-link is-outlined is-fullwidth" rv-on-click="_handleHideAssetBrowser">
                                     Close
                                   </button>
                                 </div>
                             </nav>
-                        </div>                        
+                        </div>                     
                     </div>
                 </div>           
             </div>
