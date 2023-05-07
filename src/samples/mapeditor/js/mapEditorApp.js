@@ -171,7 +171,10 @@ class GUIEngine {
     }
 
     async _mapCenter(){
-        
+        this._tiles.renderer.goToTile({
+            x: Math.round(this._tiles.renderer.width/2),
+            y: Math.round(this._tiles.renderer.height/2)
+        })
     }
 
     async _mapChangeTile(tile, asset){
@@ -748,6 +751,8 @@ class App {
         const mapEngine = await MapEngine.getInstance(mapCharacteristics.kind, mapCharacteristics.size, tiles)
         that.guiEngine = guiEngine;
         that.mapEngine = mapEngine;
+
+        that.guiEngine.map.center();
 
     }
 

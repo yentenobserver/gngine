@@ -83,7 +83,8 @@
                     <div class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">
                         <span rv-each-tag="model.mapCharacteristics.tags" class="tag is-light mx-1">{tag}</span>
                     </div>
-                    <p class="level-item"><a >|</a></p>
+                    <p class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'"><a href="mapeditor.html">Start New Map</a></p>
+                    <p class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'"><a >|</a></p>
                     <p class="level-item"><a href="assets.html">Asset Editor</a></p>
                 </div>
             
