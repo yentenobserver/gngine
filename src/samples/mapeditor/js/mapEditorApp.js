@@ -31,7 +31,7 @@ class GUIEngine {
 
         this.map = {
             changeTile: this._mapChangeTile.bind(this),
-            
+            center: this._mapCenter.bind(this)
         }
 
     }
@@ -168,6 +168,10 @@ class GUIEngine {
 
 
         return renderer;        
+    }
+
+    async _mapCenter(){
+        
     }
 
     async _mapChangeTile(tile, asset){
@@ -522,6 +526,7 @@ class App {
             }
         }
         if(that.model.process.step == "MapEdit"){
+            that.model.stepUseWizard.form.tags.value += `, ${that.model.stepUseWizard.form.size.value}, ${that.model.stepUseWizard.form.kind.value}`
             that._startMap({
                 name: that.model.stepUseWizard.form.name.value,
                 kind: that.model.stepUseWizard.form.kind.value,

@@ -70,7 +70,35 @@
         }
     </style>
     <div id="app">
+        <section class="section">
+            <nav class="level">
+                <!-- Left side -->
+                <div class="level-left">
+                    <div class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">
+                        <p class="subtitle is-5">
+                        <strong>{model.mapCharacteristics.name}</strong> 
+                        </p>
+                        <small>{model.mapCharacteristics.size}</small>
+                    </div>
+                    <div class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">
+                        <span rv-each-tag="model.mapCharacteristics.tags" class="tag is-light mx-1">{tag}</span>
+                    </div>
+                    <p class="level-item"><a >|</a></p>
+                    <p class="level-item"><a href="assets.html">Asset Editor</a></p>
+                </div>
+            
+                <!-- Right side -->
+                <div class="level-right">
+                <!-- <p class="level-item"><strong>All</strong></p> -->
+                <p class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'"><a rv-on-click="_handleDownloadMap">Download as file</a></p>
+                <p class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'"><a rv-on-click="_handleExportMap">Export to clipboard</a></p>
+                
+                <!-- <p class="level-item"><a class="button is-success">New</a></p> -->
+                </div>
+            </nav>
+        </section>
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'ChooseKind'">        
+            <h1 class="title">Create/Edit Map</h1>
             <div class="field is-grouped">
                 <p class="control">
                     <button class="button is-link" data-next-step="UseWizard" rv-on-click="_handleStepChooseKind">
@@ -84,6 +112,7 @@
                 </p>
             </div>              
         </section>
+        
         <!-- load json section -->
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'UseJson'">
             <div class="field">
@@ -173,29 +202,7 @@
         </section>
         <!-- Map Edit Section -->
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
-            <nav class="level">
-                <!-- Left side -->
-                <div class="level-left">
-                <div class="level-item">
-                    <p class="subtitle is-5">
-                    <strong>{model.mapCharacteristics.name}</strong> 
-                    </p>
-                    <small>{model.mapCharacteristics.size}</small>
-                </div>
-                <div class="level-item">
-                    <span rv-each-tag="model.mapCharacteristics.tags" class="tag is-light mx-1">{tag}</span>
-                </div>
-                </div>
             
-                <!-- Right side -->
-                <div class="level-right">
-                <!-- <p class="level-item"><strong>All</strong></p> -->
-                <p class="level-item"><a rv-on-click="_handleDownloadMap">Download as file</a></p>
-                <p class="level-item"><a rv-on-click="_handleExportMap">Export to clipboard</a></p>
-                
-                <!-- <p class="level-item"><a class="button is-success">New</a></p> -->
-                </div>
-            </nav>
             <div class="tile is-ancestor">
                 <div class="tile is-8 is-parent">
                     <div class="tile is-child" id="map-holder">
