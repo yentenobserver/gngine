@@ -258,13 +258,13 @@ class AppDemo {
     async _handeAddTags(e, that){
         console.log(e);
         
-        const asset = that.model.assets.original.find((item)=>{return item.name.toLowerCase() == e.target.dataset.id.toLowerCase()})
+        const asset = that.model.assets.original.find((item)=>{return item.id == e.target.dataset.id})
         that.emitter.emit("showModal:addTags",asset);
 
     }
 
     async _handeCopy2ClipboardAsset(e, that){
-        const asset = that.model.assets.original.find((item)=>{return item.name.toLowerCase() == e.target.dataset.id.toLowerCase()})
+        const asset = that.model.assets.original.find((item)=>{return item.id == e.target.dataset.id})
         console.log(asset);
 
         const data = {
@@ -278,6 +278,26 @@ class AppDemo {
         }
 
         navigator.clipboard.writeText(JSON.stringify(data));
+    }
+
+    async _handleCopy2ClipboardLibrary(e, that){
+        const assets = that.model.assets.filtered.filter((item)=>{return item.selected});
+        const result = [];
+
+        assets.forEach((asset)=>{
+            const data = {
+                id: asset.id,
+                created: asset.created,
+                kind: asset.kind,
+                name: asset.name,
+                tags: asset.tags,
+                variants: asset.variants,
+                description: asset.description
+            }
+            result.push(data);
+
+        })
+        navigator.clipboard.writeText(JSON.stringify(result));
     }
 
     

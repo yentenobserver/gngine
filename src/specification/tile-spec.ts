@@ -1,7 +1,7 @@
 import { TileBase } from "../logic/map/common.notest";
-import { AssetSpecs } from "./assets";
+import { AssetReference } from "./assets";
 
 export interface TileSpecs {
     tile: TileBase,
-    asset: AssetSpecs
+    asset: AssetReference
 }

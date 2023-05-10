@@ -176,11 +176,13 @@
                 <div class="level-right">
                     
                     <p class="level-item"><a class="button is-success" rv-on-click="handleAddAsset">Add assets</a></p>
+                    <p class="level-item"><a class="button is-success" rv-on-click="_handleCopy2ClipboardLibrary">Export as library</a></p>
                 </div>
             </nav>
             <h1 class="title">Asset Editor</h1>
             <table class="table is-fullwidth is-bordered is-striped">
                 <thead>
+                    <th></th>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Kind</th>                    
@@ -189,8 +191,13 @@
                     <th>Variants</th>                    
                     <th>Actions</th>
                 </thead>
-                <tbody>
+                <tbody>                    
                     <tr rv-each-item="model.assets.filtered">
+                        <td>
+                            <label class="checkbox">
+                                <input type="checkbox" rv-checked="item.selected">                                
+                            </label>
+                        </td>
                         <td>{item.name}</td>
                         <td>{item.description}</td>
                         <td>{item.kind}</td>
@@ -212,8 +219,8 @@
                         </td>
                         <!-- <td><img rv-src="item.thumbnail" width="200" height="200"></img></td> -->
                         <td>
-                            <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.name">Annotate</button><br><br>
-                            <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.name">Copy to clipboard</button>
+                            <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.id">Annotate</button><br><br>
+                            <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.id">Copy to clipboard</button>
                         </td>                        
                     </tr>
                 </tbody>

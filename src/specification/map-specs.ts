@@ -1,4 +1,6 @@
-import { TileSpecs } from "./tile-spec";
+import { TileBase } from "../logic/map/common.notest";
+import { AssetReference } from "./assets";
+
 
 export interface MapSpecs {
     name: string,
@@ -10,5 +12,6 @@ export interface MapSpecs {
 }
 export interface Map {
     specs: MapSpecs,
-    tiles: TileSpecs[]
+    tiles: TileBase[],
+    assets: AssetReference[]    // all asset references for the assets necessary to render this map
 }

@@ -756,11 +756,28 @@ class App {
 
     }
 
+    async _assetReferences(tiles){
+        const references = [];
+        const uniqueTilesR = [...new Set(tiles.map(tile => tile.r))];
+
+        uniqueTilesR.forEach((tileR)=>{
+            const asset = this.model.assets.original.find((asset)=>{
+                return asset.variant.fullName.toLowerCase() == tileR.toLowerCase()
+            })
+
+            references.push({
+                libId: asset.specs.library, // asset's library id
+                id: asset.specs.id, // asset's id (unique within library)
+                vId: asset.variant.fullName // asset's variant id
+            })
+        })
+
+        return references;        
+    }
+    
+
     async _handleExportMap(e, that){
-        // export interface TileSpecs {
-        //     tile: TileBase,
-        //     asset: AssetSpecs
-        // }
+
         // export interface MapSpecs {
         //     name: string,
         //     kind: string,
@@ -771,7 +788,8 @@ class App {
         // }
         // export interface Map {
         //     specs: MapSpecs,
-        //     tiles: TileSpecs[]
+        //     tiles: TileBase[],
+        //     assets: AssetReference[]
         // }
         const result = {
             specs: {},
@@ -779,14 +797,12 @@ class App {
         }
         result.specs = that.model.mapCharacteristics
         result.tiles = Array.from(that.mapEngine._engine.theMap.values());
+        result.assets = await that._assetReferences(result.tiles);
 
         navigator.clipboard.writeText(JSON.stringify(result));        
     }
     async _handleDownloadMap(e, that){
-        // export interface TileSpecs {
-        //     tile: TileBase,
-        //     asset: AssetSpecs
-        // }
+
         // export interface MapSpecs {
         //     name: string,
         //     kind: string,
@@ -797,7 +813,8 @@ class App {
         // }
         // export interface Map {
         //     specs: MapSpecs,
-        //     tiles: TileSpecs[]
+        //     tiles: TileBase[],
+        //     assets: AssetReference[]
         // }
         const result = {
             specs: {},
@@ -805,7 +822,7 @@ class App {
         }
         result.specs = that.model.mapCharacteristics
         result.tiles = Array.from(that.mapEngine._engine.theMap.values());
-        
+        result.assets = await that._assetReferences(result.tiles);
 
         that._downloadJson(result, result.specs.name)
     }

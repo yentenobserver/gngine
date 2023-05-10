@@ -1,10 +1,20 @@
+/**
+ * AssetVariantSpecs specifies what will be rendered and stores also preview thumbnail for the item,
+ * that will be rendered. It also holds the recipe for rendering - the renderable property that
+ * store data that can be interpreted by the renderer in order to render the AssetVariantSpecs
+ */
 export interface AssetVariantSpecs {        
     fullName: string // variant name, this is used by renderer when selecting renderable for render
     thumbnail: string // variant thumbnail image in data url format
     created: number // creation timestamp
     renderable: string  // json string representation that can be rendered by renderer    
 }
-
+/**
+ * Asset specification - used when managing assets and exporting assets for rendering.
+ * Each asset can have multiple variants representing asset state that can be rendered
+ * according to given criteria. The renderer actually renders an AssetVariantSpecs not an asset.
+ * Asset is a holder that groups multiple variants of an asset
+ */
 export interface AssetSpecs{
     id: string      // unique id
     name: string    // user readable name of asset
@@ -13,11 +23,20 @@ export interface AssetSpecs{
     created: number // creation timestamp
     variants: AssetVariantSpecs[]    // variants of the asset
     tags: string[]  // tags associated with asset
+    library?: string // id of the library that contains this asset
 }
 
 export interface Asset {
     specs: AssetSpecs,
     variant: AssetVariantSpecs
 }
-
-
+/**
+ * This is a lightweight object that stores (usually as a part of a list) all necessary data to uniquely 
+ * identyfi Asset. It is a lightweigh version of the Asset object - it stores only refence/id data instead of the whole asset model 
+ * that is stored in Asset object.
+ */
+export interface AssetReference{
+    libId: string // asset's library id
+    id: string // asset's id (unique within library)
+    vId: string // asset's variant id
+}
