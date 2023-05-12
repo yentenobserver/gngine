@@ -274,7 +274,8 @@ class AppDemo {
             name: asset.name,
             tags: asset.tags,
             variants: asset.variants,
-            description: asset.description
+            description: asset.description,
+            library: `${asset.kind}/assets.json`            
         }
 
         navigator.clipboard.writeText(JSON.stringify(data));
@@ -292,7 +293,8 @@ class AppDemo {
                 name: asset.name,
                 tags: asset.tags,
                 variants: asset.variants,
-                description: asset.description
+                description: asset.description,
+                library: `${asset.kind}/assets.json`
             }
             result.push(data);
 

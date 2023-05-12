@@ -1,3 +1,43 @@
+/**
+ * Describes ready to render map with all necessary assets' data.
+ * @typedef {Object} GngineRenderableSpecification
+ * @property {string} name - renderables specification name
+ * @property {string} url - when provided then renderable data is retrieved from url
+ * @property {string} json - when provided renderable data is retrieved/parsed from json
+ * @property {string[]} filterByNames - when provided only renderables' data that match name condition is parsed/retrieved
+ * @property {string} pivotCorrection - when provided pivot is applied for the renderable object
+ * @property {number} groundLevel - when provided ground level for the renderable object is set to this value
+ * @property {object} scaleCorrection - when provided the renderable object is scalled accordingly
+ * @property {boolean} autoPivotCorrection - when provided the renderable object is pivoted automatically
+ */
+/**
+ * Describes ready to render map with all necessary assets' data.
+ * @typedef {Object} GngineMap
+ * @property {object} specs - map specification
+ * @property {array} tiles - tiles data
+ * @property {array} assets - assets references' data
+ */
+
+/**
+ * This is a lightweight object that stores (usually as a part of a list) all necessary data to uniquely 
+ * identyfi Asset. It is a lightweigh version of the Asset object - it stores only refence/id data instead of the whole asset model 
+ * that is stored in Asset object.
+ * @typedef {Object} GngineAssetReference
+ * @property {string} libId - asset's library id
+ * @property {string} id - asset's id (unique within library)
+ * @property {string} vId - asset's variant id
+ */
+
+/**
+ * Represents asset's data.
+ * @typedef {Object} GngineAsset
+ * @property {object} specs - asset's specification
+ * @property {object} variant - asset's variant
+ */
+
+
+
+
 class MapEngine {
     constructor(){
         this._engine = {}
@@ -205,6 +245,136 @@ class GUIEngine {
 
 }
 
+class AssetManager {
+    constructor(){
+        this.assets = [] // holds all assets that were already loaded
+    }
+
+    static getInstance(){
+        const r = new AssetManager();
+        return r;
+    }
+    /**
+     * Returns assets for given assets' specifications
+     * @param {GngineAssetReference[]} assetReferences references array
+     * @returns {Promise<GngineAsset[]>}
+     */
+    async getAssets(assetReferences){
+        const result = []
+        const missingAssetsReferences = [];
+
+        for(let i=0; i<assetReferences.length; i++){
+            let asset = await this._findAsset(assetReferences[i]);
+            if(!asset){
+                missingAssetsReferences.push(assetReferences[i]);                
+            }else{
+                result.push(asset);
+            }
+            
+        }
+
+        let missingAssets = await this._loadAssets(missingAssetsReferences);
+        if(missingAssets)
+            this.assets.push(...missingAssets); // add it to the local cache              
+        
+        for(let i=0; i<missingAssetsReferences.length; i++){
+            let asset = await this._findAsset(missingAssetsReferences[i]);            
+            result.push(asset);
+        }
+        return result;
+    }
+
+    async getAssetsByLibraries(librariesIds){
+        const allAssets = await this._loadAssetsByLibraries(librariesIds);
+
+        const newAssets = allAssets.filter((item)=>{
+            return !this.assets.some((value)=>{return value.variant.fullName.toLowerCase() == item.variant.fullName.toLowerCase()})
+        })
+
+        this.assets.push(...newAssets);
+
+        return allAssets;
+    }
+
+
+
+    /**
+     * Returns asset for given reference
+     * @param {GngineAssetReference} assetReference asset reference
+     * @returns {Promise<GngineAsset>}
+     */
+    async getAsset(assetReference){
+        const assets = await this.getAssets([assetReference]);
+        return assets[0];
+    }
+
+    /**
+     * Finds asset in cache
+     * @param {GngineAssetReference} assetReference 
+     * @returns {Promise<GngineAsset>}
+     */
+    async _findAsset(assetReference){        
+        let result;
+
+        for(let i=0; i<this.assets.length; i++){
+            const item = this.assets[i];
+
+            if(item.variant.fullName.trim().toLowerCase() == assetReference.vId.trim().toLowerCase()){
+                result = item
+                break;
+            }
+
+        }
+        return result;        
+    }
+
+    /**
+     * 
+     * @param {GngineAssetReference[]} assetReferences 
+     * @returns {GngineAsset[]}
+     */
+    async _loadAssets(assetReferences){
+        return this._loadAssetsByLibraries(assetReferences.map(assetReference=>assetReference.libId));        
+    }
+
+    async _loadAssetsByLibraries(librariesIds){
+        let assets = [];
+
+        // get unique library ids
+        
+        const uniqueLibs = [...new Set(librariesIds)];
+
+
+        for(let i=0; i<uniqueLibs.length; i++){
+
+            const assetsSpecs = await this._fetchFromURL(`./assets/${uniqueLibs[i]}`, "JSON");
+            for(let i=0; i<assetsSpecs.length; i++){
+                const item = assetsSpecs[i];
+
+                for(let j=0; j<item.variants.length; j++){
+                    const variant = item.variants[j];
+                    assets.push({
+                        specs: item,
+                        variant: variant
+                    })
+                }                    
+            }
+        }   
+        return assets;   
+
+    }
+
+    _fetchFromURL(url, type){
+        return fetch(url).then((response)=>{
+            if(type=='JSON')
+                return response.json();
+            else if(type=='TXT')
+                return response.text();
+            else return response.blob();
+        })
+    }
+}
+
 class App {
     constructor(emitter, mapCanvas) {
         
@@ -313,6 +483,7 @@ class App {
         }   
         this.guiEngine = {}  
         this.mapEngine = {}   
+        this.assetManager = {}
         
         
     }
@@ -414,21 +585,31 @@ class App {
         console.log("changed tile", that.model.selected.tile.data);
     }
 
-    async _loadAssets(kind){
+    async _loadAssets(map){
         this.model.assets.original = [];
         this.model.assets.filtered = [];
 
-        const assetsSpecs = await this.loadAsset(`./assets/${kind =="HexTile"?"hex":"quad"}/assets.json`, "JSON");
-        for(let i=0; i<assetsSpecs.length; i++){
-            const item = assetsSpecs[i];
+        // load default assets
+        const defaultAssets = await this.model.assetManager.getAssetsByLibraries([`${map.specs.kind}/assets.json`]);
+        const mapAssets = await this.model.assetManager.getAssets(map.assets||[]);
 
-            const variant = item.variants[0];
+        const all = [...defaultAssets, ...mapAssets];
 
-            this.model.assets.original.push({
-                specs: item,
-                variant: variant
-            })                                                        
-        }        
+        // load map specific assets (if any)
+        this.model.assets.original = all.filter((item, idx)=>{return all.indexOf(item) == idx});
+
+
+        // const assetsSpecs = await this.loadAsset(`./assets/${kind =="HexTile"?"hex":"quad"}/assets.json`, "JSON");
+        // for(let i=0; i<assetsSpecs.length; i++){
+        //     const item = assetsSpecs[i];
+
+        //     const variant = item.variants[0];
+
+        //     this.model.assets.original.push({
+        //         specs: item,
+        //         variant: variant.
+        //     })                                                        
+        // }        
     }
 
     async _applyAssetFilter(){
@@ -443,6 +624,8 @@ class App {
             || item.specs.tags.join(",").toLowerCase().includes(searchPhrase)
         })
     }
+
+    
 
 
     async _findAsset(renderableName){
@@ -531,12 +714,14 @@ class App {
         if(that.model.process.step == "MapEdit"){
             that.model.stepUseWizard.form.tags.value += `, ${that.model.stepUseWizard.form.size.value}, ${that.model.stepUseWizard.form.kind.value}`
             that._startMap({
-                name: that.model.stepUseWizard.form.name.value,
-                kind: that.model.stepUseWizard.form.kind.value,
-                size: that.model.stepUseWizard.form.size.value,
-                tags: that.model.stepUseWizard.form.tags.value.split(",").map((item)=>{return item.trim()}).filter((item)=>{return item.length>0}),
-                address: that.model.stepUseWizard.form.address.value.trim(),
-                latlon: that.model.stepUseWizard.form.latlon.value.split(",").map((item)=>{return item.trim()})
+                specs: {
+                    name: that.model.stepUseWizard.form.name.value,
+                    kind: that.model.stepUseWizard.form.kind.value,
+                    size: that.model.stepUseWizard.form.size.value,
+                    tags: that.model.stepUseWizard.form.tags.value.split(",").map((item)=>{return item.trim()}).filter((item)=>{return item.length>0}),
+                    address: that.model.stepUseWizard.form.address.value.trim(),
+                    latlon: that.model.stepUseWizard.form.latlon.value.split(",").map((item)=>{return item.trim()})
+                }
             });
         }
     }
@@ -564,6 +749,8 @@ class App {
                 throw new Error(`Incorrect specification. "specs" element is missing`)
             if(!map.tiles)
                 throw new Error(`Incorrect specification. "tiles" array is missing`)
+            if(!map.assets)
+                throw new Error(`Incorrect specification. "assets" array is missing`)
         }catch(error){
             that.model.stepUseJson.form.contents.error = new Error(`Invalid map file contents: ${error.message}`)
             that.model.process.step = "UseJson"
@@ -571,11 +758,18 @@ class App {
         }
 
         if(that.model.process.step == "MapEdit"){
-            that._startMap(map.specs, map.tiles)
+            that._startMap(map)
         }
     }
 
-    async _startMap(mapCharacteristics, tiles){
+    /**
+     * 
+     * @param {GngineMap} map 
+     */
+    async _startMap(map){
+        const mapCharacteristics = map.specs;
+        let tiles = map.tiles;
+        this.model.assetManager = AssetManager.getInstance();
 
         const that = this;
         this.model.mapCharacteristics = mapCharacteristics;
@@ -661,9 +855,8 @@ class App {
                 that.model.selected.tile.asset = assetSpecification;
             };                                    
         });
-
-        await this._loadAssets(mapCharacteristics.kind);
-        await this._applyAssetFilter();
+        
+        
         // remove previously instantiated map
         if(that.model.game.canvas && that.model.game.canvas.nodeName && that.model.game.canvas.nodeName.toLowerCase() == "canvas"){
             document.getElementById("map-holder").removeChild(that.model.game.canvas);
@@ -675,17 +868,7 @@ class App {
         
         that.model.game.canvas = canvas;
 
-        const mapRenderablesSpecifications = [
-            {         
-                name: "mapPlaceholder",
-                json: mapCharacteristics.kind == "HexTile" ? JSON.stringify(gngine.RENDERABLES.MAP.HEX.placeholder):JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.placeholder),                    
-                autoPivotCorrection: true,                                
-                scaleCorrection: {
-                    // byFactor: 1.2
-                    autoFitSize: 1                
-                },
-                filterByNames: ["MAS_PLACEHOLDER_TILE"]
-            },
+        const mapRenderablesSpecifications = [            
             {
                 name: "mapHelpers",
                 json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
@@ -714,34 +897,47 @@ class App {
                     tiles.push(tile);
                 }
             }
+            map.assets = [{
+                libId: map.specs.kind == "HexTile"?"HexTile/assets.json":"QuadTile/assets.json",  
+                id: "", 
+                vId: "MAS_PLACEHOLDER_TILE" 
+            }]
         }
 
         //this.model.assets.original
 
-        // get all unique "r" renderable keys for map items
-        let map = new Map();
-        tiles.forEach((item)=>{
-            map.set(item.r,item);
-        })
+        // load all necessary assets
+        await this._loadAssets(map);
+        await this._applyAssetFilter();
+        
+        const renderableSpecificationsForMap = await this._renderablesSpecificationForMap(map);
 
-        const uniqueRs = Array.from(map.keys());
+        mapRenderablesSpecifications.push(...renderableSpecificationsForMap);
 
-        for(let i=0; i< uniqueRs.length; i++){
+        // // get all unique "r" renderable keys for map items
+        // let map = new Map();
+        // tiles.forEach((item)=>{
+        //     map.set(item.r,item);
+        // })
+
+        // const uniqueRs = Array.from(map.keys());
+
+        // for(let i=0; i< uniqueRs.length; i++){
             
-            const asset = await that._findAsset(uniqueRs[i]);
+        //     const asset = await that._findAsset(uniqueRs[i]);
 
-            const specs = {         
-                name: `${asset.specs.name}_${asset.specs.id}`,
-                json: JSON.stringify(asset.variant.renderableJSON),                                    
-                autoPivotCorrection: true,                
-                scaleCorrection: {                    
-                    autoFitSize: 1                
-                },
-                filterByNames: ["MAS_"]
-            }
-            // add additional specifications required by map
-            mapRenderablesSpecifications.push(specs);
-        }
+        //     const specs = {         
+        //         name: `${asset.specs.name}_${asset.specs.id}`,
+        //         json: JSON.stringify(asset.variant.renderableJSON),                                    
+        //         autoPivotCorrection: true,                
+        //         scaleCorrection: {                    
+        //             autoFitSize: 1                
+        //         },
+        //         filterByNames: ["MAS_"]
+        //     }
+        //     // add additional specifications required by map
+        //     mapRenderablesSpecifications.push(specs);
+        // }
                 
 
             
@@ -754,6 +950,35 @@ class App {
 
         that.guiEngine.map.center();
 
+    }
+
+    /**
+     * Generates renderables specification for tiles in provided map
+     * @param {GngineMap} map target map
+     * @returns {Promise<GngineRenderableSpecification[]>} array of renderables' specifications
+     */
+    async _renderablesSpecificationForMap(map){
+        
+        const result = [];               
+        const assets = await this.model.assetManager.getAssets(map.assets);
+
+        for(let i=0; i<assets.length; i++){
+            
+            const asset = assets[i];
+
+            const specs = {         
+                name: `${asset.specs.name}_${asset.specs.id}`,
+                json: JSON.stringify(asset.variant.renderableJSON),                                    
+                autoPivotCorrection: true,                
+                scaleCorrection: {                    
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAS_"]
+            }
+            // add additional specifications required by map
+            result.push(specs);
+        }
+        return result;
     }
 
     async _assetReferences(tiles){
@@ -849,15 +1074,15 @@ class App {
 
     }
 
-    loadAsset(url, type){
-        return fetch(url).then((response)=>{
-            if(type=='JSON')
-                return response.json();
-            else if(type=='TXT')
-                return response.text();
-            else return response.blob();
-        })
-    }
+    // loadAsset(url, type){
+    //     return fetch(url).then((response)=>{
+    //         if(type=='JSON')
+    //             return response.json();
+    //         else if(type=='TXT')
+    //             return response.text();
+    //         else return response.blob();
+    //     })
+    // }
 
     handleDebugDumpTile(e, that){
         const result = JSON.stringify(that.model.selected.tile.toJSON());

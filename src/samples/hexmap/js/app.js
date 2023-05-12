@@ -97,10 +97,14 @@ class AppDemo {
         //     // console.log(""+JSON.stringify(item.scene.toJSON()));       
         // })
     
+        // export interface Map {
+        //     specs: MapSpecs,
+        //     tiles: TileBase[],
+        //     assets: AssetReference[]    // all asset references for the assets necessary to render this map
+        // }
+        const map = await this.loadAsset("./assets/map.json", "JSON");
         
-        const mapjson = await this.loadAsset("./assets/map.json", "JSON");
-        
-        that.map.fromTiles(mapjson);
+        that.map.fromTiles(map.tiles);
         
             // now let's download 3d assets for renderer
         await mapRenderer.initialize();

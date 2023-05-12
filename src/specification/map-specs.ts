@@ -10,8 +10,11 @@ export interface MapSpecs {
     address: string,
     latlon: string[]
 }
+/**
+ * Describes ready to render map with all necessary assets' data.
+ */
 export interface Map {
     specs: MapSpecs,
-    tiles: TileBase[],
-    assets: AssetReference[]    // all asset references for the assets necessary to render this map
+    tiles?: TileBase[],
+    assets?: AssetReference[]    // all asset references for the assets necessary to render this map
 }
