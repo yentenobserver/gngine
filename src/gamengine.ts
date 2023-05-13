@@ -15,7 +15,8 @@ export {RenderablesFactory, RenderablesThreeJSFactory} from './gui/renderer/rend
 export type {Renderable, RenderableThreeJS, RenderableSpecification} from './gui/renderer/renderables-factory';
 
 export {  Renderer } from './gui/renderer/renderers'
-export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, MapHexFlatTopOddRendererThreeJs, AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator } from './gui/renderer/map-renderers'
+export {MapRenderer, MapRendererThreeJs, MapQuadRendererThreeJs, MapHexFlatTopOddRendererThreeJs } from './gui/renderer/map-renderers'
+export {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, HexAreaMapIndicator3Js, QuadAreaMapIndicator3Js } from './gui/renderer/map-indicators'
 export {HudComponent, HudComponentLargeThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRenderer, HudRendererThreeJs, SpriteFactory, SpriteFactoryx128x128x4xL} from './gui/renderer/hud-renderers'
 export type {Rotations, MapWritable } from './gui/renderer/map-renderers'
 export type {ScenePosition, MapPositionProvider, TilePosition, HexFlatTopDirections, OrientationProvider, QuadDirections} from './gui/renderer/providers'

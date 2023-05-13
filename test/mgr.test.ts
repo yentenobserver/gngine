@@ -23,7 +23,8 @@ import {ActionContextUnitAttack, ActionContextUnitMove, ActionUnitAttack, Action
 import { SpecsBase, SpecsLocation } from '../src/logic/units/unit';
 import {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundThreeJs, PlaygroundViewDefault, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault} from '../src/gui/playground/playground'
 import { } from '../src/gui/renderer/renderers'
-import {AreaMapIndicator, AreaMapIndicatorThreeJs, MapIndicator, MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent} from '../src/gui/renderer/map-renderers'
+import {MapQuadRendererThreeJs, MapRotateEvent, MapWritable, MapZoomEvent} from '../src/gui/renderer/map-renderers'
+import {AreaMapIndicator, MapIndicator, QuadAreaMapIndicator3Js} from '../src/gui/renderer/map-indicators'
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
@@ -2427,8 +2428,8 @@ describe("Renderers",()=>{
                 view.scene = new THREE.Scene;
                 map.setView(view);               
             })
-            it("populates indicator for tiles",()=>{
-                map._createMapHelpers();
+            it("populates indicator for tiles",async ()=>{
+                await map._createMapHelpers();
                 return expect(map.indicatorForTile).is.not.undefined;
             })
         })
@@ -2567,13 +2568,20 @@ describe("Renderers",()=>{
                 // return expect(s1.callCount).eq(0);                
             })
             it("throws error where no indicator is found",()=>{
-                return expect(()=>{map.highlightTiles([],"","no such indicator")}).to.throw('No indicator with name');  
+                return expect(()=>{map.highlightTiles([],"no such indicator", "")}).to.throw('No indicator with name');  
             })
             it("uses indicator by name",()=>{
                 map.registerIndicator(indicator3, "first" );
                 map.registerIndicator(indicator2, "second" );
-                map.highlightTiles([],"","second");
+                map.highlightTiles([],"second", "");
                 return expect(s2.callCount).eq(1);    
+            })
+            it("uses indicator for tile when no name provided",()=>{
+                map.registerIndicator(indicator3, "first" );
+                map.registerIndicator(indicator2, "second" );
+                map.highlightTiles([]);
+                return expect(s1.callCount).eq(1);    
+
             })
         })
         describe("_onEvent",()=>{
@@ -2646,7 +2654,7 @@ describe("Renderers",()=>{
                 
                 rf = new RenderablesDefaultFactory();
                 map.setRenderablesFactory(rf);                
-                s2 = sinon.stub(map,"_createMapHelpers");
+                s2 = sinon.stub(map,"_createMapHelpers").resolves();
             })
             afterEach(()=>{                
                 s2.restore();
@@ -3838,7 +3846,7 @@ describe("Renderers",()=>{
                     yxToScenePosition: (_y: number, _x: number)=><ScenePosition>{}                    
                 }
                 rf = new RenderablesDefaultFactory();
-                indicator = new AreaMapIndicatorThreeJs(mapProvider, rf, "key");
+                indicator = new QuadAreaMapIndicator3Js(mapProvider, rf, "key");
                 s1 = sinon.spy(indicator,"hide");
                 s2 = sinon.stub(indicator,"render");
                 s3 = sinon.spy(indicator,"show");

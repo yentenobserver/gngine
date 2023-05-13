@@ -72,13 +72,15 @@ class GUIEngine {
         this.map = {
             changeTile: this._mapChangeTile.bind(this),
             center: this._mapCenter.bind(this),
-            highlightTiles: this._mapHighlightTiles.bind(this)
+            highlightTiles: this._mapHighlightTiles.bind(this),
+            registerAreaIndicator: this._mapRegisterAreaIndicator.bind(this)
         }
+        this.kind = undefined
 
     }
     static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize, tiles){
         const p = new GUIEngine();
-
+        p.kind = kind;
         const playgroundAndView = await p._preparePlaygroundAndView(canvas, emitter);
         p._map.mainView = playgroundAndView.view;
         p._playground = playgroundAndView.playground;
@@ -205,8 +207,7 @@ class GUIEngine {
         
         renderer.setRenderablesFactory(factory);
         renderer.setView(view);
-        await renderer.initialize();
-
+        await renderer.initialize();        
 
         return renderer;        
     }
@@ -244,8 +245,13 @@ class GUIEngine {
 
     }
 
-    async _mapHighlightTiles(tiles){
-        this._tiles.renderer.highlightTiles(tiles);
+    async _mapHighlightTiles(tiles, indicatorName, color){        
+        this._tiles.renderer.highlightTiles(tiles, indicatorName, color);
+    }
+
+    async _mapRegisterAreaIndicator(name){
+        const indicator =  this.kind == "HexTile"?await gngine.HexAreaMapIndicator3Js.create(this._tiles.renderer):await gngine.QuadAreaMapIndicator3Js.create(this._tiles.renderer)
+        this._tiles.renderer.registerIndicator(name, indicator);
     }
 
 }
@@ -540,7 +546,7 @@ class App {
         const deploymentTiles = tiles.filter((item)=>{
             return item.t?.modifications?.includes(that.model.deployments.value)            
         })
-        that.guiEngine.map.highlightTiles(deploymentTiles)
+        that.guiEngine.map.highlightTiles(deploymentTiles, "Deployments")
     }
 
     async _handleTerrainChanged(e, that){
@@ -965,6 +971,7 @@ class App {
         that.mapEngine = mapEngine;
 
         that.guiEngine.map.center();
+        await that.guiEngine.map.registerAreaIndicator("Deployments");
 
     }
 

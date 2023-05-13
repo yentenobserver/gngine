@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Camera, Mesh, Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
+import { Camera, Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -8,8 +8,9 @@ import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
 import { HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs, ScenePosition, TilePosition } from './providers';
-import { Renderable, RenderablesFactory, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';
+import { Renderable, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';
 import { Renderer } from './renderers';
+import { AreaMapIndicatorThreeJs, HexAreaMapIndicator3Js, MapIndicator, QuadAreaMapIndicator3Js } from './map-indicators';
 
 
 
@@ -78,7 +79,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     abstract replace(tile: TileBase, direction:string):void;
     abstract put(tile: TileBase, direction:string):void;
     abstract onTileChanged(tile: TileBase, direction: string):void;    
-    abstract highlightTiles(tiles: TileBase[], color?:string, indicatorName?: string):void;
+    abstract highlightTiles(tiles: TileBase[], indicatorName?: string, color?:string):void;
     abstract rotate(rotation: number):void;
     abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
 
@@ -133,7 +134,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
      * @param indicator 
      * @param name 
      */
-    registerIndicator(indicator:MapIndicator, name:string){
+    registerIndicator(name:string, indicator:MapIndicator){
         this.indicators.set(name, indicator);
     }
 }
@@ -228,7 +229,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
      * Shows highligh indicator
      * on tile that is the target of the event.
      */
-    highlightTiles(tiles: TileBase[], color?:string, indicatorName?: string): void {
+    highlightTiles(tiles: TileBase[], indicatorName?: string, color?:string): void {
         const indicator = indicatorName?this.indicators.get(indicatorName):this.indicatorForTile;
 
         
@@ -236,7 +237,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
             throw new Error(`No indicator with name ${indicatorName}`);
         }
 
-        indicator?.forTiles(tiles, color);
+        indicator.forTiles(tiles, color);
     }
 
     _getMapObject():Object3D{
@@ -480,136 +481,7 @@ export interface MapQuadRendererThreeJsHelpers {
     Highlighter: AreaMapIndicatorThreeJs|undefined
 }
 
-/**
- * Annotates map tiles with some additional information/visualization
- */
-export abstract class MapIndicator{
 
-    // this factory should provide indicators objects that can be spawned by 
-    // the Indicator
-    renderablesFactory: RenderablesFactory;
-
-    // provides position mapping from tile/map and scene coordinates
-    mapProvider: MapPositionProvider&MapWritable;
-
-    constructor(mapProvider: MapPositionProvider&MapWritable, renderablesFactory: RenderablesFactory){
-        this.renderablesFactory = renderablesFactory;
-        this.mapProvider = mapProvider
-    };
-
-    abstract forTile(tile: TileBase):void;
-    abstract forTiles(tiles: TileBase[], hexColor?:string):void;    
-    abstract hide():void;
-    abstract show():void;
-    abstract render(renderables: Renderable[], tiles: TileBase[], colorHex?: string):void;
-}
-
-export abstract class AreaMapIndicator extends MapIndicator{
-    // renderables used for indicators
-    renderables: Renderable[];
-    tiles: TileBase[];
-    renderableKey: string;
-    colorHex?: string;
-
-    constructor(mapProvider: MapPositionProvider&MapWritable, renderablesFactory: RenderablesFactory, renderableKey: string, colorHex?: string){
-        super(mapProvider, renderablesFactory); 
-        this.renderables = [];   
-        this.tiles = [];   
-        this.renderableKey = renderableKey;
-        this.colorHex = colorHex;
-    }
-    forTile(tile: TileBase): void {
-        this.hide();        
-        if(this.renderables.length<=0){
-            const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey);
-            this.renderables.push(renderable);
-            this.mapProvider.add(renderable);
-        }        
-        this.tiles = [tile];
-        this.render(this.renderables.slice(0,1),[tile],this.colorHex);        
-        this.show();
-    }
-    forTiles(tiles: TileBase[]): void {
-        this.hide();
-        if(tiles.length==0)
-            return;
-        if(this.renderables.length<tiles.length){
-            const delta = tiles.length-this.renderables.length;
-            for(let i=0; i<delta;i++){
-                const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey);                
-                this.renderables.push(renderable);
-                this.mapProvider.add(renderable);
-            }
-        }
-        this.tiles = tiles;
-        this.render(this.renderables.slice(0,tiles.length),tiles,this.colorHex);        
-        this.show();
-        
-    }
-    
-    abstract _changeColor(renderable:Renderable, hexColor:string):void;  
-
-    forGroup(tiles: TileBase[], groupHexColor: string):void{
-        this.hide();
-        if(tiles.length==0)
-            return;
-        if(this.renderables.length<tiles.length){
-            const delta = tiles.length-this.renderables.length;
-            for(let i=0; i<delta;i++){
-                const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey); 
-                // change material color
-                this._changeColor(renderable, groupHexColor);               
-                this.renderables.push(renderable);
-                this.mapProvider.add(renderable);
-            }
-        }
-        this.tiles = tiles;
-        this.render(this.renderables.slice(0,tiles.length),tiles, groupHexColor);        
-        this.show();
-    }
-    hide(): void {
-        for(let i=0;i<this.tiles.length;i++){
-            this.renderables[i].hide&&this.renderables[i].hide!();
-        }
-    }
-    show(): void {
-        for(let i=0;i<this.tiles.length;i++){
-            this.renderables[i].show&&this.renderables[i].show!();
-        }
-    } 
-
-            
-}
-
-export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
-    _changeColor(renderable: Renderable, hexColor: string): void {
-        renderable.data.travers((object3D: Object3D)=>{
-            if(object3D.type == "Mesh"){
-                if(Array.isArray((<Mesh>object3D).material)){
-                    (<Material[]>(<Mesh>object3D).material).forEach((material:Material)=>{
-                        (<any>material).color.set(hexColor)    
-                    })
-                }else{
-                    (<any>(<Mesh>object3D).material).color.set(hexColor)
-                }                
-            }
-        })        
-    }
-
-    render(renderables: Renderable[], tiles: TileBase[], _colorHex?: string): void {        
-        if(renderables.length != tiles.length)
-            throw new Error(`Renderables and tiles count mismatch. ${renderables.length} vs ${tiles.length}`);
-        for(let i=0; i<tiles.length; i++){
-            const pos = this.mapProvider.yxToScenePosition(tiles[i].y, tiles[i].x);
-            const renderable = <RenderableThreeJS>renderables[i];            
-            if(renderable.data.position.x !=pos.x || renderable.data.position.y !=pos.y){
-                // console.log(`Cache size ${this.tiles.length} ${this.renderables.length}`)
-                renderable.data.position.set(pos.x, pos.y, renderable.data.position.z);
-            }
-        }        
-    }
-
-}
 
 /**
  * Helper that can generate threejs plane of hex shapes. It uses flat top odd approach
@@ -717,9 +589,9 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         grid.position.z=-0.01
         this.mapHolderObject.add( grid );
         // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
-        this._createMapHelpers();
+        return this._createMapHelpers();
         // })            
-        return Promise.resolve();
+        // return Promise.resolve();
     }
 
     remove(tile: TileBase): void {
@@ -875,20 +747,11 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // }
     }
 
-    _createMapHelpers(){
-        const mapIndicator = new AreaMapIndicatorThreeJs(this, this.renderablesFactory!,"MAP_HLPR_HIGHLIGHT");
+    async _createMapHelpers(){
+        // const mapIndicator = new AreaMapIndicatorThreeJs(this, this.renderablesFactory!,"MAP_HLPR_HIGHLIGHT");
+        const mapIndicator = await QuadAreaMapIndicator3Js.create(this);
 
         this.indicatorForTile = mapIndicator;
-        // const renderable = this.renderablesFactory!.spawnRenderableObject("MAP_HLPR_HIGHLIGHT");
-        // const object3D = renderable.data as THREE.Object3D;
-
-        // const scenePosition = this.xyToScenePosition(0,0);
-        
-
-        //this.mapHolderObject.add(object3D);
-        // object3D.position.set( scenePosition.x, scenePosition.y,scenePosition.z)   
-        
-        // this.HELPERS.Highlighter = object3D;
     }
 
     
@@ -909,9 +772,14 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
         
         this.mapHolderObject.add( grid );
         // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
-        this._createMapHelpers();
+        
         // })            
-        return Promise.resolve();
+        return this._createMapHelpers();
+    }
+
+    async _createMapHelpers(){        
+        const mapIndicator = await HexAreaMapIndicator3Js.create(this);
+        this.indicatorForTile = mapIndicator;
     }
 
     yxToScenePosition(y: number, x:number){
