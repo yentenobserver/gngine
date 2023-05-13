@@ -71,7 +71,8 @@ class GUIEngine {
 
         this.map = {
             changeTile: this._mapChangeTile.bind(this),
-            center: this._mapCenter.bind(this)
+            center: this._mapCenter.bind(this),
+            highlightTiles: this._mapHighlightTiles.bind(this)
         }
 
     }
@@ -241,6 +242,10 @@ class GUIEngine {
         
         this._tiles.renderer.put(theTile, theTile.d);
 
+    }
+
+    async _mapHighlightTiles(tiles){
+        this._tiles.renderer.highlightTiles(tiles);
     }
 
 }
@@ -478,6 +483,9 @@ class App {
                 tags: [],
                 address: "",
                 latlon: []
+            },
+            deployments: {
+                value: ""
             }
 
         }   
@@ -525,6 +533,14 @@ class App {
 
     async _handleShowTerrainEditor(e, that){
         that.model.terrain.hidden = false;
+    }
+
+    async _handleSpecialAreasChanged(e, that){
+        const tiles = Array.from(that.mapEngine._engine.theMap.values());
+        const deploymentTiles = tiles.filter((item)=>{
+            return item.t?.modifications?.includes(that.model.deployments.value)            
+        })
+        that.guiEngine.map.highlightTiles(deploymentTiles)
     }
 
     async _handleTerrainChanged(e, that){

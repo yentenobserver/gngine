@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Camera, Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
+import { Camera, Mesh, Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -51,6 +51,8 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     height: number;
     indicatorForTile: MapIndicator|undefined;
 
+    indicators: Map<string, MapIndicator>;
+
     // tiles = Map<string,  // "x,y"->{o: object3D, d: direction N|S|E|W, p: scene position origin relative{x: , y: , z:}}
     constructor(width:number, height:number, emitter:EventEmitter){
         super(emitter);
@@ -64,6 +66,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
 
         this.emitter.on(Events.MAP.ROTATE, this._onEvent.bind(this))
         this.emitter.on(Events.MAP.ZOOM, this._onEvent.bind(this))
+        this.indicators = new Map<string, MapIndicator>();
  
     }
     
@@ -75,7 +78,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     abstract replace(tile: TileBase, direction:string):void;
     abstract put(tile: TileBase, direction:string):void;
     abstract onTileChanged(tile: TileBase, direction: string):void;    
-    abstract highlightTiles(tiles: TileBase[]):void;
+    abstract highlightTiles(tiles: TileBase[], color?:string, indicatorName?: string):void;
     abstract rotate(rotation: number):void;
     abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
 
@@ -123,6 +126,15 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
                 this.highlightTiles([]);
             break;
         }            
+    }
+
+    /**
+     * Registers new map indicator with given name
+     * @param indicator 
+     * @param name 
+     */
+    registerIndicator(indicator:MapIndicator, name:string){
+        this.indicators.set(name, indicator);
     }
 }
 
@@ -216,10 +228,15 @@ export abstract class MapRendererThreeJs extends MapRenderer{
      * Shows highligh indicator
      * on tile that is the target of the event.
      */
-    highlightTiles(tiles: TileBase[]): void {
-        if(this.indicatorForTile){
-            this.indicatorForTile.forTiles(tiles);
+    highlightTiles(tiles: TileBase[], color?:string, indicatorName?: string): void {
+        const indicator = indicatorName?this.indicators.get(indicatorName):this.indicatorForTile;
+
+        
+        if(!indicator){
+            throw new Error(`No indicator with name ${indicatorName}`);
         }
+
+        indicator?.forTiles(tiles, color);
     }
 
     _getMapObject():Object3D{
@@ -481,7 +498,7 @@ export abstract class MapIndicator{
     };
 
     abstract forTile(tile: TileBase):void;
-    abstract forTiles(tiles: TileBase[]):void;
+    abstract forTiles(tiles: TileBase[], hexColor?:string):void;    
     abstract hide():void;
     abstract show():void;
     abstract render(renderables: Renderable[], tiles: TileBase[], colorHex?: string):void;
@@ -529,6 +546,27 @@ export abstract class AreaMapIndicator extends MapIndicator{
         this.show();
         
     }
+    
+    abstract _changeColor(renderable:Renderable, hexColor:string):void;  
+
+    forGroup(tiles: TileBase[], groupHexColor: string):void{
+        this.hide();
+        if(tiles.length==0)
+            return;
+        if(this.renderables.length<tiles.length){
+            const delta = tiles.length-this.renderables.length;
+            for(let i=0; i<delta;i++){
+                const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey); 
+                // change material color
+                this._changeColor(renderable, groupHexColor);               
+                this.renderables.push(renderable);
+                this.mapProvider.add(renderable);
+            }
+        }
+        this.tiles = tiles;
+        this.render(this.renderables.slice(0,tiles.length),tiles, groupHexColor);        
+        this.show();
+    }
     hide(): void {
         for(let i=0;i<this.tiles.length;i++){
             this.renderables[i].hide&&this.renderables[i].hide!();
@@ -544,6 +582,19 @@ export abstract class AreaMapIndicator extends MapIndicator{
 }
 
 export class AreaMapIndicatorThreeJs extends AreaMapIndicator{
+    _changeColor(renderable: Renderable, hexColor: string): void {
+        renderable.data.travers((object3D: Object3D)=>{
+            if(object3D.type == "Mesh"){
+                if(Array.isArray((<Mesh>object3D).material)){
+                    (<Material[]>(<Mesh>object3D).material).forEach((material:Material)=>{
+                        (<any>material).color.set(hexColor)    
+                    })
+                }else{
+                    (<any>(<Mesh>object3D).material).color.set(hexColor)
+                }                
+            }
+        })        
+    }
 
     render(renderables: Renderable[], tiles: TileBase[], _colorHex?: string): void {        
         if(renderables.length != tiles.length)

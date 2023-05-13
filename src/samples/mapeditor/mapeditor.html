@@ -83,6 +83,17 @@
                     <div class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">
                         <span rv-each-tag="model.mapCharacteristics.tags" class="tag is-light mx-1">{tag}</span>
                     </div>
+                    <div class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">
+                        <div class="select">
+                            <select rv-value="model.deployments.value" rv-on-change="_handleSpecialAreasChanged">
+                              <option value="">Special areas</option>
+                              <option value="RED_DEPLOYMENT">RED TEAM DEPLOYMENT</option>
+                              <option value="BLUE_DEPLOYMENT">BLUE TEAM DEPLOYMENT</option>
+                              <option value="GREEN_DEPLOYMENT">GREEN TEAM DEPLOYMENT</option>
+                              <option value="YELLOW_DEPLOYMENT">YELLOW TEAM DEPLOYMENT</option>
+                            </select>
+                        </div>
+                    </div>
                     <p class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'"><a href="mapeditor.html">Start New Map</a></p>
                     <p class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'"><a >|</a></p>
                     <p class="level-item"><a href="assets.html">Asset Editor</a></p>
@@ -96,6 +107,8 @@
                 <!-- <p class="level-item"><a class="button is-success">New</a></p> -->
                 </div>
             </nav>
+
+            
         </section>
         <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'ChooseKind'">        
             <h1 class="title">Create/Edit Map</h1>
@@ -301,6 +314,11 @@
                                         <option value="RIVER">RIVER</option>
                                         <option value="GLACIER">GLACIER</option>                                                
                                         <option value="IMPASSABLE">IMPASSABLE</option>                                                
+                                        <option value="">--------------</option>
+                                        <option value="RED_DEPLOYMENT">RED TEAM DEPLOYMENT AREA</option>
+                                        <option value="BLUE_DEPLOYMENT">BLUE TEAM DEPLOYMENT AREA</option>
+                                        <option value="GREEN_DEPLOYMENT">GREEN TEAM DEPLOYMENT AREA</option>
+                                        <option value="YELLOW_DEPLOYMENT">YELLOW TEAM DEPLOYMENT AREA</option>
                                         <option value="">--------------</option>
                                         <option value="CUSTOM">CUSTOM</option>
                                       </select>

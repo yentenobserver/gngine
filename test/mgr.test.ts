@@ -2534,15 +2534,25 @@ describe("Renderers",()=>{
 
             })
         })
-        describe("highlightTiles",()=>{
+        describe("highlightTiles",()=>{ 
+            let indicator2:any;  
+            let indicator3:any;       
             beforeEach(()=>{
                 map = new MapQuadRendererThreeJs(width, height, messageBusMocked);
                 const indicator:any = {
                     forTiles: ()=>{}
                 }
+                indicator2 = {
+                    forTiles: ()=>{}
+                }
+                indicator3 = {
+                    forTiles: ()=>{}
+                }
                 map.indicatorForTile = <MapIndicator>indicator;
+                
 
                 s1 = sinon.stub(indicator, "forTiles")
+                s2 = sinon.stub(indicator2, "forTiles")
             })
             afterEach(()=>{
                 s1.restore();
@@ -2551,10 +2561,19 @@ describe("Renderers",()=>{
                 map.highlightTiles([]);
                 return expect(s1.callCount).eq(1);                
             })
-            it("does nothing when there is no indicator",()=>{
-                map.indicatorForTile = undefined;
-                map.highlightTiles([]);
-                return expect(s1.callCount).eq(0);                
+            it("throws error when there is no indicator",()=>{
+                map.indicatorForTile = undefined;                
+                return expect(()=>{map.highlightTiles([])}).to.throw('No indicator with name');  
+                // return expect(s1.callCount).eq(0);                
+            })
+            it("throws error where no indicator is found",()=>{
+                return expect(()=>{map.highlightTiles([],"","no such indicator")}).to.throw('No indicator with name');  
+            })
+            it("uses indicator by name",()=>{
+                map.registerIndicator(indicator3, "first" );
+                map.registerIndicator(indicator2, "second" );
+                map.highlightTiles([],"","second");
+                return expect(s2.callCount).eq(1);    
             })
         })
         describe("_onEvent",()=>{
