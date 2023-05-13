@@ -107,6 +107,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
                 } 
                 tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointermove" && this.highlightTiles([tileData]);
                 tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
+                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.highlightTiles([tileData], "_OnClick", "#1ECBE1")
             break;
             case Events.MAP.ROTATE:
                 if((<MapRotateEvent>event).direction == DIRECTION.LEFT){
@@ -752,6 +753,9 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         const mapIndicator = await QuadAreaMapIndicator3Js.create(this);
 
         this.indicatorForTile = mapIndicator;
+
+        const clickedIndicator = await QuadAreaMapIndicator3Js.create(this);
+        this.registerIndicator("_OnClick",clickedIndicator);
     }
 
     
@@ -780,6 +784,9 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
     async _createMapHelpers(){        
         const mapIndicator = await HexAreaMapIndicator3Js.create(this);
         this.indicatorForTile = mapIndicator;
+
+        const clickedIndicator = await HexAreaMapIndicator3Js.create(this);
+        this.registerIndicator("_OnClick",clickedIndicator);
     }
 
     yxToScenePosition(y: number, x:number){
