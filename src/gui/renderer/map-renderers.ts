@@ -41,6 +41,71 @@ export interface MapZoomEvent extends MapEvent {
     direction: DIRECTION // IN, OUT
 }
 
+class MapPlaygroundEventHandler{
+    shiftTiles:TileBase[];
+    renderer: MapRenderer;
+    constructor(mapRenderer:MapRenderer){
+        this.shiftTiles = [];
+        this.renderer = mapRenderer;
+    }
+
+    _onEvent(event:PlaygroundInteractionEvent|MapEvent|MapRotateEvent):void{
+        
+        switch(event.type){
+            case Events.INTERACTIONS.TILE:
+                let tileData:TileBase|undefined = undefined;
+                let object:THREE.Object3D|undefined = undefined;
+                for(let i=(<PlaygroundInteractionEvent>event).data.hierarchy.length-1; i>= 0; i--){
+                    if((<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData){                
+                        tileData = (<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData
+                        object = (<PlaygroundInteractionEvent>event).data.hierarchy[i]
+                    }
+                } 
+                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointermove" && this.renderer.highlightTiles([tileData]);
+                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.renderer.goToTile(tileData, object!);
+                
+                if(tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && !(<PlaygroundInteractionEvent>event).originalEvent.shiftKey){
+                    this.shiftTiles = [];
+                    this.renderer.highlightTiles([tileData], "_OnClick", "#1ECBE1")
+                } 
+
+                if(tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && (<PlaygroundInteractionEvent>event).originalEvent.shiftKey){
+                    const isAlready = this.shiftTiles.find((item:TileBase)=>{
+                        return item.id == tileData!.id
+                    })
+
+                    if(isAlready){
+                        // remove
+                        this.shiftTiles = this.shiftTiles.filter((item)=>{return item.id != tileData!.id});
+                    }else{
+                        this.shiftTiles.push(tileData);
+                    }       
+                    this.renderer.highlightTiles(this.shiftTiles, "_OnClick", "#1ECBE1")                    
+                }
+                 
+            break;
+            case Events.MAP.ROTATE:
+                if((<MapRotateEvent>event).direction == DIRECTION.LEFT){
+                    this.renderer.rotate(1)
+                }else{
+                    this.renderer.rotate(-1)
+                }
+            break;
+            case Events.MAP.ZOOM:
+                if((<MapZoomEvent>event).direction == DIRECTION.OUT){
+                    this.renderer.zoom(-1)
+                }else{
+                    this.renderer.zoom(1)
+                }
+            break;
+            case Events.INTERACTIONS.NON_CLASSIFIED:
+                // clear highlight
+                this.renderer.highlightTiles([]);
+            break;
+        }   
+    }
+}
+
 /**
  * Responsible for rendering map tiles and tile indicator (highligh element for selecting tile);
  * It reacts to following user interactions:
@@ -53,6 +118,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     indicatorForTile: MapIndicator|undefined;
 
     indicators: Map<string, MapIndicator>;
+    mapEventHandler: MapPlaygroundEventHandler;
 
     // tiles = Map<string,  // "x,y"->{o: object3D, d: direction N|S|E|W, p: scene position origin relative{x: , y: , z:}}
     constructor(width:number, height:number, emitter:EventEmitter){
@@ -69,6 +135,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
         this.emitter.on(Events.MAP.ZOOM, this._onEvent.bind(this))
         this.indicators = new Map<string, MapIndicator>();
  
+        this.mapEventHandler = new MapPlaygroundEventHandler(this);
     }
     
     
@@ -94,40 +161,42 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     abstract zoom(level: number):void;
 
     _onEvent(event:PlaygroundInteractionEvent|MapEvent|MapRotateEvent):void{
+        this.mapEventHandler._onEvent(event);
 
-        switch(event.type){
-            case Events.INTERACTIONS.TILE:
-                let tileData:TileBase|undefined = undefined;
-                let object:THREE.Object3D|undefined = undefined;
-                for(let i=(<PlaygroundInteractionEvent>event).data.hierarchy.length-1; i>= 0; i--){
-                    if((<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData){                
-                        tileData = (<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData
-                        object = (<PlaygroundInteractionEvent>event).data.hierarchy[i]
-                    }
-                } 
-                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointermove" && this.highlightTiles([tileData]);
-                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
-                tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.highlightTiles([tileData], "_OnClick", "#1ECBE1")
-            break;
-            case Events.MAP.ROTATE:
-                if((<MapRotateEvent>event).direction == DIRECTION.LEFT){
-                    this.rotate(1)
-                }else{
-                    this.rotate(-1)
-                }
-            break;
-            case Events.MAP.ZOOM:
-                if((<MapZoomEvent>event).direction == DIRECTION.OUT){
-                    this.zoom(-1)
-                }else{
-                    this.zoom(1)
-                }
-            break;
-            case Events.INTERACTIONS.NON_CLASSIFIED:
-                // clear highlight
-                this.highlightTiles([]);
-            break;
-        }            
+        // switch(event.type){
+        //     case Events.INTERACTIONS.TILE:
+        //         let tileData:TileBase|undefined = undefined;
+        //         let object:THREE.Object3D|undefined = undefined;
+        //         for(let i=(<PlaygroundInteractionEvent>event).data.hierarchy.length-1; i>= 0; i--){
+        //             if((<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData){                
+        //                 tileData = (<PlaygroundInteractionEvent>event).data.hierarchy[i].userData.tileData
+        //                 object = (<PlaygroundInteractionEvent>event).data.hierarchy[i]
+        //             }
+        //         } 
+        //         tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointermove" && this.highlightTiles([tileData]);
+        //         tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.goToTile(tileData, object!);
+        //         tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.highlightTiles([tileData], "_OnClick", "#1ECBE1")
+        //         tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && (<PlaygroundInteractionEvent>event).originalEvent.ctrlKey && console.log("Click with ctrl")
+        //     break;
+        //     case Events.MAP.ROTATE:
+        //         if((<MapRotateEvent>event).direction == DIRECTION.LEFT){
+        //             this.rotate(1)
+        //         }else{
+        //             this.rotate(-1)
+        //         }
+        //     break;
+        //     case Events.MAP.ZOOM:
+        //         if((<MapZoomEvent>event).direction == DIRECTION.OUT){
+        //             this.zoom(-1)
+        //         }else{
+        //             this.zoom(1)
+        //         }
+        //     break;
+        //     case Events.INTERACTIONS.NON_CLASSIFIED:
+        //         // clear highlight
+        //         this.highlightTiles([]);
+        //     break;
+        // }            
     }
 
     /**

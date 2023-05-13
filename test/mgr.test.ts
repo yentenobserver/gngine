@@ -2571,14 +2571,14 @@ describe("Renderers",()=>{
                 return expect(()=>{map.highlightTiles([],"no such indicator", "")}).to.throw('No indicator with name');  
             })
             it("uses indicator by name",()=>{
-                map.registerIndicator(indicator3, "first" );
-                map.registerIndicator(indicator2, "second" );
+                map.registerIndicator("first" , indicator3);
+                map.registerIndicator("second", indicator2);
                 map.highlightTiles([],"second", "");
                 return expect(s2.callCount).eq(1);    
             })
             it("uses indicator for tile when no name provided",()=>{
-                map.registerIndicator(indicator3, "first" );
-                map.registerIndicator(indicator2, "second" );
+                map.registerIndicator("first", indicator3);
+                map.registerIndicator("second", indicator2);
                 map.highlightTiles([]);
                 return expect(s1.callCount).eq(1);    
 
@@ -2622,6 +2622,8 @@ describe("Renderers",()=>{
                 map._onEvent(<MapZoomEvent>MapEventMocks.zoom_out);
                 return expect(s4.getCall(0).args[0]).eq(-1);
             })
+            xit("selects multiple with Shift");
+            xit("when clicked selection is persistent");
         })
         describe("_dispose",()=>{
             let m1: THREE.Mesh;
@@ -3870,7 +3872,7 @@ describe("Renderers",()=>{
             describe("forTile",()=>{
                 
                 it("hides previous tiles",()=>{
-                    (<AreaMapIndicator>indicator).tiles.push(tile);
+                    
                     (<AreaMapIndicator>indicator).renderables.push(<Renderable>{
                         data: {},
                         name: "",
@@ -3900,11 +3902,7 @@ describe("Renderers",()=>{
                 it("makes sure the indicator is shown",()=>{
                     indicator.forTile(tile);
                     return expect(s3.callCount).eq(1);
-                })
-                it("adds tile to tiles array",()=>{
-                    indicator.forTile(tile);
-                    return expect((<AreaMapIndicator>indicator).tiles.length).eq(1);
-                })
+                })                
             })
             describe("forTiles",()=>{
 
@@ -3940,11 +3938,7 @@ describe("Renderers",()=>{
                 it("makes sure the indicator is shown",()=>{
                     indicator.forTiles([tile]);
                     return expect(s3.callCount).eq(1);
-                })
-                it("adds tile to tiles array",()=>{
-                    indicator.forTiles([tile]);
-                    return expect((<AreaMapIndicator>indicator).tiles.length).eq(1);
-                })
+                })                
             })
             describe("render",()=>{
                 beforeEach(()=>{

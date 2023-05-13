@@ -43,19 +43,19 @@ export interface ColorableIndicator{
 export abstract class AreaMapIndicator extends MapIndicator implements ColorableIndicator{
     // renderables used for indicators
     renderables: Renderable[];
-    tiles: TileBase[];
+    
     renderableKey: string;
     
 
     constructor(mapProvider: MapPositionProvider&MapWritable, renderablesFactory: RenderablesFactory, renderableKey: string){
         super(mapProvider, renderablesFactory); 
         this.renderables = [];   
-        this.tiles = [];   
+        
         this.renderableKey = renderableKey;
         
     }
     forTile(tile: TileBase, hexColor?:string): void {
-        this.hide();        
+        this.hide();               
         if(this.renderables.length<=0){
             const renderable = this.renderablesFactory.spawnRenderableObject(this.renderableKey);
             this.renderables.push(renderable);
@@ -67,12 +67,13 @@ export abstract class AreaMapIndicator extends MapIndicator implements Colorable
                 this._changeColor(renderable, hexColor);        
             })                   
         }
-        this.tiles = [tile];
+        
         this.render(this.renderables.slice(0,1),[tile]);        
         this.show();
     }
     forTiles(tiles: TileBase[], hexColor?:string): void {
-        this.hide();
+        
+        this.hide();        
         if(tiles.length==0)
             return;
         if(this.renderables.length<tiles.length){
@@ -90,7 +91,7 @@ export abstract class AreaMapIndicator extends MapIndicator implements Colorable
             })                   
         }
             
-        this.tiles = tiles;
+        
         this.render(this.renderables.slice(0,tiles.length),tiles);        
         this.show();
         
@@ -99,12 +100,12 @@ export abstract class AreaMapIndicator extends MapIndicator implements Colorable
     abstract _changeColor(renderable:Renderable, hexColor:string):void;  
 
     hide(): void {
-        for(let i=0;i<this.tiles.length;i++){
+        for(let i=0;i<this.renderables.length;i++){
             this.renderables[i].hide&&this.renderables[i].hide!();
         }
     }
     show(): void {
-        for(let i=0;i<this.tiles.length;i++){
+        for(let i=0;i<this.renderables.length;i++){
             this.renderables[i].show&&this.renderables[i].show!();
         }
     } 
