@@ -147,7 +147,7 @@ export class QuadAreaMapIndicator3Js extends AreaMapIndicatorThreeJs{
     }
     
     _changeColor(renderable: Renderable, hexColor: string): void {
-        renderable.data.travers((object3D: Object3D)=>{
+        renderable.data.traverse((object3D: Object3D)=>{
             if(object3D.type == "Mesh"){
                 if(Array.isArray((<Mesh>object3D).material)){
                     (<Material[]>(<Mesh>object3D).material).forEach((material:Material)=>{
@@ -183,7 +183,7 @@ export class HexAreaMapIndicator3Js extends AreaMapIndicatorThreeJs{
     }
     
     _changeColor(renderable: Renderable, hexColor: string): void {
-        renderable.data.travers((object3D: Object3D)=>{
+        renderable.data.traverse((object3D: Object3D)=>{
             if(object3D.type == "Mesh"){
                 if(Array.isArray((<Mesh>object3D).material)){
                     (<Material[]>(<Mesh>object3D).material).forEach((material:Material)=>{
