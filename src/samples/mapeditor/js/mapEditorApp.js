@@ -546,7 +546,13 @@ class App {
         const deploymentTiles = tiles.filter((item)=>{
             return item.t?.modifications?.includes(that.model.deployments.value)            
         })
-        that.guiEngine.map.highlightTiles(deploymentTiles, "Deployments","#FF0000")
+        const colors = {
+            RED_DEPLOYMENT: "#E1341E",
+            BLUE_DEPLOYMENT: "#1E6AE1",
+            GREEN_DEPLOYMENT: "#1EE196",
+            YELLOW_DEPLOYMENT: "#CBE11E"
+        }
+        that.guiEngine.map.highlightTiles(deploymentTiles, "Deployments",colors[that.model.deployments.value])
     }
 
     async _handleTerrainChanged(e, that){
