@@ -599,6 +599,8 @@ class App {
         // console.log("Modifications: ", that.model.selected.tile.data.t.modifications);
         that.mapEngine.put(that.model.selected.tile.data);
         console.log("changed tile", that.model.selected.tile.data);
+
+        that._handleSpecialAreasChanged({}, that);
     }
 
     async _handleChangeAsset(e, that){          
