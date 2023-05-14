@@ -459,11 +459,13 @@ class App {
             selected: {
                 tile: {
                     data: {},
+                    dataMulti:[],
                     renderable: {
                         worldPosition: "",
                         item: {}
                     },
-                    asset: {}
+                    asset: {},
+                    
                 },
                 unit: {},
                 unitData: {},
@@ -603,16 +605,26 @@ class App {
         that._handleSpecialAreasChanged({}, that);
     }
 
-    async _handleChangeAsset(e, that){          
-        const newTile = JSON.parse(JSON.stringify(that.model.selected.tile.data));
-        newTile.r = that.item.variant.fullName;        
+    async _handleChangeAsset(e, that){    
+        let tiles = [that.model.selected.tile.data];
+        
+        if(that.model.selected.tile.dataMulti.length>0){
+            tiles = that.model.selected.tile.dataMulti
+        }
 
-        that.model.parent.guiEngine.map.changeTile(newTile, that.item);
-                
-        that.model.selected.tile.data = newTile;
-        that.model.parent.mapEngine._engine.put(newTile);
-
-        console.log("changed tile", that.model.selected.tile.data);
+        for(let i=0; i<tiles.length; i++){
+            const tile = tiles[i];
+            const newTile = JSON.parse(JSON.stringify(tile));
+            newTile.r = that.item.variant.fullName;        
+    
+            that.model.parent.guiEngine.map.changeTile(newTile, that.item);
+                    
+            that.model.selected.tile.data = newTile;
+            that.model.parent.mapEngine._engine.put(newTile);
+    
+            // console.log("changed tile", that.model.selected.tile.data);
+        }
+        
     }
 
     async _loadAssets(map){
@@ -888,6 +900,7 @@ class App {
 
         this.emitter.on(gngine.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
             console.log("tile interaction", tileInteractionEvent);
+            that.model.selected.tile.dataMulti = tileInteractionEvent.selected
         })
         
         
