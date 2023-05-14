@@ -2624,6 +2624,8 @@ describe("Renderers",()=>{
             })
             xit("selects multiple with Shift");
             xit("when clicked selection is persistent");
+            xit("when clicked map tile event is emitted");
+            xit("when multi selected map tile event is emitted");
         })
         describe("_dispose",()=>{
             let m1: THREE.Mesh;

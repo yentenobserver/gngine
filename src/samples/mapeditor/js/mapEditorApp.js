@@ -511,17 +511,17 @@ class App {
     async _start(){     
         const that = this;   
         this.emitter.on("interaction.*",(event)=>{
-            if(event.originalEvent.type=="pointerdown") {
-                // console.log("Got both", event);
-                // that.model.selected = {
-                //     unit: {},
-                //     unitData: {},
-                //     unitDataStr: {},
-                //     tile: {},
-                //     tileData: {},
-                //     tileDataStr: {},
-                // }
-            }            
+            // if(event.originalEvent.type=="pointerdown") {
+            //     // console.log("Got both", event);
+            //     // that.model.selected = {
+            //     //     unit: {},
+            //     //     unitData: {},
+            //     //     unitDataStr: {},
+            //     //     tile: {},
+            //     //     tileData: {},
+            //     //     tileDataStr: {},
+            //     // }
+            // }            
         })
 
 
@@ -825,7 +825,7 @@ class App {
             
         });
 
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE,async (event)=>{
+        this.emitter.on(gngine.Events.INTERACTIONS.TILE+"$",async (event)=>{            
             if(event.originalEvent.type=="pointerdown") {
                 // console.log('TILE', event)
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){
@@ -885,6 +885,10 @@ class App {
                 that.model.selected.tile.asset = assetSpecification;
             };                                    
         });
+
+        this.emitter.on(gngine.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
+            console.log("tile interaction", tileInteractionEvent);
+        })
         
         
         // remove previously instantiated map

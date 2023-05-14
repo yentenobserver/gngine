@@ -756,3 +756,20 @@ export interface PlaygroundInteractionEvent extends EngineEvent{
     worldPosition: any // interacting object world position,
     scenePosition: any // scene position when interaction took place
 }
+
+export interface TileInteractionEvent extends EngineEvent{
+    click: any, // clicked tile
+    selected: any[], // tile selected or multiple tiles selected (with shift)
+    hoover: any // tile over which user mouse hoovers
+}
+// export interface MapInteractionEvent extends EngineEvent{
+//     tiles: {
+//         selected: any[], // tile selected or multiple tiles selected (with shift)
+//         hoover: any // tile over which user mouse hoovers
+//     }
+//     zoom: string, // IN or OUT
+//     rotate: {
+//         direction: string // LEFT or RIGHT
+//     }
+
+// }

@@ -65,8 +65,19 @@ class MapPlaygroundEventHandler{
                 tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && this.renderer.goToTile(tileData, object!);
                 
                 if(tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && !(<PlaygroundInteractionEvent>event).originalEvent.shiftKey){
+                    // reset previous
                     this.shiftTiles = [];
+                    this.renderer.highlightTiles(this.shiftTiles, "_OnClick", "#1ECBE1")
+                    // just in case next is shift click
+                    this.shiftTiles.push(tileData);
+                    // mark new
                     this.renderer.highlightTiles([tileData], "_OnClick", "#1ECBE1")
+                    this.renderer.emitter.emit(Events.INTERACTIONS.MAP.TILE, {
+                        type: Events.INTERACTIONS.MAP.TILE,
+                        click: tileData, // clicked tile
+                        selected: [] // tile selected or multiple tiles selected (with shift)
+                        // hoover: undefined // tile over which
+                    })
                 } 
 
                 if(tileData && (<PlaygroundInteractionEvent>event).originalEvent.type=="pointerdown" && (<PlaygroundInteractionEvent>event).originalEvent.shiftKey){
@@ -80,7 +91,13 @@ class MapPlaygroundEventHandler{
                     }else{
                         this.shiftTiles.push(tileData);
                     }       
-                    this.renderer.highlightTiles(this.shiftTiles, "_OnClick", "#1ECBE1")                    
+                    this.renderer.highlightTiles(this.shiftTiles, "_OnClick", "#1ECBE1")  
+                    this.renderer.emitter.emit(Events.INTERACTIONS.MAP.TILE, {
+                        type: Events.INTERACTIONS.MAP.TILE,
+                        click: tileData, // clicked tile
+                        selected: this.shiftTiles // tile selected or multiple tiles selected (with shift)
+                        // hoover: undefined // tile over which
+                    })                  
                 }
                  
             break;

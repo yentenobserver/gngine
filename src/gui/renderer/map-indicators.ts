@@ -69,7 +69,7 @@ export abstract class AreaMapIndicator extends MapIndicator implements Colorable
         }
         
         this.render(this.renderables.slice(0,1),[tile]);        
-        this.show();
+        // this.show();
     }
     forTiles(tiles: TileBase[], hexColor?:string): void {
         
@@ -93,7 +93,7 @@ export abstract class AreaMapIndicator extends MapIndicator implements Colorable
             
         
         this.render(this.renderables.slice(0,tiles.length),tiles);        
-        this.show();
+        // this.show();
         
     }
     
@@ -120,10 +120,11 @@ export abstract class AreaMapIndicatorThreeJs extends AreaMapIndicator{
         for(let i=0; i<tiles.length; i++){
             const pos = this.mapProvider.yxToScenePosition(tiles[i].y, tiles[i].x);
             const renderable = <RenderableThreeJS>renderables[i];            
+            renderable.show&&renderable.show();
             if(renderable.data.position.x !=pos.x || renderable.data.position.y !=pos.y){
                 // console.log(`Cache size ${this.tiles.length} ${this.renderables.length}`)
                 renderable.data.position.set(pos.x, pos.y, renderable.data.position.z);
-            }
+            }            
         }        
     }
 }
