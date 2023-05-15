@@ -56,7 +56,7 @@ class MapEngine {
         this._engine.put(tileBase);
     }
 }
-class GUIEngine {
+class MapGUIEngine {
 
     constructor(){
         this._playground = {};
@@ -79,7 +79,7 @@ class GUIEngine {
 
     }
     static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize, tiles){
-        const p = new GUIEngine();
+        const p = new MapGUIEngine();
         p.kind = kind;
         const playgroundAndView = await p._preparePlaygroundAndView(canvas, emitter);
         p._map.mainView = playgroundAndView.view;
@@ -220,7 +220,8 @@ class GUIEngine {
     }
 
     async _mapChangeTile(tile, asset){
-        const theTile = JSON.parse(JSON.stringify(tile));
+        // const theTile = JSON.parse(JSON.stringify(tile));
+        const theTile = tile;
         theTile.r = asset.variant.fullName;        
 
         const availableSpecificationsNames = this._tiles.assetFactory.spawnableRenderablesNames();
@@ -563,12 +564,21 @@ class App {
         
         if(that.model.stepMapEdit.terrainForm.terrainDict.value == "CUSTOM"){
             that.model.selected.tile.data.t.kind = that.model.stepMapEdit.terrainForm.terrainCustom.value.replace(/\s/g,'');
+            that.model.selected.tile.dataMulti.forEach((tile)=>{
+                tile.t.kind = that.model.stepMapEdit.terrainForm.terrainCustom.value.replace(/\s/g,'');
+            })
         }else{
             that.model.selected.tile.data.t.kind = that.model.stepMapEdit.terrainForm.terrainDict.value
+            that.model.selected.tile.dataMulti.forEach((tile)=>{
+                tile.t.kind = that.model.stepMapEdit.terrainForm.terrainDict.value
+            })
         }
 
 
         that.mapEngine.put(that.model.selected.tile.data);
+        that.model.selected.tile.dataMulti.forEach((tile)=>{
+            that.mapEngine.put(tile);
+        })
         // console.log("Terrain: ", that.model.selected.tile.data.t.kind);
         console.log("changed tile", that.model.selected.tile.data);
     }
@@ -614,7 +624,8 @@ class App {
 
         for(let i=0; i<tiles.length; i++){
             const tile = tiles[i];
-            const newTile = JSON.parse(JSON.stringify(tile));
+            // const newTile = JSON.parse(JSON.stringify(tile));
+            const newTile = tile;
             newTile.r = that.item.variant.fullName;        
     
             that.model.parent.guiEngine.map.changeTile(newTile, that.item);
@@ -804,6 +815,39 @@ class App {
         }
     }
 
+
+    async _onTileSelected(tileBase){
+        const tileData = tileBase;
+        const that = this;
+        that.model.selected.tile.data = tileData;
+
+        // reset prior setting
+        that.model.stepMapEdit.terrainForm.terrainDict.value = "";
+        that.model.stepMapEdit.terrainForm.terrainCustom.value = "";
+        that.model.stepMapEdit.terrainForm.modificationsDict.value = "";
+        that.model.stepMapEdit.terrainForm.modificationsCustom.value = "";
+
+        if(["UNDEFINED","MOUNTAINS","PLAINS","GRASSLANDS","DIRTS","HILLS","DESERTS","SEAS","OCEANS","LAKES","COASTAL"].includes(tileData.t.kind)){
+            that.model.stepMapEdit.terrainForm.terrainDict.value = tileData.t.kind
+        }else{
+            that.model.stepMapEdit.terrainForm.terrainDict.value = "CUSTOM"
+            that.model.stepMapEdit.terrainForm.terrainCustom.value = tileData.t.kind
+        }
+
+        // const found = tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))
+
+        if(tileData.t.modifications&&tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))){
+            that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications
+        }else if(tileData.t.modifications){
+            that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications;
+            that.model.stepMapEdit.terrainForm.modificationsCustom.value = tileData.t.modifications.join(",")
+            that.model.stepMapEdit.terrainForm.modificationsDict.value.push("CUSTOM");            
+        }
+        const assetSpecification = await that._findAsset(that.model.selected.tile.data.r);
+
+        that.model.selected.tile.asset = assetSpecification;
+    }
+
     /**
      * 
      * @param {GngineMap} map 
@@ -837,70 +881,38 @@ class App {
             
         });
 
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE+"$",async (event)=>{            
-            if(event.originalEvent.type=="pointerdown") {
-                // console.log('TILE', event)
-                for(let i=event.data.hierarchy.length-1; i>= 0; i--){
-                    if(event.data.hierarchy[i].userData.tileData){                
-                        const tileData = event.data.hierarchy[i].userData.tileData                    
-                        
-                        
+        // this.emitter.on(gngine.Events.INTERACTIONS.TILE+"$",async (event)=>{            
+        //     if(event.originalEvent.type=="pointerdown") {
+        //         // console.log('TILE', event)
+        //         for(let i=event.data.hierarchy.length-1; i>= 0; i--){
+        //             if(event.data.hierarchy[i].userData.tileData){                
+        //                 const tileData = event.data.hierarchy[i].userData.tileData                                            
+        //             }
+        //         }
+        //         // that.model.selected.tile = event.interactingObject
+        //         // that.model.selected.tile.worldPosition = event.worldPosition
 
-                        // that.model.selected.tileData = tileData
-                        // that.model.selected.tileDataStr = JSON.stringify(tileData, null, "\t");
-                        // that.model.selected.tileDataStr = that.model.selected.tileDataStr.replace( /[\n\t]+([\d\.e\-\[\]]+)/g, '$1' );
+        //         that.model.selected.tile.renderable.item = event.interactingObject;
+        //         that.model.selected.tile.renderable.worldPosition = event.worldPosition;
 
+        //         console.log('TILE',that.model.selected.tile);
 
-                        
-                        that.model.selected.tile.data = tileData;
+        //         const assetSpecification = await that._findAsset(that.model.selected.tile.data.r);
 
-                        // reset prior setting
-                        that.model.stepMapEdit.terrainForm.terrainDict.value = "";
-                        that.model.stepMapEdit.terrainForm.terrainCustom.value = "";
-                        that.model.stepMapEdit.terrainForm.modificationsDict.value = "";
-                        that.model.stepMapEdit.terrainForm.modificationsCustom.value = "";
-
-                        if(["UNDEFINED","MOUNTAINS","PLAINS","GRASSLANDS","DIRTS","HILLS","DESERTS","SEAS","OCEANS","LAKES","COASTAL"].includes(tileData.t.kind)){
-                            that.model.stepMapEdit.terrainForm.terrainDict.value = tileData.t.kind
-                        }else{
-                            that.model.stepMapEdit.terrainForm.terrainDict.value = "CUSTOM"
-                            that.model.stepMapEdit.terrainForm.terrainCustom.value = tileData.t.kind
-                        }
-
-                        // const found = tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))
-
-                        if(tileData.t.modifications&&tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))){
-                            that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications
-                        }else if(tileData.t.modifications){
-                            that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications;
-                            that.model.stepMapEdit.terrainForm.modificationsCustom.value = tileData.t.modifications.join(",")
-                            that.model.stepMapEdit.terrainForm.modificationsDict.value.push("CUSTOM");
-                            
-                        }
-                        
-                        
-
-                    //     output = JSON.stringify( output, null, '\t' );
-			        // output = output
-                    }
-                }
-                // that.model.selected.tile = event.interactingObject
-                // that.model.selected.tile.worldPosition = event.worldPosition
-
-                that.model.selected.tile.renderable.item = event.interactingObject;
-                that.model.selected.tile.renderable.worldPosition = event.worldPosition;
-
-                console.log('TILE',that.model.selected.tile);
-
-                const assetSpecification = await that._findAsset(that.model.selected.tile.data.r);
-
-                that.model.selected.tile.asset = assetSpecification;
-            };                                    
-        });
+        //         that.model.selected.tile.asset = assetSpecification;
+        //     };                                    
+        // });
 
         this.emitter.on(gngine.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
             console.log("tile interaction", tileInteractionEvent);
+
+            // which tile is "the last selected"            
+            let selectedTile =  tileInteractionEvent.operation == "GROUP_REMOVE"?tileInteractionEvent.selected[Math.max(tileInteractionEvent.selected.length-1,0)]:tileInteractionEvent.click;
+            
             that.model.selected.tile.dataMulti = tileInteractionEvent.selected
+            if(selectedTile)
+                that._onTileSelected(selectedTile);
+
         })
         
         
@@ -990,7 +1002,7 @@ class App {
             
         
                 
-        const guiEngine = await GUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles);
+        const guiEngine = await MapGUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles);
         const mapEngine = await MapEngine.getInstance(mapCharacteristics.kind, mapCharacteristics.size, tiles)
         that.guiEngine = guiEngine;
         that.mapEngine = mapEngine;

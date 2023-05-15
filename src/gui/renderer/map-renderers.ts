@@ -6,7 +6,7 @@ import { Material } from 'three';
 import { TileBase } from "../../logic/map/common.notest";
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
-import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS } from '../playground/playground';
+import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS, TileInteractionOperation } from '../playground/playground';
 import { HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs, ScenePosition, TilePosition } from './providers';
 import { Renderable, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';
 import { Renderer } from './renderers';
@@ -75,8 +75,14 @@ class MapPlaygroundEventHandler{
                     this.renderer.emitter.emit(Events.INTERACTIONS.MAP.TILE, {
                         type: Events.INTERACTIONS.MAP.TILE,
                         click: tileData, // clicked tile
-                        selected: [] // tile selected or multiple tiles selected (with shift)
-                        // hoover: undefined // tile over which
+                        selected: [], // tile selected or multiple tiles selected (with shift)
+                        operation: TileInteractionOperation.ADD,
+                        viewName: (<PlaygroundInteractionEvent>event).viewName, // name of the view that took part in the interaction
+                        originalEvent: (<PlaygroundInteractionEvent>event).originalEvent, // original event from UI that triggered the interaction
+                        interactingObject: (<PlaygroundInteractionEvent>event).interactingObject, // the object that took part in the interaction
+                        data: (<PlaygroundInteractionEvent>event).data, // additional interaction data
+                        worldPosition: (<PlaygroundInteractionEvent>event).worldPosition, // interacting object world position,
+                        scenePosition: (<PlaygroundInteractionEvent>event).scenePosition // scene position when interaction took place
                     })
                 } 
 
@@ -85,18 +91,28 @@ class MapPlaygroundEventHandler{
                         return item.id == tileData!.id
                     })
 
+                    let operation: TileInteractionOperation;
+
                     if(isAlready){
                         // remove
                         this.shiftTiles = this.shiftTiles.filter((item)=>{return item.id != tileData!.id});
+                        operation = TileInteractionOperation.GROUP_REMOVE;
                     }else{
                         this.shiftTiles.push(tileData);
+                        operation = TileInteractionOperation.GROUP_ADD;
                     }       
                     this.renderer.highlightTiles(this.shiftTiles, "_OnClick", "#1ECBE1")  
                     this.renderer.emitter.emit(Events.INTERACTIONS.MAP.TILE, {
                         type: Events.INTERACTIONS.MAP.TILE,
                         click: tileData, // clicked tile
-                        selected: this.shiftTiles // tile selected or multiple tiles selected (with shift)
-                        // hoover: undefined // tile over which
+                        selected: this.shiftTiles, // tile selected or multiple tiles selected (with shift)
+                        operation: operation,
+                        viewName: (<PlaygroundInteractionEvent>event).viewName, // name of the view that took part in the interaction
+                        originalEvent: (<PlaygroundInteractionEvent>event).originalEvent, // original event from UI that triggered the interaction
+                        interactingObject: (<PlaygroundInteractionEvent>event).interactingObject, // the object that took part in the interaction
+                        data: (<PlaygroundInteractionEvent>event).data, // additional interaction data
+                        worldPosition: (<PlaygroundInteractionEvent>event).worldPosition, // interacting object world position,
+                        scenePosition: (<PlaygroundInteractionEvent>event).scenePosition // scene position when interaction took place
                     })                  
                 }
                  

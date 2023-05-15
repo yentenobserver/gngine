@@ -23,7 +23,7 @@ export type {ScenePosition, MapPositionProvider, TilePosition, HexFlatTopDirecti
 export {HexFlatTopOrientationProviderThreeJs, HexFlatTopPositionProviderThreeJs, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs} from './gui/renderer/providers'
 export { UnitRenderablesThreeJSFactory, UnitsRenderer, UnitsRendererThreeJS } from './gui/renderer/unit-renderer';
 export type { UnitRenderablesFactory as UnitRenderableFactory } from './gui/renderer/unit-renderer';
-export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs, PlaygroundOptions} from "./gui/playground/playground"
+export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs, PlaygroundOptions, TileInteractionEvent, TileInteractionOperation} from "./gui/playground/playground"
 
 export {RENDERABLES} from "./gui/renderer/assets/threejs3d.notest"
 

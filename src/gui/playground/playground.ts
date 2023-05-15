@@ -757,10 +757,17 @@ export interface PlaygroundInteractionEvent extends EngineEvent{
     scenePosition: any // scene position when interaction took place
 }
 
-export interface TileInteractionEvent extends EngineEvent{
+export enum TileInteractionOperation {
+    ADD = "ADD",
+    GROUP_ADD = "GROUP_ADD",
+    GROUP_REMOVE = "GROUP_REMOVE"
+}
+
+export interface TileInteractionEvent extends PlaygroundInteractionEvent{
     click: any, // clicked tile
     selected: any[], // tile selected or multiple tiles selected (with shift)
     hoover: any // tile over which user mouse hoovers
+    operation: TileInteractionOperation
 }
 // export interface MapInteractionEvent extends EngineEvent{
 //     tiles: {
