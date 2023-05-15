@@ -608,9 +608,17 @@ class App {
             that.model.selected.tile.data.t.modifications = that.model.stepMapEdit.terrainForm.modificationsDict.value
         }
         
+        that.model.selected.tile.dataMulti.forEach((tile)=>{
+            tile.t.modifications = that.model.selected.tile.data.t.modifications
+        })
+
         // console.log("Modifications: ", that.model.selected.tile.data.t.modifications);
         that.mapEngine.put(that.model.selected.tile.data);
+        that.model.selected.tile.dataMulti.forEach((tile)=>{
+            that.mapEngine.put(tile);
+        })
         console.log("changed tile", that.model.selected.tile.data);
+
 
         that._handleSpecialAreasChanged({}, that);
     }
@@ -839,9 +847,11 @@ class App {
         if(tileData.t.modifications&&tileData.t.modifications.every(r=> ["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(r))){
             that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications
         }else if(tileData.t.modifications){
+            // there are some custom modifications
             that.model.stepMapEdit.terrainForm.modificationsDict.value = tileData.t.modifications;
-            that.model.stepMapEdit.terrainForm.modificationsCustom.value = tileData.t.modifications.join(",")
-            that.model.stepMapEdit.terrainForm.modificationsDict.value.push("CUSTOM");            
+            that.model.stepMapEdit.terrainForm.modificationsCustom.value = tileData.t.modifications.join(",")            
+            if(!that.model.stepMapEdit.terrainForm.modificationsDict.value.includes("CUSTOM"))
+                that.model.stepMapEdit.terrainForm.modificationsDict.value.push("CUSTOM");            
         }
         const assetSpecification = await that._findAsset(that.model.selected.tile.data.r);
 
