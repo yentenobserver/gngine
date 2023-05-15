@@ -589,8 +589,13 @@ class App {
 
         if(e.target.nodeName == "SELECT" && that.model.stepMapEdit.terrainForm.modificationsDict.value.join(",").includes("CUSTOM")){
 
-            const customAlready = that.model.stepMapEdit.terrainForm.modificationsCustom.value.split(",").map((item)=>{return item.trim()});
+            let customAlready = that.model.stepMapEdit.terrainForm.modificationsCustom.value.split(",").map((item)=>{return item.trim()});
 
+            // remove those eventually deselected from dict - so leave only true custom
+            customAlready = customAlready.filter((item)=>{return !["RAILWAY","ROAD","FORREST","BUILDING","RIVER","GLACIER","IMPASSABLE"].includes(item)})
+            
+            
+            // add also those selected by dict
             let result = customAlready.concat(that.model.stepMapEdit.terrainForm.modificationsDict.value);
             
             result = result.filter((item, pos)=>{
