@@ -76,18 +76,20 @@ class MapGUIEngine {
             registerAreaIndicator: this._mapRegisterAreaIndicator.bind(this)
         }
         this.kind = undefined
+        this.options = {}
 
     }
-    static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize, tiles){
+    static async getInstance(canvas, emitter, tileAssetsSpecificationsJSON, kind, mapSize, tiles, options){
         const p = new MapGUIEngine();
         p.kind = kind;
+        p.options = options;
         const playgroundAndView = await p._preparePlaygroundAndView(canvas, emitter);
         p._map.mainView = playgroundAndView.view;
         p._playground = playgroundAndView.playground;
         p._map.hudView = playgroundAndView.hudView;
 
         p._tiles.assetFactory = await p._prepareFactory(tileAssetsSpecificationsJSON, kind);     
-        p._tiles.renderer = await p._prepareRenderer(mapSize, kind, p._tiles.assetFactory, p._map.mainView, emitter);
+        p._tiles.renderer = await p._prepareRenderer(mapSize, kind, p._tiles.assetFactory, p._map.mainView, emitter, options);
 
         // const widthHeight = mapSize.split("x").map((item)=>{return item.trim()});
         
@@ -193,16 +195,16 @@ class MapGUIEngine {
         return factory;
     }
 
-    async _prepareRenderer(size, kind, factory, view, emitter){
+    async _prepareRenderer(size, kind, factory, view, emitter, options){
         const widthHeight = size.split("x").map((item)=>{return item.trim()});
         // prepare Renderer
         let renderer = {};
         if(kind == "Unit"){            
             renderer = new gngine.UnitsRendererThreeJS(emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());            
         }else if(kind == "HexTile"){
-            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter,{backgroundImgUrl: "assets/europeelevation.eps.zoom-gr.png"})            
+            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter, options)            
         }else if(kind == "QuadTile"){
-            renderer = new gngine.MapQuadRendererThreeJs(widthHeight[0],widthHeight[1], emitter)
+            renderer = new gngine.MapQuadRendererThreeJs(widthHeight[0],widthHeight[1], emitter, options)
         }
         
         renderer.setRenderablesFactory(factory);
@@ -452,6 +454,10 @@ class App {
                     },
                     latlon: {
                         value: "",
+                        error: ""
+                    },
+                    backgroundImageURL: {
+                        value: "assets/europeelevation.eps.zoom-gr.png",
                         error: ""
                     }
 
@@ -786,7 +792,11 @@ class App {
                     size: that.model.stepUseWizard.form.size.value,
                     tags: that.model.stepUseWizard.form.tags.value.split(",").map((item)=>{return item.trim()}).filter((item)=>{return item.length>0}),
                     address: that.model.stepUseWizard.form.address.value.trim(),
-                    latlon: that.model.stepUseWizard.form.latlon.value.split(",").map((item)=>{return item.trim()})
+                    latlon: that.model.stepUseWizard.form.latlon.value.split(",").map((item)=>{return item.trim()}),
+                    options: {
+                        backgroundImgUrl: that.model.stepUseWizard.form.backgroundImageURL.value
+                    }
+                    
                 }
             });
         }
@@ -1017,7 +1027,7 @@ class App {
             
         
                 
-        const guiEngine = await MapGUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles);
+        const guiEngine = await MapGUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles, mapCharacteristics.options );
         const mapEngine = await MapEngine.getInstance(mapCharacteristics.kind, mapCharacteristics.size, tiles)
         that.guiEngine = guiEngine;
         that.mapEngine = mapEngine;
