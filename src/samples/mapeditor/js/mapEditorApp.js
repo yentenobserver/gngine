@@ -200,7 +200,7 @@ class MapGUIEngine {
         if(kind == "Unit"){            
             renderer = new gngine.UnitsRendererThreeJS(emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());            
         }else if(kind == "HexTile"){
-            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter)            
+            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter,{backgroundImgUrl: "assets/europeelevation.eps.zoom-gr.png"})            
         }else if(kind == "QuadTile"){
             renderer = new gngine.MapQuadRendererThreeJs(widthHeight[0],widthHeight[1], emitter)
         }

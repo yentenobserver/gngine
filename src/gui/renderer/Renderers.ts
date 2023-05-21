@@ -3,7 +3,7 @@ import { EventEmitter } from '../../util/events.notest';
 import { PlaygroundView } from '../playground/playground';
 import { RenderablesFactory } from './renderables-factory';
 
-
+export interface RendererOptions{}
 
 /**
  * Renderer is responsible for drawing items and their state onto
@@ -17,8 +17,10 @@ export abstract class Renderer {
     view: PlaygroundView|undefined;
     renderablesFactory: RenderablesFactory|undefined;
     emitter: EventEmitter;
-    constructor(emitter:EventEmitter){
+    options: RendererOptions;
+    constructor(emitter:EventEmitter, options?: RendererOptions){
         this.emitter = emitter;
+        this.options = options || {}
     }
     /**
      * Renderer renders the game into provided view

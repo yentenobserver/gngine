@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Camera, Object3D, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
+import { Camera, Mesh, Object3D, PlaneGeometry, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
 
 import { Material } from 'three';
 
@@ -9,8 +9,9 @@ import { EventEmitter } from '../../util/events.notest';
 import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS, TileInteractionOperation } from '../playground/playground';
 import { HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs, ScenePosition, TilePosition } from './providers';
 import { Renderable, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';
-import { Renderer } from './renderers';
+import { Renderer, RendererOptions } from './renderers';
 import { AreaMapIndicatorThreeJs, HexAreaMapIndicator3Js, MapIndicator, QuadAreaMapIndicator3Js } from './map-indicators';
+import { Utils3JS } from '../../util/utils3JS';
 
 
 
@@ -139,6 +140,13 @@ class MapPlaygroundEventHandler{
     }
 }
 
+
+export interface MapRendererOptions extends RendererOptions {
+    backgroundImgUrl?: string,
+    showGrid?: boolean,
+    zoomLevel?: number
+}
+
 /**
  * Responsible for rendering map tiles and tile indicator (highligh element for selecting tile);
  * It reacts to following user interactions:
@@ -154,8 +162,8 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     mapEventHandler: MapPlaygroundEventHandler;
 
     // tiles = Map<string,  // "x,y"->{o: object3D, d: direction N|S|E|W, p: scene position origin relative{x: , y: , z:}}
-    constructor(width:number, height:number, emitter:EventEmitter){
-        super(emitter);
+    constructor(width:number, height:number, emitter:EventEmitter, options?: MapRendererOptions){
+        super(emitter, options);
         this.height = height;
         this.width = width       
 
@@ -273,8 +281,8 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     }
     
 
-    constructor(width: number, height: number, emitter:EventEmitter){
-        super(width, height, emitter);
+    constructor(width: number, height: number, emitter:EventEmitter, options?:MapRendererOptions){
+        super(width, height, emitter, options);
         
         this.mapHolderObject = new THREE.Object3D();
         this.mapHolderObject.name = MapRendererThreeJs.NAME,
@@ -609,6 +617,12 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
         this._helper = new HexFlatTopPositionProviderThreeJs(this._width);
         
     }
+    getTileSize(){
+        return {
+            width: this._width,
+            height: this._height
+        }
+    }
     /**
      * Creates shape of hexes map with given columns and rows. It uses flat top odd approach for 
      * positioning hexes on the plance
@@ -683,14 +697,17 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         // var grid = new THREE.Mesh( geometry, material );
         
         // grid
-        var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
-        var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-        var grid = new THREE.Mesh( geometry, material );
-        // grid.rotation.order = 'YXZ';
-        // grid.rotation.y = - Math.PI / 2;
-        // grid.rotation.x = - Math.PI / 2;
-        grid.position.z=-0.01
-        this.mapHolderObject.add( grid );
+        if((<MapRendererOptions>this.options).showGrid){
+            var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            var grid = new THREE.Mesh( geometry, material );
+            // grid.rotation.order = 'YXZ';
+            // grid.rotation.y = - Math.PI / 2;
+            // grid.rotation.x = - Math.PI / 2;
+            grid.position.z=-0.01
+            this.mapHolderObject.add( grid );
+        }
+        
         // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
         return this._createMapHelpers();
         // })            
@@ -865,18 +882,46 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
 }
 
 export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
-    initialize(): Promise<void> {
+    async initialize(): Promise<void> {
         
         // const that = this;
         // this.mapHolderObject.add( new THREE.AxesHelper( 40 ) );
 
-        const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
-        var geometry = helper.getGeometry();
-        var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
-        var grid = new THREE.Mesh( geometry, material );
-        grid.position.z=-0.01
+        if((<MapRendererOptions>this.options).showGrid){
+            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
+            var geometry = helper.getGeometry();
+            var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
+            
+            
+            var grid = new THREE.Mesh( geometry, material );
+            grid.position.z=-0.01
+            grid.name = "MAP_HELPER_GRID"
+            
+            this.mapHolderObject.add( grid );
+        }
+
+        if((<MapRendererOptions>this.options).backgroundImgUrl){
+            const texture = await Utils3JS.texture((<MapRendererOptions>this.options).backgroundImgUrl!);
+            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
+            var geometry = helper.getGeometry();
+            geometry.computeBoundingBox();
+            let size = new Vector3();
+            geometry.boundingBox?.getSize(size);
+            console.log(JSON.stringify(size));
+
+            const backgroundGeometry = new PlaneGeometry(size.x, size.y);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+            });
+            const background = new Mesh(backgroundGeometry, material);
+            background.name = "MAP_IMAGE_BACKGROUND"
+            background.position.z = -0.02
+            background.position.x = background.position.x+size.x/2-helper.getTileSize().width/2; // minus tile.width/2
+            background.position.y = background.position.y-size.y/2+helper.getTileSize().height/2; // plus tile.height/2
+            this.mapHolderObject.add( background );
+
+        }
         
-        this.mapHolderObject.add( grid );
         // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{
         
         // })            
