@@ -70,7 +70,7 @@
         }
     </style>
     <div id="app">
-        <section class="section">
+        <section class="section pb-2">
             <nav class="level">
                 <!-- Left side -->
                 <div class="level-left">
@@ -221,18 +221,14 @@
             </div>
         </section>
         <!-- Map Edit Section -->
-        <section class="section is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
+        <section class="section pt-0 is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
             
             <div class="tile is-ancestor">
                 <div class="tile is-8 is-parent">
-                    <div class="tile is-child" id="map-holder">
-                        <!-- <canvas id="map" class="map playground"></canvas> -->
-                    </div>
-                </div>
-                <div class="tile is-parent">
-                    <div class="tile is-child">
+                    
+                    <div class="tile is-child" >
                         <div class="box is-hidden" rv-class-is-hidden="model.selected.tile.data.id | empty">
-                            <article class="media my-6">
+                            <article class="media">
                               <div class="media-left">
                                 <figure class="image is-64x64">
                                   <img rv-src="model.selected.tile.asset.variant.thumbnail" alt="Image">
@@ -241,41 +237,30 @@
                               <div class="media-content">
                                 <div class="content">
                                   <p>
-                                    <strong>Tile</strong><small class="is-hidden" rv-class-is-hidden="model.selected.tile.dataMulti | sizeLt 2">(#{model.selected.tile.dataMulti | size} selected)</small> 
-                                    <br>{model.selected.tile.asset.specs.name}<small><a class="mx-1" rv-on-click="_handleShowAssetBrowser">
+                                    <strong>Tile</strong><small>({model.selected.tile.data.id})</small><small class="is-hidden" rv-class-is-hidden="model.selected.tile.dataMulti | sizeLt 2">(#{model.selected.tile.dataMulti | size} selected)</small> 
+                                    <!-- <small><a class="mx-1" rv-on-click="_handleShowAssetBrowser"> -->
+                                    <small><a class="mx-1" rv-on-click="_handleShowAssetsAndTerrain">
                                         <span class="icon is-small">
                                             <i class="fas fa-search"></i>
                                         </span>
                                         Change
-                                    </a></small><br>                                     
-                                    <small>
-                                        {model.selected.tile.asset.specs.description}                                       
-                                    </small><br>
-                                    <small>
-                                        <strong>Code: </strong>{model.selected.tile.asset.variant.fullName}                                        
-                                    </small><br>                                    
-                                    <small><strong>Location: </strong>({model.selected.tile.data.id})</small>
-                                    <small>[col-xq: {model.selected.tile.data.x}, row-yr: {model.selected.tile.data.y}]</small> 
-                                    <br>                                    
-                                    
-                                    
-                                    <small><span rv-each-tag="model.selected.tile.asset.specs.tags" class="tag is-light mx-1">{tag}</span></small>
+                                    </a></small><br>                                                                                                    
+                                    <small><span rv-each-tag="model.selected.tile.asset.specs.tags" class="tag is-light mx-1">{tag}</span></small><br>
+                                    <strong>Terrain</strong><br>
+                                    <small>{model.selected.tile.data.t.kind} <span class="is-hidden" rv-class-is-hidden="model.selected.tile.data.t.modifications | sizeLtOrNull 1">with: {model.selected.tile.data.t.modifications | arrayJoin ","}</span></small>
                                   </p>
-                                </div> 
-                                <div class="content">
-                                    <strong>Terrain</strong><small><a class="mx-1" rv-on-click="_handleShowTerrainEditor">
-                                        <span class="icon is-small">
-                                            <i class="fas fa-search"></i>
-                                        </span>
-                                        Change
-                                    </a></small>
-                                    <br>{model.selected.tile.data.t.kind}<br>
-                                    <small><strong>Modifiers: </strong>{model.selected.tile.data.t.modifications | arrayJoin " "}</small>
-                                </div>                               
+                                </div>                                 
                               </div>
                             </article>
                             
                         </div> 
+                        <div id="map-holder"></div>
+                        <!-- <canvas id="map" class="map playground"></canvas> -->
+                    </div>
+                </div>
+                <div class="tile is-parent">
+                    <div class="tile is-child">
+                        
                         <div class="box is-hidden" rv-class-is-hidden="model.terrain.hidden">
                             <h1 class="title">Terrain</h1>
                             <div class="field">

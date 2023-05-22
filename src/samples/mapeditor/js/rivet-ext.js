@@ -167,6 +167,14 @@ function initializeRivetFormatters() {
         return value.length < arg;
     }
 
+    rivets.formatters.sizeLtOrNull = function (value, arg) {
+        if (!value)
+            return true;
+        if (!Array.isArray(value) && !value.length)
+            return true;
+        return value.length < arg;
+    }
+
     rivets.formatters.sizeLte = function (value, arg) {
         if (!value)
             return false;

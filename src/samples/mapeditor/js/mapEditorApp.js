@@ -550,6 +550,11 @@ class App {
         that.model.terrain.hidden = false;
     }
 
+    async _handleShowAssetsAndTerrain(e, that){
+        that._handleShowAssetBrowser(e, that);
+        that._handleShowTerrainEditor(e, that);
+    }
+
     async _handleSpecialAreasChanged(e, that){
         const tiles = Array.from(that.mapEngine._engine.theMap.values());
         const deploymentTiles = tiles.filter((item)=>{
@@ -689,8 +694,10 @@ class App {
 
         const searchPhrase = this.model.assets.filter.toLowerCase();
 
+        searchPhrase.split(/\s+/g)
+
         this.model.assets.filtered = this.model.assets.original.filter((item)=>{
-            return item.specs.name.toLowerCase().includes(searchPhrase) 
+            return item.specs.name.toLowerCase().split(/\s+/g).every((item)=>{return searchPhrase.includes(item)})
             || item.variant.fullName.toLowerCase().includes(searchPhrase) 
             || item.specs.id.toLowerCase().includes(searchPhrase) 
             || item.specs.tags.join(",").toLowerCase().includes(searchPhrase)
