@@ -221,10 +221,10 @@
             </div>
         </section>
         <!-- Map Edit Section -->
-        <section class="section pt-0 is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
+        <section class="section pt-0 px-0 is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">        
             
             <div class="tile is-ancestor">
-                <div class="tile is-8 is-parent">
+                <div class="tile is-9 is-parent">
                     
                     <div class="tile is-child" >
                         <div class="box is-hidden" rv-class-is-hidden="model.selected.tile.data.id | empty">
@@ -325,47 +325,46 @@
                                 </div>                                        
                                 <p class="help">uppercase letters, no whitespaces, singular form,can be multiple comma separated</p>
                             </div>  
-                        </div>  
-                        <div class="box is-hidden" rv-class-is-hidden="model.assets.hidden">
-                            <nav class="panel my-2">
-                                <div class="panel-heading">
-                                  Asset Repository (#{model.assets.filtered | size} matching)<button class="delete mx-1" rv-on-click="_handleHideAssetBrowser"></button>
-                                </div>
-                                
-                                <div class="panel-block">
-                                  <p class="control has-icons-left">
-                                    <input class="input" type="text" placeholder="Search" rv-on-input="_handleFilter" rv-value="model.assets.filter">
-                                    <span class="icon is-left">
-                                      <i class="fas fa-search" aria-hidden="true"></i>
-                                    </span>
-                                  </p>
-                                </div>
-                                <p class="panel-tabs">
-                                  <a class="is-active">All</a>
-                                  <!-- <a>Public</a>
-                                  <a>Private</a>
-                                  <a>Sources</a>
-                                  <a>Forks</a> -->
+                        </div>                          
+                        <nav class="panel my-2 is-hidden" rv-class-is-hidden="model.assets.hidden">
+                            <div class="panel-heading">
+                                Asset Repository (#{model.assets.filtered | size} matching)<button class="delete mx-1" rv-on-click="_handleHideAssetBrowser"></button>
+                            </div>
+                            
+                            <div class="panel-block">
+                                <p class="control has-icons-left">
+                                <input class="input" type="text" placeholder="Search" rv-on-input="_handleFilter" rv-value="model.assets.filter">
+                                <span class="icon is-left">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </span>
                                 </p>
-                                <a class="panel-block" rv-on-click="model.handlers._handleChangeAsset" rv-each-item="model.assets.filtered" >
-                                    <div>
-                                        <img rv-src="item.variant.thumbnail" alt="Image" style="width: 10rem">                                                                          
-                                    </div>     
-                                    <div>
-                                        <div class="block">
-                                            <strong>{item.specs.name}</strong>
-                                            <br><small>{item.specs.description}</small>
-                                        </div>                                        
-                                        <div class="block"><small><span rv-each-tag="item.specs.tags" class="tag is-light mx-1 my-1">{tag}</span></small></div>                                                                                                                        
-                                    </div>                               
-                                </a>                                
-                                <div class="panel-block">
-                                  <button class="button is-link is-outlined is-fullwidth" rv-on-click="_handleHideAssetBrowser">
-                                    Close
-                                  </button>
-                                </div>
-                            </nav>
-                        </div>                     
+                            </div>
+                            <p class="panel-tabs">
+                                <a class="is-active">All</a>
+                                <!-- <a>Public</a>
+                                <a>Private</a>
+                                <a>Sources</a>
+                                <a>Forks</a> -->
+                            </p>
+                            <a class="panel-block" rv-on-click="model.handlers._handleChangeAsset" rv-each-item="model.assets.filtered" >
+                                <div>
+                                    <img rv-src="item.variant.thumbnail" alt="Image" style="width: 10rem">                                                                          
+                                </div>     
+                                <div>
+                                    <div class="block">
+                                        <strong>{item.specs.name}</strong>
+                                        <br><small>{item.specs.description}</small>
+                                    </div>                                        
+                                    <div class="block"><small><span rv-each-tag="item.specs.tags" class="tag is-light mx-1 my-1">{tag}</span></small></div>                                                                                                                        
+                                </div>                               
+                            </a>                                
+                            <div class="panel-block">
+                                <button class="button is-link is-outlined is-fullwidth" rv-on-click="_handleHideAssetBrowser">
+                                Close
+                                </button>
+                            </div>
+                        </nav>
+                                            
                     </div>
                 </div>           
             </div>
