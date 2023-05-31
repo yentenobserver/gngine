@@ -20,20 +20,39 @@ class AppDemo {
                 original: [],
                 filtered: [],
                 filter: ""
+            },
+            libraries:{
+                original: [
+                    {name: "lib name", id:"asdasd"}
+                ],
+                value: "-1"
             }
 
         }
+        this.api = {}
         this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
         this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
+        this.emitter.on("AddLibraryModal:item",this.processAddLibrary.bind(this))
+        
         
     }
     static async getInstance(emitter, mapCanvas){
         const a = new AppDemo(emitter, mapCanvas)
-        // await a._start();
+        await a._start();
         return a;
     }
 
     async _start(){
+        this.api = Api.getInstance();
+        this._loadLibraries();
+    }
+
+    async _handleLibrariesChanged(e, that){
+        console.log("selected", that.model.libraries.value);
+        if(that.model.libraries.value == "_CREATE"){
+            that.emitter.emit("showModal:addLibrary", {a:""});
+        }
+        
     }
 
     async _handleFilter(e, that){        
@@ -302,7 +321,23 @@ class AppDemo {
         navigator.clipboard.writeText(JSON.stringify(result));
     }
 
+    async _loadLibraries(){
+        this.model.libraries.original = await Api.getInstance().User.libraries();
+        this.model.libraries.original.sort((a,b)=>{return a.name.localeCompare(b.name)})
+    }
+
     
+    async processAddLibrary(item){
+        
+        const library = {
+            id: Math.random().toString(36).substring(2, 12),
+            name: item.name,
+            isPublic: item.isPublic
+        }
+        await Api.getInstance().User.putLibrary(library);
+        this._loadLibraries();
+        this.model.libraries.value = library.id
+    }
     async processAddTags(asset){
         const item = this.model.assets.original.find((item)=>{return item.name == asset.name})
         item.tags = asset.tags;
@@ -403,7 +438,10 @@ class AppDemo {
     }
 
     handleAddAsset(e, that){
-        that.emitter.emit("showModal:addAsset",{});
+        that.emitter.emit("showModal:addAsset",{
+            libraries: that.model.libraries.original,
+            selected: that.model.libraries.original.find((item)=>{return item.id == that.model.libraries.value})
+        });
     }
 }
 

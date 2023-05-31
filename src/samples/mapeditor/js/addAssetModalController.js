@@ -10,9 +10,20 @@ class AddAssetModalController {
             },
             howMany: 0,
             current: 0,
-            kind: "Unit"
+            kind: "Unit",
+            libraries: {
+                original: [],
+                value: ""
+            }
         }
-        this.emitter.on("showModal:addAsset",()=>{
+        this.emitter.on("showModal:addAsset",(librariesSpecification)=>{
+            // libraries: 
+            // selected
+            this.model.libraries.original = librariesSpecification.libraries;
+            this.model.libraries.value = librariesSpecification.selected.id;
+            
+            
+            
             this.model.message = "";
             this.model.display = true;
         })
@@ -46,7 +57,8 @@ class AddAssetModalController {
                 kind: assetsByTypeObject[item][0].kind,
                 created: assetsByTypeObject[item][0].created,
                 variants: assetsByTypeObject[item],
-                tags: [item]
+                tags: [item],
+                library: that.model.libraries.original.find((item)=>item.id == that.model.libraries.value)
             });
         })
 
