@@ -204,7 +204,8 @@
                     <th>Kind</th>                    
                     <th>Tags</th>
                     <th>Modified</th>
-                    <th>Variants</th>                    
+                    <th>Variants</th> 
+                    <th>Library</th>                    
                     <th>Actions</th>
                 </thead>
                 <tbody>                    
@@ -233,6 +234,7 @@
                             </ul>
                             
                         </td>
+                        <td>{model.libraries.selected.name} [#{model.libraries.selected.id}]</td>
                         <!-- <td><img rv-src="item.thumbnail" width="200" height="200"></img></td> -->
                         <td>
                             <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.id">Annotate</button><br><br>
@@ -287,7 +289,7 @@
                     </div>
                     <div class="field has-addons">
                         <div class="select">
-                            <select rv-value="model.libraries.value" rv-on-change="_handleLibrariesChanged">                                                                    
+                            <select rv-value="model.libraries.value" >                                                                    
                                 <option rv-each-item="model.libraries.original" rv-value="item.id">{item.name}</option>                                                                  
                             </select>
                           </div>

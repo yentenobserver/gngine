@@ -2,7 +2,7 @@ class ApiUserClient {
     constructor(){}
 
     async assetsSpecs(libraryId){
-        return this.get(`library_${libraryId}_assetsSpecs`);
+        return this._get(`library_${libraryId}_assetsSpecs`)||[];
     }
     async putAssetSpec(assetSpec){
         const libraryId = assetSpec.library;
@@ -11,7 +11,7 @@ class ApiUserClient {
     }
 
     async libraries(){
-        return this._get("libraries");
+        return this._get("libraries")||[];
     }
 
     async putLibrary(library){

@@ -39,6 +39,10 @@ class AddAssetModalController {
         that.model.display = false
     }
 
+    async _handleLibrariesChanged(e, that){
+
+    }
+
     async _handleOK(e, that){
         that.model.busy = true;
         const assetsInfo = await that.processAddAsset(JSON.parse(that.model.message));
@@ -58,7 +62,7 @@ class AddAssetModalController {
                 created: assetsByTypeObject[item][0].created,
                 variants: assetsByTypeObject[item],
                 tags: [item],
-                library: that.model.libraries.original.find((item)=>item.id == that.model.libraries.value)
+                library: that.model.libraries.value
             });
         })
 

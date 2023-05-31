@@ -25,7 +25,8 @@ class AppDemo {
                 original: [
                     {name: "lib name", id:"asdasd"}
                 ],
-                value: "-1"
+                value: "-1",
+                selected: {}
             }
 
         }
@@ -44,7 +45,19 @@ class AppDemo {
 
     async _start(){
         this.api = Api.getInstance();
-        this._loadLibraries();
+        await this._loadLibraries();
+        await this._loadAssets();
+    }
+
+    async _loadLibraries(){
+        this.model.libraries.original = await Api.getInstance().User.libraries();
+        this.model.libraries.original.sort((a,b)=>{return a.name.localeCompare(b.name)})
+    }
+
+    async _loadAssets(){
+        this.model.assets.original = await Api.getInstance().User.assetsSpecs(this.model.libraries.value);
+        this.model.assets.original.forEach((item)=>{item.that = this});
+        this.model.assets.filtered = this.model.assets.original 
     }
 
     async _handleLibrariesChanged(e, that){
@@ -52,6 +65,8 @@ class AppDemo {
         if(that.model.libraries.value == "_CREATE"){
             that.emitter.emit("showModal:addLibrary", {a:""});
         }
+        await that._loadAssets();
+        that.model.libraries.selected = that.model.libraries.original.find((item)=>item.id == that.model.libraries.value)
         
     }
 
@@ -321,10 +336,7 @@ class AppDemo {
         navigator.clipboard.writeText(JSON.stringify(result));
     }
 
-    async _loadLibraries(){
-        this.model.libraries.original = await Api.getInstance().User.libraries();
-        this.model.libraries.original.sort((a,b)=>{return a.name.localeCompare(b.name)})
-    }
+
 
     
     async processAddLibrary(item){
@@ -357,6 +369,17 @@ class AppDemo {
         this.model.assets.original = this.model.assets.original.concat(assetsInfo);
 
         this.model.assets.filtered = this.model.assets.original 
+
+
+
+        for(let i=0; i<this.model.assets.original.length; i++){
+            const item = this.model.assets.original[i];
+            delete item.that;
+            await Api.getInstance().User.putAssetSpec(item);
+            item.that = this;
+        }
+
+        
 
 
 
