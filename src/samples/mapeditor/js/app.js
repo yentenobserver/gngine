@@ -44,18 +44,19 @@ class AppDemo {
     }
 
     async _start(){
-        this.api = Api.getInstance();
+        this.api = await Api.getInstance();
         await this._loadLibraries();
         await this._loadAssets();
     }
 
     async _loadLibraries(){
-        this.model.libraries.original = await Api.getInstance().User.libraries();
+        
+        this.model.libraries.original = await this.api.User2.libraries("userId");
         this.model.libraries.original.sort((a,b)=>{return a.name.localeCompare(b.name)})
     }
 
     async _loadAssets(){
-        this.model.assets.original = await Api.getInstance().User.assetsSpecs(this.model.libraries.value);
+        this.model.assets.original = await this.api.User2.assetsSpecs("userId", this.model.libraries.value);
         this.model.assets.original.forEach((item)=>{item.that = this});
         this.model.assets.filtered = this.model.assets.original 
     }
@@ -65,7 +66,7 @@ class AppDemo {
         if(that.model.libraries.value == "_CREATE"){
             that.emitter.emit("showModal:addLibrary", {a:""});
         }
-        await that._loadAssets();
+        await that._loadAssets();        
         that.model.libraries.selected = that.model.libraries.original.find((item)=>item.id == that.model.libraries.value)
         
     }
@@ -346,14 +347,16 @@ class AppDemo {
             name: item.name,
             isPublic: item.isPublic
         }
-        await Api.getInstance().User.putLibrary(library);
-        this._loadLibraries();
+        await this.api.User2.putLibrary("userId",library);
+        await this._loadLibraries();
         this.model.libraries.value = library.id
     }
     async processAddTags(asset){
         const item = this.model.assets.original.find((item)=>{return item.name == asset.name})
         item.tags = asset.tags;
-
+        delete item.that;
+        await this.api.User2.putAssetSpec("userId", item);
+        item.that = this;
         this._handleFilter({}, this);
     }
 
@@ -375,12 +378,12 @@ class AppDemo {
         for(let i=0; i<this.model.assets.original.length; i++){
             const item = this.model.assets.original[i];
             delete item.that;
-            await Api.getInstance().User.putAssetSpec(item);
+            await this.api.User2.putAssetSpec("userId", item);
             item.that = this;
         }
 
         
-
+        await this._loadAssets(); 
 
 
         // let j = 0;
