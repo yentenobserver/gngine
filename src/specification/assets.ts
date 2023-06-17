@@ -40,3 +40,16 @@ export interface AssetReference{
     id: string // asset's id (unique within library)
     vId: string // asset's variant id
 }
+
+export interface LibraryReference{
+    id: string, // id of the library
+    name: string, // name of the library
+    version?: string, // version of the library
+    isPublic?: boolean // when true than library is available to all users
+    kind: "Unit" | "HexTile" | "QuadTile" // kind of library assets
+}
+
+export interface Library{
+    specs: LibraryReference,
+    assets: AssetSpecs[]
+}

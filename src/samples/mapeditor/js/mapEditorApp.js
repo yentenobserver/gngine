@@ -262,11 +262,17 @@ class MapGUIEngine {
 class AssetManager {
     constructor(){
         this.assets = [] // holds all assets that were already loaded
+        this.api = {}
     }
 
-    static getInstance(){
+    static async  getInstance(){
         const r = new AssetManager();
+        await r._start();
         return r;
+    }
+
+    async _start(){
+        this.api = await Api.getInstance();
     }
     /**
      * Returns assets for given assets' specifications
@@ -330,15 +336,21 @@ class AssetManager {
     async _findAsset(assetReference){        
         let result;
 
-        for(let i=0; i<this.assets.length; i++){
-            const item = this.assets[i];
+        result = this.assets.find((item)=>{
+            return item.specs.library == assetReference.libId 
+                    && item.specs.id == assetReference.id 
+                    && item.variant.fullName.trim().toLowerCase() == assetReference.vId.trim().toLowerCase()
+            })
 
-            if(item.variant.fullName.trim().toLowerCase() == assetReference.vId.trim().toLowerCase()){
-                result = item
-                break;
-            }
+        // for(let i=0; i<this.assets.length; i++){
+        //     const item = this.assets[i];
 
-        }
+        //     if(item.variant.fullName.trim().toLowerCase() == assetReference.vId.trim().toLowerCase()){
+        //         result = item
+        //         break;
+        //     }
+
+        // }
         return result;        
     }
 
@@ -361,7 +373,9 @@ class AssetManager {
 
         for(let i=0; i<uniqueLibs.length; i++){
 
-            const assetsSpecs = await this._fetchFromURL(`./assets/${uniqueLibs[i]}`, "JSON");
+            const assetsSpecs = await this.api.User3.assetsSpecs(uniqueLibs[i]);
+            // const assetsSpecs = await this._fetchFromURL(`./assets/${uniqueLibs[i]}`, "JSON");
+
             for(let i=0; i<assetsSpecs.length; i++){
                 const item = assetsSpecs[i];
 
@@ -666,6 +680,10 @@ class App {
         this.model.assets.original = [];
         this.model.assets.filtered = [];
 
+        // public assets
+        // user assets
+        
+
         // load default assets
         const defaultAssets = await this.model.assetManager.getAssetsByLibraries([`${map.specs.kind}/assets.json`]);
         const mapAssets = await this.model.assetManager.getAssets(map.assets||[]);
@@ -887,7 +905,7 @@ class App {
     async _startMap(map){
         const mapCharacteristics = map.specs;
         let tiles = map.tiles;
-        this.model.assetManager = AssetManager.getInstance();
+        this.model.assetManager = await AssetManager.getInstance();
 
         const that = this;
         this.model.mapCharacteristics = mapCharacteristics;

@@ -195,7 +195,8 @@
                 <div class="level-right">
                     
                     <p class="level-item"><a class="button is-success is-hidden" rv-class-is-hidden="model.libraries.value | eq -1" rv-on-click="handleAddAsset">Add assets</a></p>
-                    <p class="level-item"><a class="button is-success" rv-on-click="_handleCopy2ClipboardLibrary">Export as library</a></p>
+                    <p class="level-item"><a class="button is-success is-hidden" rv-class-is-hidden="model.libraries.value | eq -1" rv-on-click="_handleCopy2ClipboardLibrary">Export library (clipboard)</a></p>
+                    <p class="level-item"><a class="button is-success is-hidden" rv-class-is-hidden="model.libraries.value | eq -1" rv-on-click="_handlePublishLibrary">Publish library (public)</a></p>
                 </div>
             </nav>
             <h1 class="title">Asset Editor</h1>
@@ -267,7 +268,7 @@
             <div class="modal-background"></div>
             <div class="modal-card">
                 <header class="modal-card-head">
-                    <p class="modal-card-title" rv-class-is-hidden="model.busy">Import assets</p>                    
+                    <p class="modal-card-title" rv-class-is-hidden="model.busy">Library import assets</p>                    
                     <p class="modal-card-title" rv-class-is-hidden="model.busy | eq false">Importing assets...</p>                    
                     <button class="delete" aria-label="close" rv-on-click="_handleCancel"></button>
                 </header>
@@ -280,6 +281,13 @@
                     <div class="field" rv-class-is-hidden="model.busy">
                         <label class="label">Asset Kind</label>
                         <div class="control">
+                            <input class="input" type="text" readonly rv-value="model.kind" disabled></textarea>                            
+                        </div>
+                        <p class="help">This library only allows for this kind of assets</p>
+                    </div>
+                    <!-- <div class="field" rv-class-is-hidden="model.busy">
+                        <label class="label">Asset Kind</label>
+                        <div class="control">
                             <div class="select" >
                               <select rv-value="model.kind">
                                 <option value="Unit">Unit</option>
@@ -289,14 +297,14 @@
                             </div>
                           </div>
                         <p class="help">Assets of given type will be created</p>
-                    </div>
-                    <div class="field has-addons">
+                    </div> -->
+                    <!-- <div class="field has-addons">
                         <div class="select">
                             <select rv-value="model.libraries.value" >                                                                    
                                 <option rv-each-item="model.libraries.original" rv-value="item.id">{item.name}</option>                                                                  
                             </select>
                           </div>
-                    </div>
+                    </div> -->
                     <div class="field" rv-class-is-hidden="model.busy">
                         <label class="label">Assets ThreeJS JSON</label>
                         <div class="control">
@@ -405,6 +413,19 @@
                         </div>
                         <!-- <p class="help">Tags should be comma separated</p> -->
                         <p class="help is-danger is-hidden" rv-class-is-hidden="model.form.f1.error | empty">{model.form.f1.error.message}</p>
+                    </div>
+                    <div class="field" rv-class-is-hidden="model.busy">
+                        <label class="label">Library Asset Kind</label>
+                        <div class="control">
+                            <div class="select" >
+                              <select rv-value="model.form.f3.value">
+                                <option value="Unit">Unit</option>
+                                <option value="HexTile">Hex Tile</option>
+                                <option value="QuadTile">Quad Tile</option>
+                              </select>
+                            </div>
+                          </div>
+                        <p class="help">Library will hold only assets of given type</p>
                     </div>
                     <div class="field" rv-class-is-hidden="model.busy">
                         <label class="checkbox">
@@ -553,13 +574,49 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-functions-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-auth-compat.js"></script>
+    
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+        
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-functions-compat.js"></script> -->
     <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore-compat.js"></script> -->
     <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth-compat.js"></script> -->
 
+    <!-- <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCOJrKiXk-U9139Ys7o1OrXmQtB2YJmLUE",
+          authDomain: "gamengine-157c5.firebaseapp.com",
+          databaseURL: "https://gamengine-157c5-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "gamengine-157c5",
+          storageBucket: "gamengine-157c5.appspot.com",
+          messagingSenderId: "1054659077299",
+          appId: "1:1054659077299:web:85fab66102a43dc4cebcc6"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+      </script> -->
 
-
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCOJrKiXk-U9139Ys7o1OrXmQtB2YJmLUE",
+          authDomain: "gamengine-157c5.firebaseapp.com",
+          databaseURL: "https://gamengine-157c5-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "gamengine-157c5",
+          storageBucket: "gamengine-157c5.appspot.com",
+          messagingSenderId: "1054659077299",
+          appId: "1:1054659077299:web:85fab66102a43dc4cebcc6"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 
 
     <script>

@@ -21,7 +21,7 @@ class AddAssetModalController {
             // selected
             this.model.libraries.original = librariesSpecification.libraries;
             this.model.libraries.value = librariesSpecification.selected.id;
-            
+            this.model.kind = librariesSpecification.selected.kind;
             
             
             this.model.message = "";
@@ -56,7 +56,7 @@ class AddAssetModalController {
         const assetsByType = []
         Object.keys(assetsByTypeObject).forEach((item)=>{
             assetsByType.push({
-                id: Math.random().toString(36).substring(2, 24),  
+                id: `${Math.random().toString(36).substring(2, 24)}`,  
                 name: "",
                 kind: assetsByTypeObject[item][0].kind,
                 created: assetsByTypeObject[item][0].created,

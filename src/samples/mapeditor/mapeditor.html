@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="css/style.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css" integrity="sha512-q3eWabyZPc1XTCmF+8/LuE1ozpg5xxn7iO89yfSOd5/oKvyqLngoNGsx8jq92Y8eXJ/IRxQbEC+FGSYxtk2oiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <script src="https://unpkg.com/localbase/dist/localbase.min.js"></script>
     <script src="js/rivet.js"></script>
     <script src="js/rivet-ext.js"></script>
 
@@ -35,7 +35,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/loaders/GLTFLoader.js"></script>
     <!-- this part MUST be after all global libs like THREE.js-->
     <script src="../../../dist/gamengine.umd.js"></script>
-
+    <script src="js/api.js"></script>
     <script src="js/mapEditorApp.js"></script>
 </head>
 
@@ -404,15 +404,30 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-auth-compat.js"></script>
 
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-functions-compat.js"></script>
+
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-functions-compat.js"></script> -->
     <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-firestore-compat.js"></script> -->
     <!-- <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-auth-compat.js"></script> -->
 
 
 
-
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCOJrKiXk-U9139Ys7o1OrXmQtB2YJmLUE",
+          authDomain: "gamengine-157c5.firebaseapp.com",
+          databaseURL: "https://gamengine-157c5-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "gamengine-157c5",
+          storageBucket: "gamengine-157c5.appspot.com",
+          messagingSenderId: "1054659077299",
+          appId: "1:1054659077299:web:85fab66102a43dc4cebcc6"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 
     <script>        
         class EventEmitter {

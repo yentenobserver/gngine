@@ -51,12 +51,12 @@ class AppDemo {
 
     async _loadLibraries(){
         
-        this.model.libraries.original = await this.api.User2.libraries("userId");
+        this.model.libraries.original = await this.api.User3.libraries();
         this.model.libraries.original.sort((a,b)=>{return a.name.localeCompare(b.name)})
     }
 
     async _loadAssets(){
-        this.model.assets.original = await this.api.User2.assetsSpecs("userId", this.model.libraries.value);
+        this.model.assets.original = await this.api.User3.assetsSpecs(this.model.libraries.value);
         this.model.assets.original.forEach((item)=>{item.that = this});
         this.model.assets.filtered = this.model.assets.original 
     }
@@ -95,200 +95,6 @@ class AppDemo {
             }
         }
     }
-
-    // async processAddAsset(assetJsonObject){
-    //     let that = this;
-
-    //     const specification = {           
-    //         main: {
-    //             name: "main",
-    //             json: JSON.stringify(assetJsonObject),                    
-    //             pivotCorrection: "0.15,-0.3,0.1",
-    //             // scaleCorrection: 0.01
-    //         }
-    //     }
-    //     // const specification = {           
-    //     //     main: {
-    //     //         name: "main",
-    //     //         url: "../hexmap/assets/units.gltf",
-    //     //         pivotCorrection: "0.15,-0.3,0.1"
-    //     //     }
-    //     // }
-    //     const unitFactory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
-    //     await unitFactory.loadTemplates(["_UNIT"]);
-    //     console.log(unitFactory.spawnableRenderablesNames());
-        
-    //     // canvas for thumbnail generation
-    //     var canvas = document.createElement('canvas');
-    //     canvas.id = "temporaryCanvas"
-    //     canvas.style.display = 'none';
-    //     canvas.width = 400;
-    //     canvas.height = 400;
-        
-    //     document.body.appendChild(canvas)
-        
-
-    //     const playgroundOptions = {
-    //         enableScreenshots: true
-    //     }
-        
-    //     // let p = new gngine.PlaygroundThreeJs(document.getElementById("unitCanvas"),this.emitter, playgroundOptions);
-    //     let p = new gngine.PlaygroundThreeJs(canvas,this.emitter, playgroundOptions);
-    //     p.initialize();    
-    //     let viewOptions = {
-    //         cameraParams: {                
-    //             fov: 50,
-    //             near: 0.1,
-    //             far: 1000                             
-    //         },
-    //         cameraPosition: new THREE.Vector3(0,-1,0.75)
-    //     }           
-    //     let mainView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
-    //     await p.attach(mainView);        
-    //     mainView._setupScene(); 
-    //     p.run();
-    //     const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());
-    //     unitRenderer.setRenderablesFactory(unitFactory);
-    //     unitRenderer.setView(mainView);
-    //     await unitRenderer.initialize();
-
-    //     const tile = {
-    //         "id": "0,0",
-    //         "x": 0,
-    //         "y": 0,
-    //         "d": "S",
-    //         "t": "C_T_GRASS_1_TILE",
-    //         "loc": {
-    //           "n": "Grassland",
-    //           "g": "43.74650403587078,7.421766928360976"
-    //         },
-    //         "ext": {},
-    //         "nft": {
-    //           "v": 100,
-    //           "b": "ETHEREUM",
-    //           "i": "123",
-    //           "t": "0x123",
-    //           "o": "0x0022"
-    //         }
-    //     }
-
-    //     const spawnableNames = unitFactory.spawnableRenderablesNames();                
-
-    //     for(let j=0; j<spawnableNames.length; j++){
-    //     // for(let j=0; j<1; j++){
-    //         let unit = {
-    //             actionPoints: 1,
-    //             actionRunner: undefined,
-    //             actionsAllowed: [],
-    //             actionsQueue: [],
-    //             attackStrength: (_unit)=>{ return 1},
-    //             defendStrength: (_unit)=>{ return 1},
-    //             gainBattleExperience: ()=>{},
-    //             hitPoints: 5,
-    //             rangeStrength: 10,
-    //             strength: 10,
-    //             sight: 2,
-    //             uid: Math.random().toString(36).substring(2, 8),
-    //             unitSpecification: {
-    //                 hitPoints: 10,
-    //                 name: "Type",
-    //                 tuid: spawnableNames[j].split("_")[0]
-    //             }
-    //         }
-            
-    //         unitRenderer.put(unit, tile,"SW");            
-    //         const waitForScreenshot = new Promise((resolve, reject)=>{
-    //             setTimeout(()=>{                                        
-    //                 resolve(p.takeScreenShot())
-    //             },2000);
-    //         })
-    //         const screenshotDataUrl = await waitForScreenshot;
-
-    //         // const screenshotDataUrl = p.takeScreenShot();
-    //         // const screenshotDataUrl1 = p.takeScreenShot();
-    //         // const screenshotDataUrl2 = p.takeScreenShot();
-    //         // const screenshotDataUrl3 = p.takeScreenShot();
-    //         console.log(j, screenshotDataUrl);
-    //         that.model.assetsData.push({
-    //             id: unit.uid,
-    //             name: unit.unitSpecification.tuid,
-    //             fullName: spawnableNames[j],
-    //             thumbnail: screenshotDataUrl
-
-    //         });
-    //         unitRenderer.remove(unit);
-    //     }
-       
-
-    //     window.playground = p;
-
-    //     // let j = 0;
-    //     // let unit = {
-    //     //     actionPoints: 1,
-    //     //     actionRunner: undefined,
-    //     //     actionsAllowed: [],
-    //     //     actionsQueue: [],
-    //     //     attackStrength: (_unit)=>{ return 1},
-    //     //     defendStrength: (_unit)=>{ return 1},
-    //     //     gainBattleExperience: ()=>{},
-    //     //     hitPoints: 5,
-    //     //     rangeStrength: 10,
-    //     //     strength: 10,
-    //     //     sight: 2,
-    //     //     uid: Math.random().toString(36).substring(2, 8),
-    //     //     unitSpecification: {
-    //     //         hitPoints: 10,
-    //     //         name: "Type",
-    //     //         tuid: spawnableNames[j].split("_")[0]
-    //     //     }
-    //     // }
-    //     // unitRenderer.put(unit, tile,"SW");            
-    //     // this.emitter.emit("playground:screenshot");
-
-        
-    //     // this.emitter.on("playground:screenshot:data",(dataUrl)=>{
-    //     //     // console.log("Got screenshot")
-    //     //     // console.log(dataUrl)
-    //     //     // document.getElementById("preview").src = dataUrl;
-
-    //     //     assetsData.push({
-    //     //         name: unit.unitSpecification.tuid,
-    //     //         fullName: spawnableNames[j],
-    //     //         thumbnail: dataUrl
-
-    //     //     });
-
-    //     //     unitRenderer.remove(unit);
-
-    //     //     if(j<spawnableNames.length-1){
-    //     //         j++;
-    //     //         unit = {
-    //     //             actionPoints: 1,
-    //     //             actionRunner: undefined,
-    //     //             actionsAllowed: [],
-    //     //             actionsQueue: [],
-    //     //             attackStrength: (_unit)=>{ return 1},
-    //     //             defendStrength: (_unit)=>{ return 1},
-    //     //             gainBattleExperience: ()=>{},
-    //     //             hitPoints: 5,
-    //     //             rangeStrength: 10,
-    //     //             strength: 10,
-    //     //             sight: 2,
-    //     //             uid: Math.random().toString(36).substring(2, 8),
-    //     //             unitSpecification: {
-    //     //                 hitPoints: 10,
-    //     //                 name: "Type",
-    //     //                 tuid: spawnableNames[j].split("_")[0]
-    //     //             }
-    //     //         }
-    //     //         unitRenderer.put(unit, tile,"SW");            
-    //     //         this.emitter.emit("playground:screenshot", unit.uid);
-    //     //     }                
-    //     // })
-
-    //     // console.log(assetsData);
-        
-    // }
 
     async _handeAddTags(e, that){
         console.log(e);
@@ -338,35 +144,55 @@ class AppDemo {
     }
 
 
+    async _handlePublishLibrary(e, that){
+        that.model.libraries.selected.isPublic = true;
+        that.processAddPublicLibrary(that.model.libraries.selected)
+    }
 
-    
-    async processAddLibrary(item){
+    async processAddPublicLibrary(libraryReference){
         
         const library = {
-            id: Math.random().toString(36).substring(2, 12),
-            name: item.name,
-            isPublic: item.isPublic
+            specs: libraryReference,
+            assets: this.model.assets.original.map((item)=>{
+                delete item.that;
+                return item;
+            })
         }
-        await this.api.User2.putLibrary("userId",library);
+        
+        library.specs.version += 1;        
+        await this.api.User3.putLibraryWithAssets(library);        
+        this.model.assets.original = this.model.assets.original.map((item)=>{item.that = this; return item;})
         await this._loadLibraries();
-        this.model.libraries.value = library.id
+        this.model.libraries.value = library.specs.id
+        await this._handleLibrariesChanged({},this);
     }
+    
+    async processAddLibrary(item){        
+        const library = {
+            specs: {
+                id: `${Math.random().toString(36).substring(2, 12)}`,
+                name: item.name,
+                isPublic: item.isPublic,
+                kind: item.kind,
+                version: 1
+            },
+            assets: []
+        }                
+        await this.api.User3.putLibraryWithAssets(library);        
+        await this._loadLibraries();
+        this.model.libraries.value = library.specs.id
+        await this._handleLibrariesChanged({},this);
+    }
+
     async processAddTags(asset){
         const item = this.model.assets.original.find((item)=>{return item.name == asset.name})
         item.tags = asset.tags;
-        delete item.that;
-        await this.api.User2.putAssetSpec("userId", item);
-        item.that = this;
+        this.processAddPublicLibrary(this.model.libraries.selected)
         this._handleFilter({}, this);
     }
 
     async processAddAsset(assetsInfo){
         assetsInfo.forEach((item)=>{item.that = this})
-
-        // first remove objects that are in the new assetsInfo array
-        // this.model.assetsData = this.model.assetsData.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.fullName == item.fullName }) == -1 })
-        // this.model.assetsData = this.model.assetsData.concat(assetsInfo);
-
 
         this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.name == item.name && item.kind == item2.kind }) == -1 })
         this.model.assets.original = this.model.assets.original.concat(assetsInfo);
@@ -374,84 +200,8 @@ class AppDemo {
         this.model.assets.filtered = this.model.assets.original 
 
 
-
-        for(let i=0; i<this.model.assets.original.length; i++){
-            const item = this.model.assets.original[i];
-            delete item.that;
-            await this.api.User2.putAssetSpec("userId", item);
-            item.that = this;
-        }
-
-        
-        await this._loadAssets(); 
-
-
-        // let j = 0;
-        // let unit = {
-        //     actionPoints: 1,
-        //     actionRunner: undefined,
-        //     actionsAllowed: [],
-        //     actionsQueue: [],
-        //     attackStrength: (_unit)=>{ return 1},
-        //     defendStrength: (_unit)=>{ return 1},
-        //     gainBattleExperience: ()=>{},
-        //     hitPoints: 5,
-        //     rangeStrength: 10,
-        //     strength: 10,
-        //     sight: 2,
-        //     uid: Math.random().toString(36).substring(2, 8),
-        //     unitSpecification: {
-        //         hitPoints: 10,
-        //         name: "Type",
-        //         tuid: spawnableNames[j].split("_")[0]
-        //     }
-        // }
-        // unitRenderer.put(unit, tile,"SW");            
-        // this.emitter.emit("playground:screenshot");
-
-        
-        // this.emitter.on("playground:screenshot:data",(dataUrl)=>{
-        //     // console.log("Got screenshot")
-        //     // console.log(dataUrl)
-        //     // document.getElementById("preview").src = dataUrl;
-
-        //     assetsData.push({
-        //         name: unit.unitSpecification.tuid,
-        //         fullName: spawnableNames[j],
-        //         thumbnail: dataUrl
-
-        //     });
-
-        //     unitRenderer.remove(unit);
-
-        //     if(j<spawnableNames.length-1){
-        //         j++;
-        //         unit = {
-        //             actionPoints: 1,
-        //             actionRunner: undefined,
-        //             actionsAllowed: [],
-        //             actionsQueue: [],
-        //             attackStrength: (_unit)=>{ return 1},
-        //             defendStrength: (_unit)=>{ return 1},
-        //             gainBattleExperience: ()=>{},
-        //             hitPoints: 5,
-        //             rangeStrength: 10,
-        //             strength: 10,
-        //             sight: 2,
-        //             uid: Math.random().toString(36).substring(2, 8),
-        //             unitSpecification: {
-        //                 hitPoints: 10,
-        //                 name: "Type",
-        //                 tuid: spawnableNames[j].split("_")[0]
-        //             }
-        //         }
-        //         unitRenderer.put(unit, tile,"SW");            
-        //         this.emitter.emit("playground:screenshot", unit.uid);
-        //     }                
-        // })
-
-        // console.log(assetsData);
-        
+        this.processAddPublicLibrary(this.model.libraries.selected)                
+        await this._loadAssets();                 
     }
     handleDebugDumpTile(e, that){
         const result = JSON.stringify(that.model.selected.tile.toJSON());

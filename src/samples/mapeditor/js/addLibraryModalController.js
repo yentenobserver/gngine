@@ -31,7 +31,12 @@ class addLibraryModalController {
                 f2: {
                     value: false,
                     errorMsg: "",
+                },
+                f3: {
+                    value: "HexTile",
+                    errorMsg: "",
                 }
+
             }
             
             this.model.display = true;
@@ -57,6 +62,10 @@ class addLibraryModalController {
             },
             f2: {
                 value: false,
+                errorMsg: "",
+            },
+            f3: {
+                value: "HexTile",
                 errorMsg: "",
             }
         }
@@ -85,7 +94,8 @@ class addLibraryModalController {
                 
         that.model.item = {
             name: that.model.form.f1.value,
-            isPublic: that.model.form.f2.value
+            isPublic: that.model.form.f2.value,
+            kind: that.model.form.f3.value
         }
         that.emitter.emit("AddLibraryModal:item", that.model.item)        
         that.model.busy = false
