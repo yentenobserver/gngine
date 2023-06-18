@@ -16,24 +16,28 @@ class AppDemo {
                 tileDataStr: {},
             },
             assetsData: [],
-            assets: {
+            assets: {                
                 original: [],
                 filtered: [],
                 filter: ""
             },
-            libraries:{
+            libraries:{                
                 original: [
                     {name: "lib name", id:"asdasd"}
                 ],
                 value: "-1",
                 selected: {}
-            }
+            },
+            busy: false
 
         }
         this.api = {}
         this.emitter.on("AddAssetModalController:json",this.processAddAsset.bind(this))
         this.emitter.on("AddTagsModalController:item",this.processAddTags.bind(this))
         this.emitter.on("AddLibraryModal:item",this.processAddLibrary.bind(this))
+        this.f = {
+            _handleAddTags: this._handleAddTags.bind(this)
+        }
         
         
     }
@@ -51,24 +55,25 @@ class AppDemo {
 
     async _loadLibraries(){
         
-        this.model.libraries.original = await this.api.User3.libraries();
+        this.model.libraries.original = await this.api.User3.libraries();        
         this.model.libraries.original.sort((a,b)=>{return a.name.localeCompare(b.name)})
     }
 
     async _loadAssets(){
         this.model.assets.original = await this.api.User3.assetsSpecs(this.model.libraries.value);
-        this.model.assets.original.forEach((item)=>{item.that = this});
         this.model.assets.filtered = this.model.assets.original 
     }
 
     async _handleLibrariesChanged(e, that){
-        console.log("selected", that.model.libraries.value);
+        
         if(that.model.libraries.value == "_CREATE"){
             that.emitter.emit("showModal:addLibrary", {a:""});
+            return;
         }
+        that.model.busy = true;
         await that._loadAssets();        
-        that.model.libraries.selected = that.model.libraries.original.find((item)=>item.id == that.model.libraries.value)
-        
+        that.model.libraries.selected = that.model.libraries.original.find((item)=>item.id == that.model.libraries.value)        
+        that.model.busy = false;
     }
 
     async _handleFilter(e, that){        
@@ -96,17 +101,14 @@ class AppDemo {
         }
     }
 
-    async _handeAddTags(e, that){
-        console.log(e);
-        
+    async _handleAddTags(e, that){                
         const asset = that.model.assets.original.find((item)=>{return item.id == e.target.dataset.id})
         that.emitter.emit("showModal:addTags",asset);
 
     }
 
     async _handeCopy2ClipboardAsset(e, that){
-        const asset = that.model.assets.original.find((item)=>{return item.id == e.target.dataset.id})
-        console.log(asset);
+        const asset = that.model.assets.original.find((item)=>{return item.id == e.target.dataset.id})        
 
         const data = {
             id: asset.id,
@@ -146,22 +148,19 @@ class AppDemo {
 
     async _handlePublishLibrary(e, that){
         that.model.libraries.selected.isPublic = true;
-        that.processAddPublicLibrary(that.model.libraries.selected)
+        await that.processAddPublicLibrary(that.model.libraries.selected)
     }
 
     async processAddPublicLibrary(libraryReference){
         
         const library = {
             specs: libraryReference,
-            assets: this.model.assets.original.map((item)=>{
-                delete item.that;
-                return item;
-            })
+            assets: this.model.assets.original
         }
         
         library.specs.version += 1;        
         await this.api.User3.putLibraryWithAssets(library);        
-        this.model.assets.original = this.model.assets.original.map((item)=>{item.that = this; return item;})
+        // this.model.assets.original = this.model.assets.original.map((item)=>{item.that = this; return item;})
         await this._loadLibraries();
         this.model.libraries.value = library.specs.id
         await this._handleLibrariesChanged({},this);
@@ -185,14 +184,18 @@ class AppDemo {
     }
 
     async processAddTags(asset){
+        this.model.busy = true;
         const item = this.model.assets.original.find((item)=>{return item.id == asset.id})
         item.tags = asset.tags;
-        this.processAddPublicLibrary(this.model.libraries.selected)
+        console.log("Asset with tags added", asset, item)
+        await this.processAddPublicLibrary(this.model.libraries.selected)
+        console.log("Saved", asset, item)
         this._handleFilter({}, this);
+        this.model.busy = false;
     }
 
     async processAddAsset(assetsInfo){
-        assetsInfo.forEach((item)=>{item.that = this})
+        // assetsInfo.forEach((item)=>{item.that = this})
 
         this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.id == item.id && item.kind == item2.kind }) == -1 })
         this.model.assets.original = this.model.assets.original.concat(assetsInfo);
@@ -200,7 +203,7 @@ class AppDemo {
         this.model.assets.filtered = this.model.assets.original 
 
 
-        this.processAddPublicLibrary(this.model.libraries.selected)                
+        await this.processAddPublicLibrary(this.model.libraries.selected)                
         await this._loadAssets();                 
     }
     handleDebugDumpTile(e, that){

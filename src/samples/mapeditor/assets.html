@@ -241,14 +241,20 @@
                         <td>{model.libraries.selected.name} [#{model.libraries.selected.id}]</td>
                         <!-- <td><img rv-src="item.thumbnail" width="200" height="200"></img></td> -->
                         <td>
-                            <button class="button is-info" rv-on-click="item.that._handeAddTags" rv-data-id="item.id">Annotate</button><br><br>
-                            <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.id">Copy to clipboard</button>
+                            <button class="button is-info" rv-on-click="f._handleAddTags" rv-data-id="item.id">Annotate</button><br><br>
+                            <!-- <button class="button is-info" rv-on-click="item.that._handeCopy2ClipboardAsset" rv-data-id="item.id">Copy to clipboard</button> -->
                         </td>                        
                     </tr>
                 </tbody>
             </table>            
         </section>
-        
+        <div id="globalBusyModal">
+            <div class="modal" rv-class-is-active="model.busy">
+                <!-- <div class="modal" class="is-active"></div> -->
+                    <div class="modal-background"></div>
+                    <div class="modal-content">Processing...</div>
+            </div>
+        </div>
     </div>
     
     <!-- <form action='#' onsubmit="return false;">
@@ -259,6 +265,7 @@
     <!-- <div id="wrapper"></div> -->
 
     <!-- Modals -->    
+    
 
     <!-- Add Asset -->
     <div id="loadAssetModal">
