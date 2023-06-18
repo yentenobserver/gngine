@@ -521,6 +521,7 @@ class App {
         this.guiEngine = {}  
         this.mapEngine = {}   
         this.assetManager = {}
+        this.api = {}
         
         
     }
@@ -533,6 +534,7 @@ class App {
 
     async _start(){     
         const that = this;   
+        this.api = await Api.getInstance();
         this.emitter.on("interaction.*",(event)=>{
             // if(event.originalEvent.type=="pointerdown") {
             //     // console.log("Got both", event);
@@ -681,14 +683,22 @@ class App {
         this.model.assets.filtered = [];
 
         // public assets
-        // user assets
+        const publicLibraries = await this.api.User3.publicLibraries();
+        const publicLibrariesIds = publicLibraries.map((item)=>{item.id});
         
+        const publicAssets = await this.model.assetManager.getAssetsByLibraries(publicLibrariesIds);
+        // user assets
+        const userLibraries = await this.api.User3.libraries();        
+        const userLibrariesIds = userLibraries.map((item)=>{item.id}).filter((item)=>{return !publicLibrariesIds.includes(item)});
+
+        const userAssets = await this.model.assetManager.getAssetsByLibraries(userLibrariesIds);
 
         // load default assets
-        const defaultAssets = await this.model.assetManager.getAssetsByLibraries([`${map.specs.kind}/assets.json`]);
-        const mapAssets = await this.model.assetManager.getAssets(map.assets||[]);
+        // const defaultAssets = await this.model.assetManager.getAssetsByLibraries([`${map.specs.kind}/assets.json`]);
+        // const mapAssets = await this.model.assetManager.getAssets(map.assets||[]);
 
-        const all = [...defaultAssets, ...mapAssets];
+        // const all = [...defaultAssets, ...mapAssets];
+        const all = [...publicAssets, ...userAssets];
 
         // load map specific assets (if any)
         this.model.assets.original = all.filter((item, idx)=>{return all.indexOf(item) == idx});

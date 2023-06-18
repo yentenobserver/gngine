@@ -185,7 +185,7 @@ class AppDemo {
     }
 
     async processAddTags(asset){
-        const item = this.model.assets.original.find((item)=>{return item.name == asset.name})
+        const item = this.model.assets.original.find((item)=>{return item.id == asset.id})
         item.tags = asset.tags;
         this.processAddPublicLibrary(this.model.libraries.selected)
         this._handleFilter({}, this);
@@ -194,7 +194,7 @@ class AppDemo {
     async processAddAsset(assetsInfo){
         assetsInfo.forEach((item)=>{item.that = this})
 
-        this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.name == item.name && item.kind == item2.kind }) == -1 })
+        this.model.assets.original = this.model.assets.original.filter((item)=>{return assetsInfo.findIndex((item2)=>{return item2.id == item.id && item.kind == item2.kind }) == -1 })
         this.model.assets.original = this.model.assets.original.concat(assetsInfo);
 
         this.model.assets.filtered = this.model.assets.original 
