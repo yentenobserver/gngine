@@ -684,12 +684,12 @@ class App {
 
         // public assets
         const publicLibraries = await this.api.User3.publicLibraries();
-        const publicLibrariesIds = publicLibraries.map((item)=>{item.id});
+        const publicLibrariesIds = publicLibraries.map((item)=>{return item.id});
         
         const publicAssets = await this.model.assetManager.getAssetsByLibraries(publicLibrariesIds);
         // user assets
         const userLibraries = await this.api.User3.libraries();        
-        const userLibrariesIds = userLibraries.map((item)=>{item.id}).filter((item)=>{return !publicLibrariesIds.includes(item)});
+        const userLibrariesIds = userLibraries.map((item)=>{return item.id}).filter((item)=>{return !publicLibrariesIds.includes(item)});
 
         const userAssets = await this.model.assetManager.getAssetsByLibraries(userLibrariesIds);
 
@@ -703,6 +703,7 @@ class App {
         // load map specific assets (if any)
         this.model.assets.original = all.filter((item, idx)=>{return all.indexOf(item) == idx});
 
+        console.log(`Loaded ${this.model.assets.original.length} assets`);
 
         // const assetsSpecs = await this.loadAsset(`./assets/${kind =="HexTile"?"hex":"quad"}/assets.json`, "JSON");
         // for(let i=0; i<assetsSpecs.length; i++){
@@ -1017,8 +1018,8 @@ class App {
                 }
             }
             map.assets = [{
-                libId: map.specs.kind == "HexTile"?"HexTile/assets.json":"QuadTile/assets.json",  
-                id: "", 
+                libId: map.specs.kind == "HexTile"?"3haerbnuju":"QuadTile/assets.json",  
+                id: "7muco5e2p8o", 
                 vId: "MAS_PLACEHOLDER_TILE" 
             }]
         }
