@@ -86,11 +86,12 @@
                     <div class="level-item is-hidden" rv-class-is-hidden="model.process.step | neq 'MapEdit'">
                         <div class="select">
                             <select rv-value="model.deployments.value" rv-on-change="_handleSpecialAreasChanged">
-                              <option value="">Deployment View</option>
+                              <option value="">Helper Views</option>
                               <option value="RED_DEPLOYMENT">Show Romeo Team</option>
                               <option value="BLUE_DEPLOYMENT">Show Bravo Team</option>
                               <option value="GREEN_DEPLOYMENT">Show Golf Team</option>
                               <option value="YELLOW_DEPLOYMENT">Show Yankee Team</option>
+                              <option value="X_MISSING_CONFIG">Show Missing Config</option>
                             </select>
                         </div>
                     </div>

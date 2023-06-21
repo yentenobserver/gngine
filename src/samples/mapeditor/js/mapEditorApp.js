@@ -573,16 +573,29 @@ class App {
 
     async _handleSpecialAreasChanged(e, that){
         const tiles = Array.from(that.mapEngine._engine.theMap.values());
-        const deploymentTiles = tiles.filter((item)=>{
-            return item.t?.modifications?.includes(that.model.deployments.value)            
-        })
-        const colors = {
-            RED_DEPLOYMENT: "#E1341E",
-            BLUE_DEPLOYMENT: "#1E6AE1",
-            GREEN_DEPLOYMENT: "#1EE196",
-            YELLOW_DEPLOYMENT: "#CBE11E"
+
+        if( that.model.deployments.value.startsWith("X_")){
+            const theTiles = tiles.filter((item)=>{
+                let hasConfig = true;
+                let hasTerrainMissesRenderable = item.t && item.t.kind && !item.t.kind.includes("UNDEFINED") && (!item.r || item.r.includes("MAS_PLACEHOLDER"));
+                let hasRenderableMissesTerrain = item.r && !item.r.includes("MAS_PLACEHOLDER") && (!item.t || !item.t.kind || item.t.kind.includes("UNDEFINED"))
+                hasConfig = !(hasTerrainMissesRenderable || hasRenderableMissesTerrain)
+                return !hasConfig;
+            })
+            that.guiEngine.map.highlightTiles(theTiles, "Helpers","#E1341E");
+        }else{
+            const deploymentTiles = tiles.filter((item)=>{
+                return item.t?.modifications?.includes(that.model.deployments.value)            
+            })
+            const colors = {
+                RED_DEPLOYMENT: "#E1341E",
+                BLUE_DEPLOYMENT: "#1E6AE1",
+                GREEN_DEPLOYMENT: "#1EE196",
+                YELLOW_DEPLOYMENT: "#CBE11E"
+            }
+            that.guiEngine.map.highlightTiles(deploymentTiles, "Helpers",colors[that.model.deployments.value])
         }
-        that.guiEngine.map.highlightTiles(deploymentTiles, "Deployments",colors[that.model.deployments.value])
+        
     }
 
     async _handleTerrainChanged(e, that){
@@ -608,6 +621,7 @@ class App {
         })
         // console.log("Terrain: ", that.model.selected.tile.data.t.kind);
         console.log("changed tile", that.model.selected.tile.data);
+        that._handleSpecialAreasChanged(e, that);
     }
 
     async _handleModifiersChanged(e, that){
@@ -675,6 +689,8 @@ class App {
     
             // console.log("changed tile", that.model.selected.tile.data);
         }
+
+        that._handleSpecialAreasChanged(e, that);
         
     }
 
@@ -1069,7 +1085,8 @@ class App {
         that.mapEngine = mapEngine;
 
         that.guiEngine.map.center();
-        await that.guiEngine.map.registerAreaIndicator("Deployments");
+        await that.guiEngine.map.registerAreaIndicator("Helpers");
+        // await that.guiEngine.map.registerAreaIndicator("MissingConfig");
 
     }
 
