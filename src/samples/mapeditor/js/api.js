@@ -303,7 +303,6 @@ class ApiUserClient3 {
         let ref = `/userlibraries/${userId}/dict/${library.specs.id}`;
         await this.db.ref(ref).set(library.specs);
         // put private assets
-        
         for(let i=0; i<library.assets.length; i++){
             const assetSpec = library.assets[i];
             const libraryId = assetSpec.library;
@@ -315,7 +314,7 @@ class ApiUserClient3 {
             // optional put public specs
             ref = `/libraries/dict/${library.specs.id}`;
             await this.db.ref(ref).set(library.specs);                
-            // optional put public assets      
+            
             for(let i=0; i<library.assets.length; i++){
                 const assetSpec = library.assets[i];
                 const libraryId = assetSpec.library;

@@ -124,6 +124,17 @@ class AppDemo {
         navigator.clipboard.writeText(JSON.stringify(data));
     }
 
+    async _handleDelete(e, that){
+        that.model.busy = true;
+        const assets = that.model.assets.filtered.filter((item)=>{return item.selected});
+        const result = [];
+
+        that.model.assets.original = that.model.assets.original.filter((item)=>{return !assets.some((item2)=>{return item2.id == item.id})});
+
+        await that.processAddPublicLibrary(that.model.libraries.selected)
+        that.model.busy = false;
+    }
+
     async _handleCopy2ClipboardLibrary(e, that){
         const assets = that.model.assets.filtered.filter((item)=>{return item.selected});
         const result = [];
