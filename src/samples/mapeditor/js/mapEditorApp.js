@@ -509,6 +509,7 @@ class App {
                 _handleChangeAsset: this._handleChangeAsset.bind(this)
             },
             mapCharacteristics: {
+                id: "",
                 name: "",
                 kind: "",
                 size: "",
@@ -842,6 +843,7 @@ class App {
             that.model.stepUseWizard.form.tags.value += `, ${that.model.stepUseWizard.form.size.value}, ${that.model.stepUseWizard.form.kind.value}`
             that._startMap({
                 specs: {
+                    id: Math.random().toString(36).substring(2, 24),   
                     name: that.model.stepUseWizard.form.name.value,
                     kind: that.model.stepUseWizard.form.kind.value,
                     size: that.model.stepUseWizard.form.size.value,
@@ -1174,6 +1176,19 @@ class App {
 
         navigator.clipboard.writeText(JSON.stringify(result));        
     }
+    async _handlePublishMap(e, that){
+        const result = {
+            specs: {},
+            tiles: []
+        }
+        result.specs = that.model.mapCharacteristics
+        result.specs.isPublic = true;
+        result.tiles = Array.from(that.mapEngine._engine.theMap.values());
+        result.assets = await that._assetReferences(result.tiles);
+
+        await that.api.User3.putMap(result);
+    }
+
     async _handleDownloadMap(e, that){
 
         // export interface MapSpecs {

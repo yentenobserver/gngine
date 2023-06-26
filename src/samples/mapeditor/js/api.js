@@ -1,4 +1,11 @@
 /**
+ * Map specification
+ * @typedef {Object} MapData
+ * @property {MapSpecs} specs - map specification
+ * @property {TileBase[]} tiles - map tiles
+ * @property {AssetReference[]} assets - assets used in map 
+ */
+/**
  * Assets library specification
  * @typedef {Object} LibraryReference
  * @property {string} id - library id
@@ -300,6 +307,26 @@ class ApiUserClient3 {
         }
         
         return libraries||[];        
+    }
+
+    /**
+     * 
+     * @param {MapData} map 
+     */
+    async putMap(map, userId = this.userCredential.user.uid){
+      let ref = `/usermaps/${userId}/dict/${map.specs.id}`;
+      await this.db.ref(ref).set(JSON.parse(JSON.stringify(map.specs)));
+
+      ref = `/usermaps/${userId}/${map.specs.id}`;
+      await this.db.ref(ref).set(JSON.parse(JSON.stringify(map)));
+
+      if(map.specs.isPublic){
+        ref = `/maps/dict/${map.specs.id}`;
+        await this.db.ref(ref).set(JSON.parse(JSON.stringify(map.specs)));
+
+        ref = `/maps/${map.specs.id}`;
+        await this.db.ref(ref).set(JSON.parse(JSON.stringify(map)));
+      }
     }
 
     /**

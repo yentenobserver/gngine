@@ -7,12 +7,14 @@ export interface MapSpecsOptions {
 }
 
 export interface MapSpecs {
+    id: string,    
     name: string,
     kind: string,
     size: string,
     tags: string[],
     address: string,
     latlon: string[],
+    isPublic?: boolean // when true than map is available to all users
     options?: MapSpecsOptions
 }
 /**
