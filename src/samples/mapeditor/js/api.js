@@ -241,6 +241,16 @@ class ApiUserClient3 {
         this.userCredential = await firebase.auth().signInAnonymously();
     }
 
+    async assetsConfig(){
+      let result = {};
+      const ref = `/config/assetConfig`;
+      const snap = await this.db.ref(ref).once("value");
+      if(snap.exists()&&snap.val()){
+        result = snap.val()
+      }
+      return result;
+    }
+
     async assetsSpecs(libraryId, userId = this.userCredential.user.uid){
         let result = [];
         const ref = `/userlibraries/${userId}/${libraryId}`;

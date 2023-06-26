@@ -274,6 +274,9 @@ class AssetManager {
     async _start(){
         this.api = await Api.getInstance();
     }
+    async getAssetsConfig(){
+        return this.api.User3.assetsConfig();
+    }
     /**
      * Returns assets for given assets' specifications
      * @param {GngineAssetReference[]} assetReferences references array
@@ -1004,6 +1007,12 @@ class App {
         
         that.model.game.canvas = canvas;
 
+        // load all necessary assets
+        await this._loadAssets(map);
+        await this._applyAssetFilter();
+        const assetsConfig = await this.model.assetManager.getAssetsConfig();
+
+
         const mapRenderablesSpecifications = [            
             {
                 name: "mapHelpers",
@@ -1033,18 +1042,19 @@ class App {
                     tiles.push(tile);
                 }
             }
-            map.assets = [{
-                libId: map.specs.kind == "HexTile"?"3haerbnuju":"QuadTile/assets.json",  
-                id: "7muco5e2p8o", 
-                vId: "MAS_PLACEHOLDER_TILE" 
-            }]
+            // map.assets = [{
+            //     libId: map.specs.kind == "HexTile"?"3haerbnuju":"QuadTile/assets.json",  
+            //     id: "7muco5e2p8o", 
+            //     vId: "MAS_PLACEHOLDER_TILE" 
+            // }]
+            map.assets = [
+                assetsConfig.map.placeholderReference
+            ]
         }
 
         //this.model.assets.original
 
-        // load all necessary assets
-        await this._loadAssets(map);
-        await this._applyAssetFilter();
+        
         
         const renderableSpecificationsForMap = await this._renderablesSpecificationForMap(map);
 
