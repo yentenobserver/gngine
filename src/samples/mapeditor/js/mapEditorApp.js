@@ -494,9 +494,16 @@ class App {
                 unit: {},
                 unitData: {},
                 unitDataStr: {},
+                map: -1
             },
             assetsData: [],
             assets: {
+                original: [],
+                filtered: [],
+                filter: "",
+                hidden: true
+            },
+            maps: {
                 original: [],
                 filtered: [],
                 filter: "",
@@ -539,6 +546,8 @@ class App {
     async _start(){     
         const that = this;   
         this.api = await Api.getInstance();
+        this.model.maps.original = await this.api.User3.maps();
+        this.model.selected.map = this.model.maps.original.length>0?this.model.maps.original[0].specs.id:-1
         this.emitter.on("interaction.*",(event)=>{
             // if(event.originalEvent.type=="pointerdown") {
             //     // console.log("Got both", event);
@@ -804,6 +813,12 @@ class App {
     async _handleStepChooseKind(e, that){
         that.model.process.step =  e.target.dataset.nextStep;
         console.log(that.model.process.step)
+    }   
+    
+    async _handleLoadMap(e, that){
+        that.model.process.step = "MapEdit";
+        const map = that.model.maps.original.find((item)=>{return item.specs.id == that.model.selected.map});
+        that._startMap(map);
     }
 
     async _handleStepUseWizard(e, that){

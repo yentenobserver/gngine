@@ -125,6 +125,19 @@
                     Use Json
                     </button>
                 </p>
+                
+                <p class="control">
+                    <button class="button is-success" rv-on-click="_handleLoadMap">
+                        Load Map
+                    </button>
+                    <div class="select" >
+                        <select rv-value="model.selected.map">                        
+                          <option value="-1">Choose</option>                          
+                          <option rv-each-map="model.maps.original" rv-value="map.specs.id">{map.specs.name} {map.specs.size}@{map.specs.kind} #{map.specs.id}</option>                          
+                        </select>
+                    </div>
+                    
+                </p>
             </div>              
         </section>
         

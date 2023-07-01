@@ -329,6 +329,27 @@ class ApiUserClient3 {
       }
     }
 
+    async maps(userId = this.userCredential.user.uid){
+      let mapIds = [];
+      let maps = [];
+      let ref = `/usermaps/${userId}/dict`;
+      let snap = await this.db.ref(ref).once("value");
+      if(snap.exists()&&snap.val()){
+          snap.forEach((item)=>{
+            mapIds.push(item.val().id);
+          })          
+      }
+      for(let i=0;i<mapIds.length; i++){
+        let ref = `/usermaps/${userId}/${mapIds[i]}`;
+        let snap = await this.db.ref(ref).once("value");
+        if(snap.exists()&&snap.val()){
+          maps.push(snap.val())                  
+        } 
+      }
+      
+      return maps;        
+  }
+
     /**
      * 
      * @param {Library} library 
