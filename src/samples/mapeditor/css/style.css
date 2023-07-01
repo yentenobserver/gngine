@@ -5,10 +5,8 @@
 
 .playground {
     /* The image used */
-    background-image: url("../assets/background.jpeg");
-    /* Center and scale the image nicely */
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
+    background-color: white;
 }
+
+
 
