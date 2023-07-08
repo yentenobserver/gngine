@@ -189,7 +189,7 @@ export abstract class MapRenderer extends Renderer implements MapPositionProvide
     abstract onTileChanged(tile: TileBase, direction: string):void;    
     abstract highlightTiles(tiles: TileBase[], indicatorName?: string, color?:string):void;
     abstract rotate(rotation: number):void;
-    abstract goToTile(tile: TileBase, object:THREE.Object3D):void;
+    abstract goToTile(tile: TileBase, object?:THREE.Object3D):void;
 
     
     abstract yxToScenePosition(y: number, x:number):ScenePosition;
@@ -551,7 +551,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         this.view!.camera.lookAt(npoint);        
     } 
 
-    goToTile(tile: TileBase, _object: THREE.Object3D){
+    goToTile(tile: TileBase, _object?: THREE.Object3D){
 
         // this.yxToScenePosition(tile.y, tile.x);
         

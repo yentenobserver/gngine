@@ -108,6 +108,11 @@ class MapGUIEngine {
         return p;                
     }
 
+    /**
+     * 
+     * @param {*} specifications 
+     * @deprecated do not use
+     */
     async addTileSpecifications(specifications){
         await this._tiles.assetFactory.setSpecifications(specifications);
     }
@@ -595,7 +600,7 @@ class App {
                 hasConfig = !(hasTerrainMissesRenderable || hasRenderableMissesTerrain)
                 return !hasConfig;
             })
-            that.guiEngine.map.highlightTiles(theTiles, "Helpers","#E1341E");
+            that.guiEngine.tileHighlight(theTiles, "Helpers","#E1341E");
         }else{
             const deploymentTiles = tiles.filter((item)=>{
                 return item.t?.modifications?.includes(that.model.deployments.value)            
@@ -606,7 +611,7 @@ class App {
                 GREEN_DEPLOYMENT: "#1EE196",
                 YELLOW_DEPLOYMENT: "#CBE11E"
             }
-            that.guiEngine.map.highlightTiles(deploymentTiles, "Helpers",colors[that.model.deployments.value])
+            that.guiEngine.tileHighlight(deploymentTiles, "Helpers",colors[that.model.deployments.value])
         }
         
     }
@@ -695,7 +700,7 @@ class App {
             const newTile = tile;
             newTile.r = that.item.variant.fullName;        
     
-            that.model.parent.guiEngine.map.changeTile(newTile, that.item);
+            that.model.parent.guiEngine.tileChange(newTile, that.item);
                     
             that.model.selected.tile.data = newTile;
             that.model.parent.mapEngine._engine.put(newTile);
@@ -1105,15 +1110,15 @@ class App {
 
             
         
-                
-        const guiEngine = await MapGUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles, mapCharacteristics.options );
+        const guiEngine = await gngine.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, that.model.game.canvas, that.emitter, new THREE.GLTFLoader());      
+        // const guiEngine = await MapGUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles, mapCharacteristics.options );
         const mapEngine = await MapEngine.getInstance(mapCharacteristics.kind, mapCharacteristics.size, tiles)
         that.guiEngine = guiEngine;
         that.mapEngine = mapEngine;
 
-        that.guiEngine.map.center();
-        await that.guiEngine.map.registerAreaIndicator("Helpers");
-        // await that.guiEngine.map.registerAreaIndicator("MissingConfig");
+        await that.guiEngine.gotoCenter();
+        await that.guiEngine.registerIndicator("Helpers");
+        
 
     }
 
