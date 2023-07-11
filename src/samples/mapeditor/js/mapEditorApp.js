@@ -1069,6 +1069,7 @@ class App {
             //     id: "7muco5e2p8o", 
             //     vId: "MAS_PLACEHOLDER_TILE" 
             // }]
+            map.tiles = tiles;
             map.assets = [
                 assetsConfig.map.placeholderReference
             ]

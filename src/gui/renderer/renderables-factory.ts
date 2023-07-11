@@ -12,13 +12,13 @@ export interface RenderableSpecificationScale{
     autoFitSize?: number // size to fit for largest dimension, will be scalled accordingly
 }
 export interface RenderableSpecification {
-    name: string,
-    url?: string,
-    json?: string,
-    filterByNames?:string[],
-    pivotCorrection?: string,
-    groundLevel?: number,
-    scaleCorrection?: RenderableSpecificationScale,
+    name: string, // just a name
+    url?: string, // either url or json should be provided. when url is provided then renderable data will be retrieved from this URL using the loader that was provided
+    json?: string, // either url or json should be provided. when json is provided then renderable data is created by parsing JSON specification
+    filterByNames?:string[], // array that filters objects either from json or url. only objects matching any of strings in this array will be loaded 
+    pivotCorrection?: string, // comma separated x,y,z pivot correction (translates object to this location)
+    groundLevel?: number, // in case some different ground level is required
+    scaleCorrection?: RenderableSpecificationScale, // usually autoscale to fit 1
     autoPivotCorrection?: boolean // important it is assumed that previous pivot point is in the "lower left (x,y)" position. 
 }
 
