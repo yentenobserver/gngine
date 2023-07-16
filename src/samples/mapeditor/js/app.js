@@ -156,6 +156,29 @@ class AppDemo {
         navigator.clipboard.writeText(JSON.stringify(result));
     }
 
+    async _handleCopy2ClipboardLibraryAsRenderablesArray(e, that){
+        const assets = that.model.assets.filtered.filter((item)=>{return item.selected});
+        const result = [];
+
+        assets.forEach((asset)=>{
+            asset.variants.forEach((variant)=>{
+                // AssetSpecs
+                const data = {
+
+                    name: `${asset.name}_${asset.id}`,
+                    json: JSON.stringify(variant.renderableJSON),                                    
+                    autoPivotCorrection: true,                
+                    scaleCorrection: {                    
+                        autoFitSize: 1                
+                    },
+                    filterByNames: ["MAS_"]
+                }
+                result.push(data);
+            })            
+        })
+        navigator.clipboard.writeText(JSON.stringify(result));
+    }
+
 
     async _handlePublishLibrary(e, that){
         that.model.libraries.selected.isPublic = true;

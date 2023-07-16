@@ -95,10 +95,10 @@ class AddTagsModalController {
             return;  
         }
         
-        if(!that.model.form.f2.value || that.model.form.f2.value.length < 12){
+        if(!that.model.form.f2.value || that.model.form.f2.value.length < 4){
             that.model.busy = false;
-            that.model.notify.errors.push(new Error("Description must be at least 12 chars long"))  ;
-            that.model.form.f2.error = new Error("Description must be at least 12 chars long");
+            that.model.notify.errors.push(new Error("Description must be at least 4 chars long"))  ;
+            that.model.form.f2.error = new Error("Description must be at least 4 chars long");
             return;  
         }
 
