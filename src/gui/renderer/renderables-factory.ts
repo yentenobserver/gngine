@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { Box3, Material, Object3D, Vector3 } from 'three';
 
 export interface Renderable{
+    id: string,
     name: string,
     data: any,
     show?: ()=>void;
@@ -229,6 +230,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
 
             // console.log(`${objectName} Final renderable data. Position object: ${JSON.stringify(cloned.position)} Position wrap: ${JSON.stringify(wrap.position)}. Size: ${JSON.stringify(sizeVector)}`)
             return {
+                id: result.uuid,
                 name: objectName,
                 data: result,                
                 hide: ()=>{

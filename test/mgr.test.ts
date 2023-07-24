@@ -2406,6 +2406,7 @@ describe("Renderers",()=>{
                 map.setView(view); 
                 s1 = sinon.stub(map.mapHolderObject,"add");
                 r = {
+                    id: "",
                     data: {},
                     name: "",
                     hide: ()=>{},
@@ -2773,6 +2774,7 @@ describe("Renderers",()=>{
                 s10 = sinon.spy(map.mapHolderObject,"add");
                 s3 = sinon.stub(map,"orientate");
                 s4 = sinon.stub(rf,"spawnRenderableObject").returns({
+                    id: "",
                     data: new THREE.Object3D(),
                     name:"name"
                 });
@@ -3231,6 +3233,14 @@ describe("Renderers",()=>{
             })
         })
     })
+    describe("LayeredRenderer",()=>{
+        xit("throws error when layer already exists");
+        xit("renderable is added");
+        xit("renderable is removed");
+        xit("renderable is added at new location");
+        xit("layer name is prefixed accordingly");
+        xit("throws error when trying to add to non existing layer");
+    });
     describe("RenderablesThreeJSFactory",()=>{
         let s1:SinonStub;
         let s2:SinonStub;
@@ -3257,7 +3267,7 @@ describe("Renderers",()=>{
 
         let specification: RenderableSpecification;        
         let specification2: RenderableSpecification;   
-        let specification3: RenderableSpecification;        
+        let specification3: RenderableSpecification;                
         describe("spawnRenderableObject",()=>{
             beforeEach(()=>{
                 l = {
@@ -3386,7 +3396,8 @@ describe("Renderers",()=>{
                 spawned.hide!();
                 spawned.show!();
                 return expect(spawned.data.visible).is.true;
-            })          
+            })  
+            xit("Id is populated");        
         })
         describe("setSpecifications", ()=>{
             let s1: SinonStub;
@@ -3814,6 +3825,7 @@ describe("Renderers",()=>{
                         }                        
                     },
                     name: "r1",
+                    id: "",
                     hide: ()=>{},
                     show: ()=>{},                    
                 }
@@ -3826,6 +3838,7 @@ describe("Renderers",()=>{
                         }                        
                     },
                     name: "r2",
+                    id: "",
                     hide: ()=>{},
                     show: ()=>{}
                 }
@@ -3838,6 +3851,7 @@ describe("Renderers",()=>{
                         }                        
                     },
                     name: "r3",
+                    id: "",
                     hide: ()=>{},
                     show: ()=>{}
                 }
@@ -3856,6 +3870,7 @@ describe("Renderers",()=>{
                 s3 = sinon.spy(indicator,"show");
                 s4 = sinon.spy((<AreaMapIndicator>indicator).renderables,"push");
                 s5 = sinon.stub(indicator.renderablesFactory, "spawnRenderableObject").returns({
+                    id: "",
                     data: {},
                     name: "",
                     hide: ()=>{},
