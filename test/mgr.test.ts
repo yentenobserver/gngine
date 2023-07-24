@@ -28,12 +28,15 @@ import {AreaMapIndicator, MapIndicator, QuadAreaMapIndicator3Js} from '../src/gu
 import {HudComponentDefaultThreeJs, HudComponentMapNavigationThreeJs, HudComponentThreeJs, HudRendererThreeJs } from '../src/gui/renderer/hud-renderers'
 import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
-import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, QuadPositionProviderThreeJs, ScenePosition, TilePosition} from '../src/gui/renderer/providers';
+import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadPositionProviderThreeJs, ScenePosition, TilePosition} from '../src/gui/renderer/providers';
 
 import { EventEmitter, messageBus } from '../src/util/events.notest';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Material, Mesh, Vector2, Vector3 } from 'three';
 import { Renderable, RenderablesDefaultFactory, RenderableSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
+
+import {LayeredRenderer3JS} from "../src/gui/renderer/layered-renderer";
+
 
 
 
@@ -3234,12 +3237,277 @@ describe("Renderers",()=>{
         })
     })
     describe("LayeredRenderer",()=>{
-        xit("throws error when layer already exists");
-        xit("renderable is added");
-        xit("renderable is removed");
-        xit("renderable is added at new location");
-        xit("layer name is prefixed accordingly");
-        xit("throws error when trying to add to non existing layer");
+        let messageBusMocked = new EventEmitter();
+        let mapProvider:MapPositionProvider = {        
+            scenePositionToYX: (_sceneX: number, _sceneY: number) => <TilePosition>{},
+            yxToScenePosition: (_y: number, _x: number)=><ScenePosition>{}                    
+        }
+
+        let orientationProvider:OrientationProvider = {        
+            orientate: (_object:any, _direction:string)=>void{}       
+        }
+
+        let renderer:LayeredRenderer3JS;
+        let object:THREE.Object3D; 
+        let renderable: Renderable;
+
+        let spy1: SinonSpy;
+        let spy2: SinonSpy;
+        let spy3: SinonSpy;
+        let spy4: SinonSpy;
+
+        beforeEach(()=>{
+            renderer  = new LayeredRenderer3JS(messageBusMocked,  mapProvider, orientationProvider);
+            object = new THREE.Object3D();
+            renderable = {
+                data: object,
+                name: "Some object",
+                id: object.uuid,
+                delete:()=>{}
+            }
+            spy1 = sinon.spy(mapProvider,"yxToScenePosition");
+            spy2 = sinon.spy(object.position,"set");
+            spy3 = sinon.spy(orientationProvider,"orientate");
+            spy4 = sinon.spy(renderable,"delete");
+        })
+        afterEach(()=>{
+            spy1.restore();
+            spy2.restore();
+            spy3.restore();
+            spy4.restore();
+        })
+
+        describe("LayeredRenderer3JS",()=>{
+            
+            it("throws error when layer already exists",()=>{
+                renderer.registerLayer("Buildings");
+
+                return expect(()=>{renderer.registerLayer.bind(renderer)("Buildings")}).to.throw("Layer already registered");      
+                
+            });
+            it("error is thrown when one adds renderable to non existing layer",()=>{
+                return expect(
+                    ()=>{
+                        renderer.put.bind(renderer)({
+                            data: {},
+                            name: "Some object",
+                            id: "id"
+                        }, "Other", {
+                            id: "0,0",
+                            t: {kind: ""},
+                            x: 0,
+                            y: 0
+                        })
+                    }
+                ).to.throw("No such layer"); 
+            });
+            it("renderable is added",()=>{
+                
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 0
+                })
+                return expect(renderer.layers[0].children[0].uuid).eq(object.uuid);
+            })
+            it("renderable is located accordingly (1)",()=>{
+                
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 0
+                })
+
+                return expect(spy1.callCount).eq(1);
+            })
+            it("renderable is located accordingly (2)",()=>{
+                
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", tile);
+
+                return expect(spy1.getCall(0).args[0]).eq(tile.y);
+            })
+            it("renderable is located accordingly (3)",()=>{
+                
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", tile);
+
+                return expect(spy1.getCall(0).args[1]).eq(tile.x);
+            })
+            
+            it("renderable is located accordingly (4)",()=>{                
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", tile);
+
+                return expect(spy2.callCount).eq(1);
+            })
+
+            it("renderable is oriented accordingly",()=>{                
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", tile);
+
+                return expect(spy3.callCount).eq(1);
+            })
+
+
+            
+            it("multiple put result in single object",()=>{
+                const object = new THREE.Object3D();
+                renderer.registerLayer("Buildings");
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 0
+                })
+
+                renderer.put({
+                    data: object,
+                    name: "Some object",
+                    id: object.uuid
+                }, "Buildings", {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 1,
+                    y: 1
+                })
+
+                return expect(renderer.layers[0].children.length).eq(1);
+
+            });
+
+
+            it("renderable is removed",()=>{
+                
+
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                
+                renderer.registerLayer("Buildings");
+                renderer.put(renderable, "Buildings", tile);
+                renderer.remove(renderable, "Buildings");
+                return expect(renderer.layers[0].children.length).eq(0);
+            });
+            it("error is thrown when no such renderable existst",()=>{
+                
+
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                
+                renderer.registerLayer("Buildings");
+                renderer.registerLayer("Other");
+                renderer.put(renderable, "Buildings", tile);
+                renderer.remove(renderable, "Buildings");
+
+                return expect(()=>{renderer.remove.bind(renderer)(renderable, "Other")}).to.throw("No such object");                    
+            });
+            it("renderable resources are deleted",()=>{
+                const tile = {
+                    id: "0,0",
+                    t: {kind: ""},
+                    x: 0,
+                    y: 1
+                };
+                
+                renderer.registerLayer("Buildings");
+                renderer.put(renderable, "Buildings", tile);
+                renderer.remove(renderable, "Buildings");
+                return expect(spy4.callCount).eq(1);
+            });
+            
+
+            it("layer name is prefixed accordingly",()=>{
+                renderer.registerLayer("Buildings");
+                return expect(renderer.layers[0].name).eq(`${renderer.NAME_PREFIX}Buildings`);
+            });            
+            
+            it("there is a holder object for all layers",()=>{
+                return expect(renderer.holderObject.name).eq(`LAYERS`)
+            })
+
+            it("hasLayer",()=>{
+                renderer.registerLayer("Buildings");
+                return expect(renderer.hasLayer("Buildings")).is.true;
+            })
+            it("hasLayer negative",()=>{
+                renderer.registerLayer("Buildings");
+                return expect(renderer.hasLayer("Other")).is.false;
+            })
+
+            it("getLayer",()=>{
+                renderer.registerLayer("Buildings");
+                return expect(renderer.getLayer("Buildings")).is.not.undefined;
+            })
+            it("getLayer throws error when no such layer",()=>{
+                renderer.registerLayer("Buildings");
+                return expect(()=>{renderer.getLayer.bind(renderer)("Other")}).to.throw("No such layer");                 
+            })
+            
+        })        
     });
     describe("RenderablesThreeJSFactory",()=>{
         let s1:SinonStub;

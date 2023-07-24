@@ -7,6 +7,7 @@ export interface Renderable{
     data: any,
     show?: ()=>void;
     hide?: ()=>void;
+    delete?: ()=>void;
 }
 export interface RenderableSpecificationScale{
     byFactor?: number, // scale by this factor, >1 enlarge, <1 make smaller
@@ -229,7 +230,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             bbBox.setFromObject(wrap).getSize(sizeVector);   
 
             // console.log(`${objectName} Final renderable data. Position object: ${JSON.stringify(cloned.position)} Position wrap: ${JSON.stringify(wrap.position)}. Size: ${JSON.stringify(sizeVector)}`)
-            return {
+            const renderable = {
                 id: result.uuid,
                 name: objectName,
                 data: result,                
@@ -238,8 +239,33 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 },                
                 show: ()=>{
                     result!.visible = true;
-                }
+                },
+                delete: ()=>{
+                    const dispose = (object3D:THREE.Mesh)=>{
+                        if(!object3D.geometry)
+                            return;
+                        object3D.geometry.dispose();
+                        
+                        if(Array.isArray(object3D.material)){
+                            const materials = object3D.material as Material[];
+                            materials.forEach((material)=>{
+                                material.dispose();    
+                            })
+                        }else{
+                            const material =  object3D.material as Material;
+                            material.dispose()
+                        }                
+                        
+                        // todo texture?
+                    };
+
+                    result!.traverse((child)=>{                
+                        dispose(child as THREE.Mesh)
+                    })
+                }                
             }     
+            return renderable;
+
         }else{
             throw new Error(`No template found ${objectName}`);
         }        
