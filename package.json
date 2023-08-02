@@ -1,6 +1,6 @@
 {
   "name": "gamengine",
-  "version": "0.0.1",
+  "version": "0.2.0",
   "description": "Typescript game engine",
   "main": "dist/gamengine.umd.js",
   "types": "dist/gamengine.d.ts",
