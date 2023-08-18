@@ -257,8 +257,8 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     tileSize: number;
     
     mapHolderObject: THREE.Object3D;
-    renderablesFactory: RenderablesThreeJSFactory|undefined;
-    view: PlaygroundViewThreeJS|undefined;
+    declare renderablesFactory: RenderablesThreeJSFactory|undefined;
+    declare view: PlaygroundViewThreeJS|undefined;
 
     state: {
         zoomLevel: number,  // current map zoom level

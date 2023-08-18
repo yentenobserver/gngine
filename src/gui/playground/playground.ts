@@ -446,7 +446,7 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
 }
 
 export abstract class PlaygroundViewHudThreeJs extends PlaygroundViewThreeJS implements PlaygroundViewHud{
-    camera: THREE.OrthographicCamera|undefined;
+    declare camera: THREE.OrthographicCamera|undefined;
     isViewHud: boolean;
     static VIEW_NAME: string = "HUD_VIEW";
     // components: HudComponentThreeJs[];
@@ -497,7 +497,7 @@ export interface OptionsPlaygroundViewThreeJS {
 }
 
 export abstract class PlaygroundViewMainThreeJs extends PlaygroundViewThreeJS implements PlaygroundViewMain{     
-    camera: THREE.PerspectiveCamera|undefined;
+    declare camera: THREE.PerspectiveCamera|undefined;
     options: OptionsPlaygroundViewThreeJS;
     
     isViewMain: boolean;

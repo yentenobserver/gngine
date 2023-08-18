@@ -366,7 +366,7 @@ export abstract class UnitsRenderer extends Renderer {
 export class UnitsRendererThreeJS extends UnitsRenderer {
     static NAME: string = "THE_UNITS";
     static MAP_NAME: string = "THE_MAP";
-    view: PlaygroundViewThreeJS|undefined;
+    declare view: PlaygroundViewThreeJS|undefined;
     holderObject: Object3D;
 
     constructor(emitter: EventEmitter, mapProvider: MapPositionProvider, orientationProvider: OrientationProvider){

@@ -34,7 +34,7 @@ export abstract class HudRenderer extends Renderer{
  * Order of components is important.
  */
 export class HudRendererThreeJs extends HudRenderer {
-    view: PlaygroundViewThreeJS|undefined;
+    declare view: PlaygroundViewThreeJS|undefined;
     setView(view: PlaygroundViewThreeJS): void {
         this.view = view;
     }
