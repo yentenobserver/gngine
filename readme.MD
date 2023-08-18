@@ -28,6 +28,7 @@ Below is more information about preparing all necessary objects like map and ren
 ## The Map
 Ok, let's start with map data. In GNGine map information is separated from 3D assets that are rendered as map tile.
 
+
 Map data contains 3 key elements:
 ```typescript
 export interface Map {
