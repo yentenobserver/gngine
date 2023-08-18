@@ -6,8 +6,10 @@
   "types": "dist/hexmap3d.d.ts",
   "module": "dist/hexmap3d.esm.min.js",
   "keywords": [
-    "sample",
-    "template"
+    "hex",
+    "3d",
+    "webgl",
+    "hexmap"
   ],
   "exports": {
     ".": {
