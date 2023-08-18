@@ -1,16 +1,17 @@
 import typescript from '@rollup/plugin-typescript';
 
 export default {
-  input: 'src/hexmap3d.ts',
+  input: 'src/gamengine.ts',
   output: [
     {
-      file: 'dist/hexmap3d.esm.js',
-      format: 'es'
+      file: 'dist/gamengine.esm.js',
+      format: 'es',
+      globals: { three: 'THREE' }
     },
     {
-      file: 'dist/hexmap3d.umd.js',
+      file: 'dist/gamengine.umd.js',
       format: 'umd',
-      name: 'hexmap3d',
+      name: 'gngine',
       globals: { three: 'THREE' }
     },
   ],

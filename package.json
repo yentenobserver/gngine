@@ -1,26 +1,26 @@
 {
-  "name": "gamengine",
+  "name": "hexmap3d",
   "version": "0.2.0",
-  "description": "Typescript game engine",
-  "main": "dist/gamengine.umd.js",
-  "types": "dist/gamengine.d.ts",
-  "module": "dist/gamengine.esm.min.js",
+  "description": "3D HexMap using WebGL",
+  "main": "dist/hexmap3d.umd.js",
+  "types": "dist/hexmap3d.d.ts",
+  "module": "dist/hexmap3d.esm.min.js",
   "keywords": [
     "sample",
     "template"
   ],
   "exports": {
     ".": {
-      "require": "./dist/gamengine.umd.min.js",
-      "import": "./dist/gamengine.esm.min.js"
+      "require": "./dist/hexmap3d.umd.min.js",
+      "import": "./dist/hexmap3d.esm.min.js"
     }
   },
   "scripts": {
     "docs": "typedoc && touch docs/.nojekyll",
-    "build:types": "tsc -t esnext --moduleResolution node -d --emitDeclarationOnly --outFile dist/gamengine.d.ts src/gamengine.ts",
+    "build:types": "tsc -t esnext --moduleResolution node -d --emitDeclarationOnly --outFile dist/hexmap3d.d.ts src/hexmap3d.ts",
     "build:js": "rollup -c rollup.config.js",
-    "build:minjs:umd": "terser dist/gamengine.umd.js --compress --mangle > dist/gamengine.umd.min.js",
-    "build:minjs:esm": "terser dist/gamengine.esm.js --compress --mangle > dist/gamengine.esm.min.js",
+    "build:minjs:umd": "terser dist/hexmap3d.umd.js --compress --mangle > dist/hexmap3d.umd.min.js",
+    "build:minjs:esm": "terser dist/hexmap3d.esm.js --compress --mangle > dist/hexmap3d.esm.min.js",
     "build:minjs": "npm run build:minjs:esm -s && npm run build:minjs:umd -s",
     "build": "date && npm run build:js -s && npm run build:minjs -s && npm run build:types -s",
     "test": "env TS_NODE_PROJECT=\"tsconfig-test.json\" mocha -r ts-node/register **/test/**/*.test.ts",

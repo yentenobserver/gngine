@@ -42,7 +42,7 @@ import {LayeredRenderer3JS} from "../src/gui/renderer/layered-renderer";
 
 
 
-describe('Gamengine', () => {
+describe('hexmap3d', () => {
     describe('MapSquare', () => {   
         describe('_direction', () => {   
             let mappy:MapSquare;
