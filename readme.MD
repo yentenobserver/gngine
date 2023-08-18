@@ -17,6 +17,7 @@ hexmap3d is a to-be tile game engine. As of today here are ready to use componen
 <script src="../../../dist/hexmap3d.umd.js"></script>
 ```
 
+
 Then in Javascript initialize MapViewerComponent3JS within given HTMLCanvas element.
 
 ```javascript
