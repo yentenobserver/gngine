@@ -20,7 +20,7 @@ GNGine is a to-be tile game engine. As of today here are ready to use components
 Then in Javascript initialize MapViewerComponent3JS within given HTMLCanvas element.
 
 ```javascript
-const mapViewer = await gngine.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, htmlCanvasElement, eventHandler, new THREE.GLTFLoader());
+const mapViewer = await hexmap3d.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, htmlCanvasElement, eventHandler, new THREE.GLTFLoader());
 ```
 
 Below is more information about preparing all necessary objects like map and renderables specification for map viewer.

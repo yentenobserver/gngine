@@ -95,7 +95,7 @@ class App {
 
     
 
-        // this.emitter.on(gngine.Events.INTERACTIONS.TILE+"$",async (event)=>{            
+        // this.emitter.on(hexmap3d.Events.INTERACTIONS.TILE+"$",async (event)=>{            
         //     if(event.originalEvent.type=="pointerdown") {
         //         // console.log('TILE', event)
         //         for(let i=event.data.hierarchy.length-1; i>= 0; i--){
@@ -117,7 +117,7 @@ class App {
         //     };                                    
         // });
 
-        this.emitter.on(gngine.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
+        this.emitter.on(hexmap3d.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
             console.log("tile interaction", tileInteractionEvent);
 
             // which tile is "the last selected"            
@@ -166,7 +166,7 @@ class App {
         const mapRenderablesSpecifications = [            
             {
                 name: "mapHelpers",
-                json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
+                json: JSON.stringify(hexmap3d.RENDERABLES.MAP.SQUARE.highlight),                    
                 pivotCorrection: "0,0,0.12",
                 scaleCorrection: {
                     // byFactor: 1.2
@@ -187,7 +187,7 @@ class App {
 
         mapRenderablesSpecifications.push(...renderableSpecificationsForMap);
 
-        const guiEngine = await gngine.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, that.model.canvas, that.emitter, new THREE.GLTFLoader());              
+        const guiEngine = await hexmap3d.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, that.model.canvas, that.emitter, new THREE.GLTFLoader());              
 
         await guiEngine.gotoCenter();
         await guiEngine.registerIndicator("Helpers");

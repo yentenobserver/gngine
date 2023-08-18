@@ -84,11 +84,11 @@ class AddAssetModalController {
         }
         let factory = {};
         if(kind == "Unit"){
-            factory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+            factory = new hexmap3d.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
             await factory.setSpecifications([specification])
             // await factory.loadTemplates(["_UNIT"]);            
         }else if (kind == "HexTile" || kind == "QuadTile"){
-            factory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());            
+            factory = new hexmap3d.RenderablesThreeJSFactory(new THREE.GLTFLoader());            
             await factory.setSpecifications([specification]);            
         }
         // console.log(factory.spawnableRenderablesNames());
@@ -101,7 +101,7 @@ class AddAssetModalController {
             enableScreenshots: true
         }
                 
-        let p = new gngine.PlaygroundThreeJs(canvas,emitter, playgroundOptions);
+        let p = new hexmap3d.PlaygroundThreeJs(canvas,emitter, playgroundOptions);
         p.initialize();    
         let viewOptions = {
             cameraParams: {                
@@ -112,7 +112,7 @@ class AddAssetModalController {
             },
             cameraPosition: new THREE.Vector3(0,-1,0.75)
         }           
-        let mainView = new gngine.PlaygroundViewMainThreeJsDefault(emitter, viewOptions); 
+        let mainView = new hexmap3d.PlaygroundViewMainThreeJsDefault(emitter, viewOptions); 
         await p.attach(mainView);        
         mainView._setupScene(); 
         p.run();
@@ -128,11 +128,11 @@ class AddAssetModalController {
         // prepare Renderer
         let renderer = {};
         if(kind == "Unit"){            
-            renderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());            
+            renderer = new hexmap3d.UnitsRendererThreeJS(this.emitter, new hexmap3d.HexFlatTopPositionProviderThreeJs(1), new hexmap3d.HexFlatTopOrientationProviderThreeJs());            
         }else if(kind == "HexTile"){
-            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)            
+            renderer = new hexmap3d.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)            
         }else if(kind == "QuadTile"){
-            renderer = new gngine.MapQuadRendererThreeJs(3,2, this.emitter)
+            renderer = new hexmap3d.MapQuadRendererThreeJs(3,2, this.emitter)
         }
         
         renderer.setRenderablesFactory(factory);
@@ -191,7 +191,7 @@ class AddAssetModalController {
         //         pivotCorrection: "0.15,-0.3,0.1"
         //     }
         // }
-        // const unitFactory = new gngine.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
+        // const unitFactory = new hexmap3d.UnitRenderablesThreeJSFactory(specification, new THREE.GLTFLoader());
         // await unitFactory.loadTemplates(["_UNIT"]);
         // console.log(unitFactory.spawnableRenderablesNames());
         
@@ -213,8 +213,8 @@ class AddAssetModalController {
         //     enableScreenshots: true
         // }
         
-        // // let p = new gngine.PlaygroundThreeJs(document.getElementById("unitCanvas"),this.emitter, playgroundOptions);
-        // let p = new gngine.PlaygroundThreeJs(canvas,this.emitter, playgroundOptions);
+        // // let p = new hexmap3d.PlaygroundThreeJs(document.getElementById("unitCanvas"),this.emitter, playgroundOptions);
+        // let p = new hexmap3d.PlaygroundThreeJs(canvas,this.emitter, playgroundOptions);
         // p.initialize();    
         // let viewOptions = {
         //     cameraParams: {                
@@ -225,11 +225,11 @@ class AddAssetModalController {
         //     },
         //     cameraPosition: new THREE.Vector3(0,-1,0.75)
         // }           
-        // let mainView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
+        // let mainView = new hexmap3d.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
         // await p.attach(mainView);        
         // mainView._setupScene(); 
         // p.run();
-        // const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());
+        // const unitRenderer = new hexmap3d.UnitsRendererThreeJS(this.emitter, new hexmap3d.HexFlatTopPositionProviderThreeJs(1), new hexmap3d.HexFlatTopOrientationProviderThreeJs());
         // unitRenderer.setRenderablesFactory(unitFactory);
         // unitRenderer.setView(mainView);
         // await unitRenderer.initialize();

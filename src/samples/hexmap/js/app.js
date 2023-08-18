@@ -4,7 +4,7 @@ class AppDemo {
         this.emitter = emitter
         this.mapCanvas = mapCanvas
         this.assets3DLoader = new THREE.GLTFLoader();
-        this.map = new gngine.MapHexOddQ(4,5);
+        this.map = new hexmap3d.MapHexOddQ(4,5);
         this.mapRenderer = {};
         this.model = {
             selected: {
@@ -28,16 +28,16 @@ class AppDemo {
 
     async _start(){
 
-        // this.emitter.on(gngine.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
-        // this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
-        // this.emitter.on(gngine.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
+        // this.emitter.on(hexmap3d.Events.INTERACTIONS.TILE,(e)=>{console.log('TILE',e.originalEvent.type)});
+        // this.emitter.on(hexmap3d.Events.INTERACTIONS.UNIT,(e)=>{console.log('UNIT', e)});
+        // this.emitter.on(hexmap3d.Events.INTERACTIONS.HUD,(e)=>{console.log('HUD', e)});
 
 
         
 
 
         let that = this;
-        let p = new gngine.PlaygroundThreeJs(this.mapCanvas,this.emitter);
+        let p = new hexmap3d.PlaygroundThreeJs(this.mapCanvas,this.emitter);
         p.initialize();
         
         let mapRenderer;
@@ -54,7 +54,7 @@ class AppDemo {
             
         }
 
-        let mainMapView = new gngine.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
+        let mainMapView = new hexmap3d.PlaygroundViewMainThreeJsDefault(this.emitter, viewOptions); 
 
         // await p.attach(mainMapView);
         
@@ -71,12 +71,12 @@ class AppDemo {
         }
         const mapHelpersSpecification = {
             name: "mapHelpers",
-            json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
+            json: JSON.stringify(hexmap3d.RENDERABLES.MAP.SQUARE.highlight),                    
             pivotCorrection: "0,0,0.12",
             filterByNames: ["MAP_HLPR_HIGHLIGHT"]
         }
 
-        let mapTileFactory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());
+        let mapTileFactory = new hexmap3d.RenderablesThreeJSFactory(new THREE.GLTFLoader());
         await mapTileFactory.setSpecifications([mapRenderablesSpecification, mapHelpersSpecification])
                         
         await p.attach(mainMapView);
@@ -84,10 +84,10 @@ class AppDemo {
         mainMapView._setupScene(); 
         p.run();
 
-        let hudView = new gngine.PlaygroundViewHudThreeJsDefault(this.emitter);
+        let hudView = new hexmap3d.PlaygroundViewHudThreeJsDefault(this.emitter);
         await p.attach(hudView);
 
-        mapRenderer = new gngine.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)
+        mapRenderer = new hexmap3d.MapHexFlatTopOddRendererThreeJs(3,2, this.emitter)
         mapRenderer.setRenderablesFactory(mapTileFactory);
         // map renderer will render map tiles into main map view
         mapRenderer.setView(mainMapView);
@@ -113,10 +113,10 @@ class AppDemo {
             mapRenderer.put(val, val.d);
         });
 
-        const hudRenderer = new gngine.HudRendererThreeJs(this.emitter);
+        const hudRenderer = new hexmap3d.HudRendererThreeJs(this.emitter);
         hudRenderer.setView(hudView);
 
-        const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
+        const navComp = new hexmap3d.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
         await navComp.build();
         hudRenderer.addComponent(navComp); 
 
@@ -134,9 +134,9 @@ class AppDemo {
                 groundLevel: 0.11
             
         }
-        const unitFactory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+        const unitFactory = new hexmap3d.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
         await unitFactory.setSpecifications([unitsRenderablesSpecification]);
-        const unitRenderer = new gngine.UnitsRendererThreeJS(this.emitter, mapRenderer, new gngine.HexFlatTopOrientationProviderThreeJs());
+        const unitRenderer = new hexmap3d.UnitsRendererThreeJS(this.emitter, mapRenderer, new hexmap3d.HexFlatTopOrientationProviderThreeJs());
         unitRenderer.setRenderablesFactory(unitFactory);
         unitRenderer.setView(mainMapView);
         await unitRenderer.initialize();
@@ -279,7 +279,7 @@ class AppDemo {
             }            
         })
 
-        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
+        this.emitter.on(hexmap3d.Events.INTERACTIONS.UNIT,(event)=>{
             if(event.originalEvent.type=="pointerdown") {
                 
 
@@ -302,7 +302,7 @@ class AppDemo {
             
         });
 
-        this.emitter.on(gngine.Events.INTERACTIONS.TILE,(event)=>{
+        this.emitter.on(hexmap3d.Events.INTERACTIONS.TILE,(event)=>{
             if(event.originalEvent.type=="pointerdown") {
                 // console.log('TILE', event)
                 for(let i=event.data.hierarchy.length-1; i>= 0; i--){

@@ -47,7 +47,7 @@ class MapEngine {
         const widthHeight = mapSize.split("x").map((item)=>{return item.trim()});
 
         const r = new MapEngine();
-        r._engine = kind == "HexTile"?new gngine.MapHexOddQ(widthHeight[0],widthHeight[1]):new gngine.MapSquare(widthHeight[0],widthHeight[1]);
+        r._engine = kind == "HexTile"?new hexmap3d.MapHexOddQ(widthHeight[0],widthHeight[1]):new hexmap3d.MapSquare(widthHeight[0],widthHeight[1]);
         r._engine.fromTiles(tiles);
         return r;
     }  
@@ -123,7 +123,7 @@ class MapGUIEngine {
             enableScreenshots: true
         }
                 
-        let p = new gngine.PlaygroundThreeJs(canvas,emitter, playgroundOptions);
+        let p = new hexmap3d.PlaygroundThreeJs(canvas,emitter, playgroundOptions);
         p.initialize();    
         // let viewOptions = {
         //     cameraParams: {                
@@ -143,17 +143,17 @@ class MapGUIEngine {
             },
             cameraPosition: new THREE.Vector3(0,-5,4)
         }        
-        let mainView = new gngine.PlaygroundViewMainThreeJsDefault(emitter, viewOptions); 
+        let mainView = new hexmap3d.PlaygroundViewMainThreeJsDefault(emitter, viewOptions); 
         await p.attach(mainView);        
         mainView._setupScene(); 
         p.run();
 
-        let hudView = new gngine.PlaygroundViewHudThreeJsDefault(emitter);
+        let hudView = new hexmap3d.PlaygroundViewHudThreeJsDefault(emitter);
         await p.attach(hudView);
-        const hudRenderer = new gngine.HudRendererThreeJs(emitter);
+        const hudRenderer = new hexmap3d.HudRendererThreeJs(emitter);
         hudRenderer.setView(hudView);
 
-        const navComp = new gngine.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
+        const navComp = new hexmap3d.HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
         await navComp.build();
         hudRenderer.addComponent(navComp); 
 
@@ -189,10 +189,10 @@ class MapGUIEngine {
         
         let factory = {};
         if(kind == "Unit"){
-            factory = new gngine.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
+            factory = new hexmap3d.UnitRenderablesThreeJSFactory(new THREE.GLTFLoader());
             await factory.setSpecifications(specification);
         }else if (kind == "HexTile" || kind == "QuadTile"){
-            factory = new gngine.RenderablesThreeJSFactory(new THREE.GLTFLoader());            
+            factory = new hexmap3d.RenderablesThreeJSFactory(new THREE.GLTFLoader());            
             await factory.setSpecifications(specification);
         }
         // console.log(factory.spawnableRenderablesNames());
@@ -205,11 +205,11 @@ class MapGUIEngine {
         // prepare Renderer
         let renderer = {};
         if(kind == "Unit"){            
-            renderer = new gngine.UnitsRendererThreeJS(emitter, new gngine.HexFlatTopPositionProviderThreeJs(1), new gngine.HexFlatTopOrientationProviderThreeJs());            
+            renderer = new hexmap3d.UnitsRendererThreeJS(emitter, new hexmap3d.HexFlatTopPositionProviderThreeJs(1), new hexmap3d.HexFlatTopOrientationProviderThreeJs());            
         }else if(kind == "HexTile"){
-            renderer = new gngine.MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter, options)            
+            renderer = new hexmap3d.MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter, options)            
         }else if(kind == "QuadTile"){
-            renderer = new gngine.MapQuadRendererThreeJs(widthHeight[0],widthHeight[1], emitter, options)
+            renderer = new hexmap3d.MapQuadRendererThreeJs(widthHeight[0],widthHeight[1], emitter, options)
         }
         
         renderer.setRenderablesFactory(factory);
@@ -258,7 +258,7 @@ class MapGUIEngine {
     }
 
     async _mapRegisterAreaIndicator(name){
-        const indicator =  this.kind == "HexTile"?await gngine.HexAreaMapIndicator3Js.create(this._tiles.renderer):await gngine.QuadAreaMapIndicator3Js.create(this._tiles.renderer)
+        const indicator =  this.kind == "HexTile"?await hexmap3d.HexAreaMapIndicator3Js.create(this._tiles.renderer):await hexmap3d.QuadAreaMapIndicator3Js.create(this._tiles.renderer)
         this._tiles.renderer.registerIndicator(name, indicator);
     }
 
@@ -961,7 +961,7 @@ class App {
 
         const that = this;
         this.model.mapCharacteristics = mapCharacteristics;
-        this.emitter.on(gngine.Events.INTERACTIONS.UNIT,(event)=>{
+        this.emitter.on(hexmap3d.Events.INTERACTIONS.UNIT,(event)=>{
             if(event.originalEvent.type=="pointerdown") {
                 
 
@@ -983,7 +983,7 @@ class App {
             
         });
 
-        // this.emitter.on(gngine.Events.INTERACTIONS.TILE+"$",async (event)=>{            
+        // this.emitter.on(hexmap3d.Events.INTERACTIONS.TILE+"$",async (event)=>{            
         //     if(event.originalEvent.type=="pointerdown") {
         //         // console.log('TILE', event)
         //         for(let i=event.data.hierarchy.length-1; i>= 0; i--){
@@ -1005,7 +1005,7 @@ class App {
         //     };                                    
         // });
 
-        this.emitter.on(gngine.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
+        this.emitter.on(hexmap3d.Events.INTERACTIONS.MAP.TILE,async (tileInteractionEvent)=>{
             console.log("tile interaction", tileInteractionEvent);
 
             // which tile is "the last selected"            
@@ -1038,7 +1038,7 @@ class App {
         const mapRenderablesSpecifications = [            
             {
                 name: "mapHelpers",
-                json: JSON.stringify(gngine.RENDERABLES.MAP.SQUARE.highlight),                    
+                json: JSON.stringify(hexmap3d.RENDERABLES.MAP.SQUARE.highlight),                    
                 pivotCorrection: "0,0,0.12",
                 scaleCorrection: {
                     // byFactor: 1.2
@@ -1111,7 +1111,7 @@ class App {
 
             
         
-        const guiEngine = await gngine.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, that.model.game.canvas, that.emitter, new THREE.GLTFLoader());      
+        const guiEngine = await hexmap3d.MapViewerComponent3JS.getInstance(map, mapRenderablesSpecifications, that.model.game.canvas, that.emitter, new THREE.GLTFLoader());      
         // const guiEngine = await MapGUIEngine.getInstance(that.model.game.canvas, that.emitter, mapRenderablesSpecifications, mapCharacteristics.kind, mapCharacteristics.size, tiles, mapCharacteristics.options );
         const mapEngine = await MapEngine.getInstance(mapCharacteristics.kind, mapCharacteristics.size, tiles)
         that.guiEngine = guiEngine;

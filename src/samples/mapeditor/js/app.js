@@ -4,7 +4,7 @@ class AppDemo {
         this.emitter = emitter
         this.mapCanvas = mapCanvas
         this.assets3DLoader = new THREE.GLTFLoader();
-        this.map = new gngine.MapSquare(2,3);
+        this.map = new hexmap3d.MapSquare(2,3);
         this.mapRenderer = {};
         this.model = {
             selected: {
