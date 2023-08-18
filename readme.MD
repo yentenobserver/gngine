@@ -1,6 +1,6 @@
-# ThreeJs Map Component
+# hexmap3d Map Component
 
-GNGine is a to-be tile game engine. As of today here are ready to use components that can be used for building tile games:
+hexmap3d is a to-be tile game engine. As of today here are ready to use components that can be used for building tile games:
 
   - MapViewerComponent3JS - ThreeJs powered map view component. Allows for map rendering, navigation and interaction.
 
@@ -14,7 +14,7 @@ GNGine is a to-be tile game engine. As of today here are ready to use components
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/loaders/GLTFLoader.js"></script>
 <!-- this part MUST be after all global libs like THREE.js-->
-<script src="../../../dist/gamengine.umd.js"></script>
+<script src="../../../dist/hexmap3d.umd.js"></script>
 ```
 
 Then in Javascript initialize MapViewerComponent3JS within given HTMLCanvas element.

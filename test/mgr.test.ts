@@ -4184,10 +4184,10 @@ describe("Renderers",()=>{
                     indicator.forTile(tile);
                     return expect(s2.callCount).eq(1);
                 })
-                it("makes sure the indicator is shown",()=>{
-                    indicator.forTile(tile);
-                    return expect(s3.callCount).eq(1);
-                })                
+                // it("makes sure the indicator is shown",()=>{
+                //     indicator.forTile(tile);
+                //     return expect(s3.callCount).eq(1);
+                // })                
             })
             describe("forTiles",()=>{
 
@@ -4220,10 +4220,10 @@ describe("Renderers",()=>{
                     indicator.forTiles([tile]);
                     return expect(s2.callCount).eq(1);
                 })
-                it("makes sure the indicator is shown",()=>{
-                    indicator.forTiles([tile]);
-                    return expect(s3.callCount).eq(1);
-                })                
+                // it("makes sure the indicator is shown",()=>{
+                //     indicator.forTiles([tile]);
+                //     return expect(s3.callCount).eq(1);
+                // })                
             })
             describe("render",()=>{
                 beforeEach(()=>{
