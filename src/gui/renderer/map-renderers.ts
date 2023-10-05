@@ -901,25 +901,28 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
         }
 
         if((<MapRendererOptions>this.options).backgroundImgUrl){
-            const texture = await Utils3JS.texture((<MapRendererOptions>this.options).backgroundImgUrl!);
-            const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
-            var geometry = helper.getGeometry();
-            geometry.computeBoundingBox();
-            let size = new Vector3();
-            geometry.boundingBox?.getSize(size);
-            console.log(JSON.stringify(size));
-
-            const backgroundGeometry = new PlaneGeometry(size.x, size.y);
-            const material = new THREE.MeshBasicMaterial({
-                map: texture,
-            });
-            const background = new Mesh(backgroundGeometry, material);
-            background.name = "MAP_IMAGE_BACKGROUND"
-            background.position.z = -0.02
-            background.position.x = background.position.x+size.x/2-helper.getTileSize().width/2; // minus tile.width/2
-            background.position.y = background.position.y-size.y/2+helper.getTileSize().height/2; // plus tile.height/2
-            this.mapHolderObject.add( background );
-
+            try{
+                const texture = await Utils3JS.texture((<MapRendererOptions>this.options).backgroundImgUrl!);
+                const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
+                var geometry = helper.getGeometry();
+                geometry.computeBoundingBox();
+                let size = new Vector3();
+                geometry.boundingBox?.getSize(size);
+                // console.log(JSON.stringify(size));
+    
+                const backgroundGeometry = new PlaneGeometry(size.x, size.y);
+                const material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                });
+                const background = new Mesh(backgroundGeometry, material);
+                background.name = "MAP_IMAGE_BACKGROUND"
+                background.position.z = -0.02
+                background.position.x = background.position.x+size.x/2-helper.getTileSize().width/2; // minus tile.width/2
+                background.position.y = background.position.y-size.y/2+helper.getTileSize().height/2; // plus tile.height/2
+                this.mapHolderObject.add( background );
+            }catch(error:any){
+                console.error(`Can't load background from ${(<MapRendererOptions>this.options).backgroundImgUrl}. Check if background image exists and is publicly accessible.`, error);
+            }            
         }
         
         // return this.renderablesFactory!.loadTemplates(["MAS", MapQuadRendererThreeJs.HELPERS_HIGHLIGHTER]).then(()=>{

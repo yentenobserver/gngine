@@ -41,6 +41,9 @@
   "author": "Maciej Grula",
   "license": "MIT",
   "dependencies": {},
+  "peerDependencies": {
+    "three":"^0.124.0"
+  },
   "devDependencies": {
     "@rollup/plugin-typescript": "^6.1.0",
     "@types/chai": "4.2.14",
