@@ -1,6 +1,6 @@
 {
   "name": "hexmap3d",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "3D HexMap using WebGL",
   "main": "dist/hexmap3d.umd.js",
   "types": "dist/hexmap3d.d.ts",
@@ -71,7 +71,7 @@
     "tslib": "^2.6.2",
     "typedoc": "~0.25.1",
     "typescript": "^5.1.6",
-    "@rollup/plugin-node-resolve":"^15.2.2"
+    "@rollup/plugin-node-resolve": "^15.2.2"
   },
   "nyc": {
     "check-coverage": true,
