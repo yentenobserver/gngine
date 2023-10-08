@@ -1,6 +1,6 @@
 import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material, CanvasTexture } from "three";
-import { TileBase } from "../../logic/map/common.notest";
-import { Actionable, SpecsBase, SpecsFlag, SpecsType, UnitBase } from "../../logic/units/unit";
+import { TileBase } from "gameyngine";
+import { Actionable, SpecsBase, SpecsFlag, SpecsType, UnitBase } from "gameyngine";
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
 import { DocumentCanvasContextProvider, MapPositionProvider, OrientationProvider } from "./providers";

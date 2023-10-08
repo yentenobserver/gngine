@@ -1,5 +1,5 @@
 import { Object3D, Mesh, Material } from "three";
-import { TileBase } from "../../logic/map/common.notest";
+import { TileBase } from "gameyngine";
 import { MapWritable } from "./map-renderers";
 import { MapPositionProvider } from "./providers";
 import { RenderablesFactory, Renderable, RenderableThreeJS, RenderablesThreeJSFactory, RenderableSpecification } from "./renderables-factory";

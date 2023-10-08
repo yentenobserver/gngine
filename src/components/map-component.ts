@@ -5,7 +5,7 @@ import { Playground, PlaygroundThreeJs, PlaygroundView, PlaygroundViewHudThreeJs
 import { MapHexFlatTopOddRendererThreeJs, MapQuadRendererThreeJs, MapRenderer } from "../gui/renderer/map-renderers";
 import { Vector3 } from 'three';
 import { HudComponentMapNavigationThreeJs, HudRendererThreeJs } from "../gui/renderer/hud-renderers";
-import { TileBase, TileBaseDirected } from "../logic/map/common.notest";
+import { TileBase, TileBaseDirected } from "gameyngine";
 import { Asset } from "../specification/assets";
 import { HexAreaMapIndicator3Js, QuadAreaMapIndicator3Js } from "../gui/renderer/map-indicators";
 

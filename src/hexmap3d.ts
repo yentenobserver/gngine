@@ -1,13 +1,13 @@
 
-import { TileBase } from "./logic/map/common.notest";
-import { ActionBase } from "./logic/units/actions/action";
-import { UnitPosition, UnitPositions } from "./logic/units/positions";
-import { SpecsBase, UnitBase } from "./logic/units/unit";
+import { TileBase } from "gameyngine";
+import { ActionBase } from "gameyngine";
+import { UnitPosition, UnitPositions } from "gameyngine";
+import { SpecsBase, UnitBase } from "gameyngine";
 import { Events } from "./util/eventDictionary.notest";
 import { EventEmitter } from "./util/events.notest";
 
-export { MapSquare, MapHexOddQ } from "./logic/map/map";
-export { CostCalculatorConst, CostCalculatorTerrain } from "./logic/map/costs"
+export { MapSquare, MapHexOddQ } from "gameyngine";
+export { CostCalculatorConst, CostCalculatorTerrain } from "gameyngine"
 
 export {Playground, PlaygroundInteractions, PlaygroundThreeJs, PlaygroundView, PlaygroundViewDefault, PlaygroundViewHudThreeJs, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJs, PlaygroundViewMainThreeJsDefault, PlaygroundViewThreeJS} from "./gui/playground/playground"
 

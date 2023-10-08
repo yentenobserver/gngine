@@ -1,5 +1,5 @@
 import { Object3D} from "three";
-import { TileBase } from "../../logic/map/common.notest";
+import { TileBase } from "gameyngine";
 
 import { EventEmitter } from "../../util/events.notest";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";

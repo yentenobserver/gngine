@@ -3,7 +3,7 @@ import { Camera, Mesh, Object3D, PlaneGeometry, Shape, ShapeGeometry, Vector2, V
 
 import { Material } from 'three';
 
-import { TileBase } from "../../logic/map/common.notest";
+import { TileBase } from "gameyngine";
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from '../../util/events.notest';
 import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS, TileInteractionOperation } from '../playground/playground';

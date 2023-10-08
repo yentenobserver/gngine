@@ -1,4 +1,4 @@
-import { TileBaseDirected } from "../logic/map/common.notest";
+import { TileBaseDirected } from "gameyngine";
 import { AssetReference } from "./assets";
 
 export interface MapSpecsOptions {

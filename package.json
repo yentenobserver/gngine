@@ -40,9 +40,11 @@
   ],
   "author": "Maciej Grula",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "gameyngine": "~0.1.4"
+  },
   "peerDependencies": {
-    "three":"^0.124.0"
+    "three": "^0.124.0"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^6.1.0",
@@ -67,7 +69,7 @@
     "three": "^0.137.4",
     "ts-node": "10.8.1",
     "tslib": "^2.6.2",
-    "typedoc": "^0.19.2",
+    "typedoc": "~0.25.1",
     "typescript": "^5.1.6"
   },
   "nyc": {
