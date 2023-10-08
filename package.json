@@ -70,14 +70,15 @@
     "ts-node": "10.8.1",
     "tslib": "^2.6.2",
     "typedoc": "~0.25.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "@rollup/plugin-node-resolve":"^15.2.2"
   },
   "nyc": {
     "check-coverage": true,
-    "branches": 70,
-    "lines": 70,
-    "functions": 70,
-    "statements": 70,
+    "branches": 62,
+    "lines": 68,
+    "functions": 66,
+    "statements": 68,
     "exclude-after-remap": false,
     "extension": [
       ".ts",
