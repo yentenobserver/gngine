@@ -378,6 +378,6 @@ Well ... many can go wrong, here are some most common problems and how to handle
 
 
 ## Version History
-* 0.2.8 - cleaned dependencies
+* 0.2.9 - cleaned dependencies & docs update
 * 0.2.7 - initial
 
