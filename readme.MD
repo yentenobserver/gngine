@@ -57,7 +57,7 @@ When correctly initialized and rendered map provides following user interactions
 
 - selecting tile (or multiselecting with SHIFT). Each tile or tiles clicked are highlighted with default highlight color.
 
-<img alt="drawing" width="200" src="docs/images/docs2.png"/>
+<img alt="drawing" width="200" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs2.png"/>
 
 - navigating (moving) along map by clicking tiles. After each click map pans toward the tile that was clicked and puts it in the center of the view.
 
@@ -197,7 +197,7 @@ export interface TileBase {
 
 It contain's tile location data in `x,y` coordinates (not real world location). `0,0` is the `upper/north` `left/west` corner. `1,1` is the `lower/south` `right/east` corner.
 
-<img alt="drawing" width="200" src="docs/images/docs3.png"/>
+<img alt="drawing" width="200" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs3.png"/>
 
 And here is the json data for tile `(1,0)`:
 ```typescript
@@ -229,11 +229,11 @@ Map renderer will browse all it's 3D assets in search of a matching asset that i
 
 In this instance the asset that represents `MAS_FORREST` was designed in 3D design program as:
 
-<img width="200" src="docs/images/docs4.png"/>
+<img width="200" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs4.png"/>
 
 And it is rendered on map accordingly:
 
-<img width="200" src="docs/images/docs5.png"/>
+<img width="200" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs5.png"/>
 
 Next we have assets specification:
 
@@ -349,15 +349,15 @@ Here is a sample walkthrough of the `MAS_MOUNTAIN` ThreeJS object in Google Sket
 
 The whole tile object name is `MAS_MOUNTAIN` and it's a group that contains two groups:
 
-<img width="400" src="docs/images/docs6.png"/>
+<img width="400" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs6.png"/>
 
 The tile part is a separated child group named `_TILE`:
 
-<img width="400" src="docs/images/docs7.png"/>
+<img width="400" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs7.png"/>
 
 And the child group, that stores "upper" part of the tile and holds actual mountains is named `ITEM`:
 
-<img width="400" src="docs/images/docs8.png"/>
+<img width="400" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs8.png"/>
 
 
 So this is a generic ThreeJs object structure that i keep in all tile assets:
