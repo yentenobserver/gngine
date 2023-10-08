@@ -376,3 +376,8 @@ Well ... many can go wrong, here are some most common problems and how to handle
 - map shows but the asset does not show. This is usually caused either by scale problem (object to large or to small) pivot point problem (ie. somehow center of the object is somewhere far so the object is not placed correctly where it supposed to be placed). In such case please make sure that in `RenderableSpecification` proper corrections are passed - if possible use autosettings i.e. setting `autoPivotCorrection = true` and `scaleCorrection.autoFitSize=1`
 - map shows but the asset is somehow misaligned or misplaced. You need to check in your graphics program where is pivot point located (in autopivot correction it is assumed that the pivot point is at local 0,0 of object which is usually bottom lower left point of object) and make sure that the tile 3D object is a valid square (in case of a quad map) oraz a valid hex shape. Make necessary corrections.
 
+
+## Version History
+* 0.2.8 - cleaned dependencies
+* 0.2.7 - initial
+
