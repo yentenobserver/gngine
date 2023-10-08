@@ -14,7 +14,7 @@ hexmap3d is a to-be tile game engine. As of today here are ready to use componen
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/examples/js/loaders/GLTFLoader.js"></script>
 <!-- this part MUST be after all global libs like THREE.js-->
-<script src="../../../dist/hexmap3d.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hexmap3d"></script>
 ```
 
 Then in Javascript initialize MapViewerComponent3JS within given HTMLCanvas element.
