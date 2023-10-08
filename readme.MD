@@ -53,7 +53,7 @@ When correctly initialized and rendered map provides following user interactions
 - showing selection indicator while hovering over mouse. The indicator "snaps" to each of the tiles that are below the cursor.
 - rotating and zooming map (with provided rotation controlls) 
 
-<img alt="drawing" width="200" src="docs/images/docs1.png"/>
+<img alt="drawing" width="200" src="https://github.com/yentenobserver/gngine/raw/master/docs/images/docs1.png"/>
 
 - selecting tile (or multiselecting with SHIFT). Each tile or tiles clicked are highlighted with default highlight color.
 
