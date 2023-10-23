@@ -604,7 +604,7 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
         // camera.position.set(0, -5, 4);
         camera.position.set(this.options.cameraPosition.x, this.options.cameraPosition.y, this.options.cameraPosition.z);
         // camera.position.set(0, -25, 4);
-        camera.lookAt(0,0,this.options.cameraParams.height);
+        camera.lookAt(0,0,this.options.cameraParams.height!);
         camera.name = PlaygroundViewMainThreeJsDefault.CAMERA_NAME;
         // for zoom in/zoom out this is important
         camera.up.set( 0, 0, 1 );

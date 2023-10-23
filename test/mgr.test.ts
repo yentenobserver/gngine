@@ -2636,13 +2636,14 @@ describe("Renderers",()=>{
                     load(){}
                 }
                 o1 = new THREE.Object3D();
-                o1.type = "OBJECT3D"
+
+                // o1.type = "OBJECT3D"
                 o1.name = "My fancy name"
-                o2 = new THREE.Object3D();
-                o2.type = "Scene"
+                o2 = new THREE.Scene();
+                // o2.type = "Scene"
                 o2.name = "Scene"
                 o3 = new THREE.Object3D();
-                o3.type = "Object3D"
+                // o3.type = "Object3D"
                 o3.name = "My other name is"
 
                 specification = {                    

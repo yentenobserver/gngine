@@ -698,7 +698,7 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
         
         // grid
         if((<MapRendererOptions>this.options).showGrid){
-            var geometry = new THREE.PlaneBufferGeometry( this.width, this.height, this.width, this.height );
+            var geometry = new THREE.PlaneGeometry( this.width, this.height, this.width, this.height );
             var material = new THREE.MeshBasicMaterial( { wireframe: true, opacity: 0.5, transparent: true } );
             var grid = new THREE.Mesh( geometry, material );
             // grid.rotation.order = 'YXZ';
