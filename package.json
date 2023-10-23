@@ -33,7 +33,7 @@
     "gltfhextiles": "tools/COLLADA2GLTF-v2.1.5-osx/COLLADA2GLTF-bin -i models/hex-tiles.dae src/samples/hexmap/assets/tiles.gltf",
     "remote-publish-patch": "npm install && npm update && npm run coverage && npm run build && npm version patch && npm publish && git push origin && git push origin --tags",
     "remote-publish-minor": "npm install && npm update && npm run coverage && npm run build && npm version minor && npm publish && git push origin && git push origin --tags",
-    "remote-publish-major": "npm install && npm update && npm run coverage && npm run build && npm version major && npm publish && git push origin && git push origin --tags",
+    "remote-publish-major": "npm install && npm update && npm run coverage && npm run build && npm version major && npm publish && git push origin && git push origin --tags"
   },
   "files": [
     "src",
