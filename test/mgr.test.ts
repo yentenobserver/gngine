@@ -30,7 +30,7 @@ import {UnitRenderablesThreeJSFactory} from '../src/gui/renderer/unit-renderer';
 
 import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadPositionProviderThreeJs, ScenePosition, TilePosition} from '../src/gui/renderer/providers';
 
-import { EventEmitter} from '../src/util/events.notest';
+import { EventEmitter} from 'eventemitter3';
 import { Events } from '../src/util/eventDictionary.notest';
 import { Material, Mesh, Vector2, Vector3 } from 'three';
 import { Renderable, RenderablesDefaultFactory, RenderableSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';

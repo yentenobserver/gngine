@@ -5,7 +5,7 @@ import { Material } from 'three';
 
 import { TileBase } from "gameyngine";
 import { Events } from '../../util/eventDictionary.notest';
-import { EventEmitter } from '../../util/events.notest';
+import { EventEmitter } from 'eventemitter3';
 import { EngineEvent, PlaygroundInteractionEvent, PlaygroundView, PlaygroundViewThreeJS, TileInteractionOperation } from '../playground/playground';
 import { HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvider, QuadOrientationProviderThreeJs, QuadPositionProviderThreeJs, ScenePosition, TilePosition } from './providers';
 import { Renderable, RenderablesThreeJSFactory, RenderableThreeJS } from './renderables-factory';

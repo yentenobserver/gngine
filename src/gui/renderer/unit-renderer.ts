@@ -1,7 +1,7 @@
 import { Object3D, SpriteMaterial, Sprite, ColorRepresentation, Box3, Material, CanvasTexture } from "three";
 import { TileBase } from "gameyngine";
 import { Actionable, SpecsBase, SpecsFlag, SpecsType, UnitBase } from "gameyngine";
-import { EventEmitter } from "../../util/events.notest";
+import { EventEmitter } from "eventemitter3";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
 import { DocumentCanvasContextProvider, MapPositionProvider, OrientationProvider } from "./providers";
 import { Renderable, RenderablesFactory, RenderablesThreeJSFactory, SpawnSpecification } from "./renderables-factory";

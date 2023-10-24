@@ -3,7 +3,7 @@ import { Object3D } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
 
 
-import { EventEmitter } from '../../util/events.notest';
+import { EventEmitter } from 'eventemitter3';
 import { EngineEvent, PlaygroundInteractionEvent, PlaygroundViewThreeJS } from '../playground/playground';
 import { Renderer } from './renderers';
 

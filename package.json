@@ -42,7 +42,8 @@
   "author": "Maciej Grula",
   "license": "MIT",
   "dependencies": {
-    "gameyngine": "~0.1.4"
+    "gameyngine": "~0.1.7",
+    "eventemitter3": "~5.0.1"
   },
   "peerDependencies": {
     "three": "^0.157.0"

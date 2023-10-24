@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Object3D, Vector3 } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
-import { EventEmitter } from '../../util/events.notest';
+import { EventEmitter } from 'eventemitter3';
 
 export interface PlaygroundOptions {
     enableScreenshots: boolean

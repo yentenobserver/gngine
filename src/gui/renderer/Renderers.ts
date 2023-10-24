@@ -1,5 +1,5 @@
 
-import { EventEmitter } from '../../util/events.notest';
+import { EventEmitter } from 'eventemitter3';
 import { PlaygroundView } from '../playground/playground';
 import { RenderablesFactory } from './renderables-factory';
 

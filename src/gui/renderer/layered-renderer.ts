@@ -1,7 +1,7 @@
 import { Object3D} from "three";
 import { TileBase } from "gameyngine";
 
-import { EventEmitter } from "../../util/events.notest";
+import { EventEmitter } from "eventemitter3";
 import { PlaygroundView, PlaygroundViewThreeJS } from "../playground/playground";
 import { MapPositionProvider, OrientationProvider } from "./providers";
 import { Renderable } from "./renderables-factory";
