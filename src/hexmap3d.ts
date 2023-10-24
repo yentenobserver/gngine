@@ -4,7 +4,7 @@ import { ActionBase } from "gameyngine";
 import { UnitPosition, UnitPositions } from "gameyngine";
 import { SpecsBase, UnitBase } from "gameyngine";
 import { Events } from "./util/eventDictionary.notest";
-import { EventEmitter } from "./util/events.notest";
+import { EventEmitter } from "eventemitter3";
 
 export { MapSquare, MapHexOddQ } from "gameyngine";
 export { CostCalculatorConst, CostCalculatorTerrain } from "gameyngine"

@@ -1,5 +1,5 @@
 import { RenderableSpecification, RenderablesFactory, RenderablesThreeJSFactory } from "../gui/renderer/renderables-factory";
-import { EventEmitter } from "../util/events.notest";
+import { EventEmitter } from "eventemitter3";
 import {Map} from "../specification/map-specs"
 import { Playground, PlaygroundThreeJs, PlaygroundView, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault } from "../gui/playground/playground";
 import { MapHexFlatTopOddRendererThreeJs, MapQuadRendererThreeJs, MapRenderer } from "../gui/renderer/map-renderers";
