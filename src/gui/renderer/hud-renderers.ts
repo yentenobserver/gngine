@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { Object3D } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
 
 
@@ -316,7 +315,7 @@ export class HudComponentMapNavigationThreeJs extends HudComponentMediumThreeJs{
      */
      build(): Promise<HudComponentThreeJs> {
         const that = this;
-        let hud = new Object3D();
+        let hud = new THREE.Object3D();
         hud.name = HudComponentMapNavigationThreeJs.NAME;
         return this.buttonsFactory.initialize().then(()=>{            
             const up = this.buttonsFactory.getInstance(0);            

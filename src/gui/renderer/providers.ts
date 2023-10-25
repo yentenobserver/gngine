@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { Vector2, Vector3 } from 'three';
 
 /**
  * Represents position in real world (scene) coordinates (x,y,z)
@@ -108,22 +107,22 @@ export class HexFlatTopOrientationProviderThreeJs implements OrientationProvider
         // objects by default face South (are aligned north->south)
         switch (direction) {
             case HexFlatTopDirections.N:                                                    
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-3*60));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-3*60));
               break;
             case HexFlatTopDirections.NE:            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(2*60));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(2*60));
               break;
             case HexFlatTopDirections.NW:
             //   object3D.rotateZ(THREE.MathUtils.degToRad(120));            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-2*60));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-2*60));
               break;
             case HexFlatTopDirections.SE:
             //   object3D.rotateZ(THREE.MathUtils.degToRad(60));                            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(1*60));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(1*60));
               break;
             case HexFlatTopDirections.SW:
             //   object3D.rotateZ(THREE.MathUtils.degToRad(300));                            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-1*60));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-1*60));
               break;            
             default:
                 // default is S south
@@ -150,13 +149,13 @@ export class QuadOrientationProviderThreeJs implements OrientationProvider{
         // objects by default face West (are aligned east->west)
         switch (direction) {
             case QuadDirections.N:                                                       
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-4*45));                
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-4*45));                
               break;
             case QuadDirections.E:            
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(2*45));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(2*45));
               break;
             case QuadDirections.W:           
-                object3D.rotateOnWorldAxis(new Vector3(0,0,1), THREE.MathUtils.degToRad(-2*45));
+                object3D.rotateOnWorldAxis(new THREE.Vector3(0,0,1), THREE.MathUtils.degToRad(-2*45));
               break;            
             default:
                 // default is S south
@@ -197,7 +196,7 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
         }
     }
     scenePositionToYX(_sceneX: number, _sceneY: number): TilePosition {
-        const qr = this._xyToQR(new Vector2(_sceneX, -_sceneY)); // axial coords , minus as we are against y axis
+        const qr = this._xyToQR(new THREE.Vector2(_sceneX, -_sceneY)); // axial coords , minus as we are against y axis
         const qr_offset = this._axial_to_oddq(qr);
         return {
             y: qr_offset.r,
@@ -207,7 +206,7 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
 
 
 
-    _xyToQR(point: Vector2):{q: number, r:number}{
+    _xyToQR(point: THREE.Vector2):{q: number, r:number}{
         var q = ( 2./3 * point.x                        ) / this._size
         var r = (-1./3 * point.x  +  Math.sqrt(3)/3 * point.y) / this._size
         // var r = (-1./3 * point.x  -  Math.sqrt(3)/3 * point.y) / this._size
@@ -221,10 +220,10 @@ export class HexFlatTopPositionProviderThreeJs implements MapPositionProvider {
         }
     }        
 
-    _qrToXY(q:number, r:number):Vector2{
+    _qrToXY(q:number, r:number):THREE.Vector2{
         const xCenter = q*this._width*3/4;
         const yCenter = q%2==1?-r*this._height-this._height/2:-r*this._height; // here we go negative in y (map left top hex(0,0) is at 0,0)
-        return new Vector2(xCenter, yCenter);
+        return new THREE.Vector2(xCenter, yCenter);
     }
 
     // function oddq_offset_to_pixel(hex):

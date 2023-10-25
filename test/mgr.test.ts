@@ -32,7 +32,7 @@ import {HexFlatTopPositionProviderThreeJs, MapPositionProvider, OrientationProvi
 
 import { EventEmitter} from 'eventemitter3';
 import { Events } from '../src/util/eventDictionary.notest';
-import { Material, Mesh, Vector2, Vector3 } from 'three';
+
 import { Renderable, RenderablesDefaultFactory, RenderableSpecification, RenderablesThreeJSFactory, RenderableTemplateThreeJS } from '../src/gui/renderer/renderables-factory';
 
 import {LayeredRenderer3JS} from "../src/gui/renderer/layered-renderer";
@@ -479,7 +479,7 @@ describe('Playground', () => {
                 }
                 playgroundView1.scene = new THREE.Scene();
                 s1 = sinon.stub(pointerEvent,"preventDefault");
-                s2 = sinon.stub(playgroundView1,"_pickScenePosition").returns(new Vector2(1,1));
+                s2 = sinon.stub(playgroundView1,"_pickScenePosition").returns(new THREE.Vector2(1,1));
                 s3 = sinon.stub(playgroundView1._raycaster,"setFromCamera");
                 s4 = sinon.stub(playgroundView1._raycaster,"intersectObjects");
                 s5 = sinon.stub(playgroundView1,"_findClosestObjectMatching");
@@ -735,7 +735,7 @@ describe('Playground', () => {
                 s1 = sinon.stub(p1,"pickObjectOfNames").returns({
                     object: new THREE.Object3D(),
                     hierarchy: [],
-                    scenePos: new Vector3()
+                    scenePos: new THREE.Vector3()
                 });
                 s2 = sinon.stub(p2,"pickObjectOfNames");
                 s3 = sinon.stub(messageBusMocked,"emit");
@@ -946,7 +946,7 @@ describe("Renderers",()=>{
                     const updatedBBox = new THREE.Box3().setFromObject(c1.object!);
                     const size = new THREE.Vector3();
                     updatedBBox.getSize(size);
-                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(4,4,4)));
+                    return expect(JSON.stringify(size)).eq(JSON.stringify(new THREE.Vector3(4,4,4)));
                 })
                 it("resizes object accordingly to size percentage - size is updated",()=>{
                     c1.resize();                
@@ -967,7 +967,7 @@ describe("Renderers",()=>{
                     const updatedBBox = new THREE.Box3().setFromObject(c2.object!);
                     const size = new THREE.Vector3();
                     updatedBBox.getSize(size);
-                    return expect(JSON.stringify(size)).eq(JSON.stringify(new Vector3(4,4,4)));
+                    return expect(JSON.stringify(size)).eq(JSON.stringify(new THREE.Vector3(4,4,4)));
                 })
             })
         })
@@ -1180,31 +1180,31 @@ describe("Renderers",()=>{
                 //_getCameraDirectionFromPoint
                 
                 camera.position.set(1,1,1);
-                const point = new Vector3(0,0,0);
+                const point = new THREE.Vector3(0,0,0);
                 map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(90));
                 return expect(sx1.callCount).eq(1);
             })
             it("sets camera position accordingly - turn left 90 degs",()=>{                
                 camera.position.set(0,1,0);
-                const point = new Vector3(0,0,0);
+                const point = new THREE.Vector3(0,0,0);
                 map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(90));
                 return expect(JSON.stringify(camera.position)).eq(JSON.stringify({x: -1, y:1.2246467991473532e-16, z:0}))
             })
             it("sets camera position accordingly - turn right 90 degs",()=>{                
                 camera.position.set(0,1,0);
-                const point = new Vector3(0,0,0);
+                const point = new THREE.Vector3(0,0,0);
                 map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(-90));
                 return expect(JSON.stringify(camera.position)).eq(JSON.stringify({x: 1, y:0, z:0}))
             })
             it("sets camera position accordingly - turn right 180 degs",()=>{                
                 camera.position.set(0,1,0);
-                const point = new Vector3(0,0,0);
+                const point = new THREE.Vector3(0,0,0);
                 map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(-180));
                 return expect(JSON.stringify(camera.position)).eq(JSON.stringify({x: 6.123233995736766e-17, y:-1, z:0}))
             })
             it("sets camera look at accordingly", ()=>{
                 camera.position.set(1,1,1);
-                const point = new Vector3(0,0,0);
+                const point = new THREE.Vector3(0,0,0);
                 map._rotateCameraAroundPoint(camera, point, THREE.MathUtils.degToRad(90));
                 return expect(sx2.getCall(0).args[0]).eq(point);
 
@@ -1773,7 +1773,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -1791,7 +1791,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -1809,7 +1809,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -1827,7 +1827,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -1845,7 +1845,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -1863,7 +1863,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -1881,7 +1881,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[0];
@@ -1899,7 +1899,7 @@ describe("Renderers",()=>{
                     type: Events.INTERACTIONS.HUD,
                     viewName: "",
                     worldPosition: {},
-                    scenePosition: new Vector2(2,3)
+                    scenePosition: new THREE.Vector2(2,3)
                 }
                 c._onEvent(event);
                 const arg = s3.getCall(0).args[1];
@@ -2261,7 +2261,7 @@ describe("Renderers",()=>{
                 (<RenderablesThreeJSFactory>rf2).templates.set(T1,template3);
                 (<RenderablesThreeJSFactory>rf2).templates.set(T2,template4);
                 s3 = sinon.stub((<RenderablesThreeJSFactory>rf2),"_cloneMaterials");     
-                s4 = sinon.stub(o1.scale, "set").returns(new Vector3(0,0,0)); 
+                s4 = sinon.stub(o1.scale, "set").returns(new THREE.Vector3(0,0,0)); 
             })
             afterEach(()=>{
                 s1.restore();
@@ -2393,14 +2393,14 @@ describe("Renderers",()=>{
         describe("_freeTemplatesMemory",()=>{
             let object3D: THREE.Object3D;
             let geometry: THREE.BoxGeometry;
-            let mesh: Mesh;
+            let mesh: THREE.Mesh;
             let sx1: SinonSpy;
             let s2: SinonStub;
 
             beforeEach(()=>{
                 object3D = new THREE.Object3D();
                 geometry = new THREE.BoxGeometry();
-                mesh = new Mesh(geometry);
+                mesh = new THREE.Mesh(geometry);
                 object3D.add(mesh);
 
                 l = {
@@ -2665,7 +2665,7 @@ describe("Renderers",()=>{
         describe("_cloneMaterials",()=>{
             let material:THREE.MeshBasicMaterial;
             let material2:THREE.MeshBasicMaterial;
-            let o4: Mesh;
+            let o4: THREE.Mesh;
 
             beforeEach(()=>{
                 l = {
@@ -2710,7 +2710,7 @@ describe("Renderers",()=>{
             it("clones all materials if there are more than one",()=>{
                 (<RenderablesThreeJSFactory>rf)._cloneMaterials(<THREE.Mesh>o4);
 
-                const materials = o4.material as Material[];
+                const materials = o4.material as THREE.Material[];
 
                 const different = materials[0] != material && materials[1] != material2;
 

@@ -3,7 +3,8 @@ import { EventEmitter } from "eventemitter3";
 import {Map} from "../specification/map-specs"
 import { Playground, PlaygroundThreeJs, PlaygroundView, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault } from "../gui/playground/playground";
 import { MapHexFlatTopOddRendererThreeJs, MapQuadRendererThreeJs, MapRenderer } from "../gui/renderer/map-renderers";
-import { Vector3 } from 'three';
+
+import * as THREE from 'three'
 import { HudComponentMapNavigationThreeJs, HudRendererThreeJs } from "../gui/renderer/hud-renderers";
 import { TileBase, TileBaseDirected } from "gameyngine";
 import { Asset } from "../specification/assets";
@@ -119,7 +120,7 @@ export class MapViewerComponent3JS extends MapViewerComponent {
                 far: 1000,
                 height: 0                             
             },
-            cameraPosition: new Vector3(0,-5,4)
+            cameraPosition: new THREE.Vector3(0,-5,4)
         }        
         let mainView = new PlaygroundViewMainThreeJsDefault(emitter, viewOptions); 
         await p.attach(mainView);        

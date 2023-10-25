@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { Object3D, Vector3 } from 'three';
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from 'eventemitter3';
 
@@ -270,7 +269,7 @@ export interface PlaygroundView3D {
 interface PickResultThreeJs {
     object: THREE.Object3D,
     hierarchy: THREE.Object3D[], // [n-1] object itself, [0] - parent of all parents
-    scenePos: Vector3
+    scenePos: THREE.Vector3
 }
 
 export interface MatchingThreeJs {
@@ -371,7 +370,7 @@ export abstract class PlaygroundViewThreeJS extends PlaygroundView implements Pl
         // if(item.type.toUpperCase()=='OBJECT3D'&&item.parent&&item.parent.name&&item.parent.name.toUpperCase()=='THE_MAP')
         //     return item;
         
-        item.traverseAncestors((parent:Object3D)=>{
+        item.traverseAncestors((parent:THREE.Object3D)=>{
             ancestors.unshift(parent);
         })
 
@@ -486,7 +485,7 @@ export abstract class PlaygroundViewHudThreeJs extends PlaygroundViewThreeJS imp
 
 }
 export interface OptionsPlaygroundViewThreeJS {
-    cameraPosition: Vector3,    
+    cameraPosition: THREE.Vector3,    
     cameraParams: {        
         fov?: number, // for perspective
         near: number, // for perspective and ortographic
@@ -513,7 +512,7 @@ export abstract class PlaygroundViewMainThreeJs extends PlaygroundViewThreeJS im
                 far: 1000,
                 height: 0                             
             },
-            cameraPosition: new Vector3(0,-5,4)
+            cameraPosition: new THREE.Vector3(0,-5,4)
         }
     }             
 }
@@ -540,7 +539,7 @@ export class PlaygroundViewHudThreeJsDefault extends PlaygroundViewHudThreeJs{
                 far: 1000,
                 sizing: 20
             },
-            cameraPosition: new Vector3(0,0,1)
+            cameraPosition: new THREE.Vector3(0,0,1)
         }                
         this._setupScene();
     }

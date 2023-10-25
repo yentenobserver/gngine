@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+// import commonjs from '@rollup/plugin-commonjs';
 
 export default {
   input: 'src/hexmap3d.ts',
@@ -12,9 +13,10 @@ export default {
       file: 'dist/hexmap3d.umd.js',
       format: 'umd',
       name: 'hexmap3d',
-      globals: { three: 'THREE' }
+      globals: { three: 'THREE' },      
     },
   ],
   external:['three'],
+  // plugins: [nodeResolve(), commonjs(), typescript()],
   plugins: [nodeResolve(), typescript()],
 };

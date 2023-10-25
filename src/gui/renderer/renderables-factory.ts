@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { Box3, Material, Object3D, Vector3 } from 'three';
 
 export interface Renderable{
     id: string,
@@ -113,9 +112,9 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         this.templates = new Map<string, RenderableTemplateThreeJS>();        
     }
 
-    _scale(objectName: string, object3D:Object3D, scaleSpecs?:RenderableSpecificationScale){
-        const bbBox = new Box3();
-        const sizeVector = new Vector3();                
+    _scale(objectName: string, object3D:THREE.Object3D, scaleSpecs?:RenderableSpecificationScale){
+        const bbBox = new THREE.Box3();
+        const sizeVector = new THREE.Vector3();                
         bbBox.setFromObject(object3D).getSize(sizeVector);                
         // console.log(`${objectName}  Auto Scale Correction - initial size ${JSON.stringify(sizeVector)}`)
         // console.log(`Initial scale: ${JSON.stringify(object3D.scale)}`)
@@ -205,8 +204,8 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                     throw new Error(`Can't apply pivot correction for specification ${objectName}`);
                 }                
             }else if(specification.autoPivotCorrection){
-                const bbBox = new Box3();
-                const sizeVector = new Vector3();                
+                const bbBox = new THREE.Box3();
+                const sizeVector = new THREE.Vector3();                
                 bbBox.setFromObject(cloned).getSize(sizeVector);   
                                 
                 // console.log(`${objectName} Auto Pivot Correction size: ${JSON.stringify(sizeVector)} pos: ${JSON.stringify(cloned.position)}`)
@@ -225,8 +224,8 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             
             wrap.add(cloned);
             result = wrap;
-            const bbBox = new Box3();
-            const sizeVector = new Vector3();                
+            const bbBox = new THREE.Box3();
+            const sizeVector = new THREE.Vector3();                
             bbBox.setFromObject(wrap).getSize(sizeVector);   
 
             // console.log(`${objectName} Final renderable data. Position object: ${JSON.stringify(cloned.position)} Position wrap: ${JSON.stringify(wrap.position)}. Size: ${JSON.stringify(sizeVector)}`)
@@ -247,12 +246,12 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                         object3D.geometry.dispose();
                         
                         if(Array.isArray(object3D.material)){
-                            const materials = object3D.material as Material[];
+                            const materials = object3D.material as THREE.Material[];
                             materials.forEach((material)=>{
                                 material.dispose();    
                             })
                         }else{
-                            const material =  object3D.material as Material;
+                            const material =  object3D.material as THREE.Material;
                             material.dispose()
                         }                
                         
@@ -302,12 +301,12 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
         object3D.geometry.dispose();
         
         if(Array.isArray(object3D.material)){
-            const materials = object3D.material as Material[];
+            const materials = object3D.material as THREE.Material[];
             materials.forEach((material)=>{
                 material.dispose();    
             })
         }else{
-            const material =  object3D.material as Material;
+            const material =  object3D.material as THREE.Material;
             material.dispose()
         }                
         
@@ -366,7 +365,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
                 // load component templates
 
                 // traverse all scene descendants
-                const searchRoot:Object3D[] = []
+                const searchRoot:THREE.Object3D[] = []
 
                 gltf.scene.traverse((item:THREE.Object3D)=>{
                     searchRoot.push(item);
@@ -418,7 +417,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
 
             loader.parse( json, (object:any)=>{
                 // traverse all descendants
-                const searchRoot:Object3D[] = []
+                const searchRoot:THREE.Object3D[] = []
                 searchRoot.push(object);
                 
                 object.traverse((item:THREE.Object3D)=>{
@@ -473,12 +472,12 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             if(Array.isArray(parent.material)){
                 clonedMaterial = [];
                 parent.material.forEach((material)=>{
-                    const originalMaterial: Material = material as Material; 
+                    const originalMaterial: THREE.Material = material as THREE.Material; 
                     clonedMaterial.push(originalMaterial.clone()); 
                 })
 
             }else{
-                const originalMaterial: Material = parent.material as Material;
+                const originalMaterial: THREE.Material = parent.material as THREE.Material;
                 clonedMaterial = originalMaterial.clone();    
             }
             

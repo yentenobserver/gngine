@@ -1,8 +1,4 @@
 import * as THREE from 'three'
-import { Camera, Mesh, Object3D, PlaneGeometry, Shape, ShapeGeometry, Vector2, Vector3 } from 'three';
-
-import { Material } from 'three';
-
 import { TileBase } from "gameyngine";
 import { Events } from '../../util/eventDictionary.notest';
 import { EventEmitter } from 'eventemitter3';
@@ -294,8 +290,8 @@ export abstract class MapRendererThreeJs extends MapRenderer{
             zoomLevel: 10 ,
             current: {
                 tile: undefined,
-                tileWorldPos: new Vector3(this.yxToScenePosition(0,0).x, this.yxToScenePosition(0,0).y,0),
-                tileLocalPos: new Vector3(this.yxToScenePosition(0,0).x, this.yxToScenePosition(0,0).y,0),
+                tileWorldPos: new THREE.Vector3(this.yxToScenePosition(0,0).x, this.yxToScenePosition(0,0).y,0),
+                tileLocalPos: new THREE.Vector3(this.yxToScenePosition(0,0).x, this.yxToScenePosition(0,0).y,0),
             },
             
             lookAt: new THREE.Vector3(0,0,0),
@@ -324,12 +320,12 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         object3D.geometry.dispose();
         
         if(Array.isArray(object3D.material)){
-            const materials = object3D.material as Material[];
+            const materials = object3D.material as THREE.Material[];
             materials.forEach((material)=>{
                 material.dispose();    
             })
         }else{
-            const material =  object3D.material as Material;
+            const material =  object3D.material as THREE.Material;
             material.dispose()
         }                
         
@@ -351,7 +347,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         indicator.forTiles(tiles, color);
     }
 
-    _getMapObject():Object3D{
+    _getMapObject():THREE.Object3D{
         let map:THREE.Object3D|undefined;
 
         // find the map object in scene
@@ -403,7 +399,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
 
     }    
 
-    _getCameraDirectionFromPoint(camera: Camera, point: Vector3){
+    _getCameraDirectionFromPoint(camera: THREE.Camera, point: THREE.Vector3){
         // Create a vector from the camera position to the point of interest
         const direction = new THREE.Vector3()
         // direction.subVectors(point, camera.position)
@@ -432,7 +428,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     //     camera.lookAt(point);
     //   }
 
-    _rotateCameraAroundPoint(camera:Camera, point: Vector3, angle: number) {
+    _rotateCameraAroundPoint(camera:THREE.Camera, point: THREE.Vector3, angle: number) {
 
         const npoint = point.clone().setZ(camera.position.z);
 
@@ -469,7 +465,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
     // axis - the axis of rotation (normalized THREE.Vector3)
     // theta - radian value of rotation
     // pointIsWorld - boolean indicating the point is in world coordinates (default = false)
-    _rotateAboutPoint(obj:Object3D, point: Vector3, axis: Vector3, theta: number, pointIsWorld:boolean){
+    _rotateAboutPoint(obj:THREE.Object3D, point: THREE.Vector3, axis: THREE.Vector3, theta: number, pointIsWorld:boolean){
         pointIsWorld = (pointIsWorld === undefined)? false : pointIsWorld;
 
         if(pointIsWorld){
@@ -561,7 +557,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         // // const localPosition = object.position;
         // const localPosition = objectWorldPosition;
         const pos = this.yxToScenePosition(tile.y, tile.x);
-        const worldPosition = new Vector3(pos.x, pos.y, pos.z)
+        const worldPosition = new THREE.Vector3(pos.x, pos.y, pos.z)
 
         // console.log(">>>>>>>>>>>")
         // console.log("tile", localPosition)
@@ -572,7 +568,7 @@ export abstract class MapRendererThreeJs extends MapRenderer{
         const to = worldPosition.clone();
         to.z = 0;
 
-        const translation = new Vector3();
+        const translation = new THREE.Vector3();
         translation.subVectors(to, from!)
 
         this.view!.camera.position.add(translation)
@@ -628,8 +624,8 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
      * positioning hexes on the plance
      * @returns {ShapeGeometry} threejs geometry of the plane with hexes generated
      */
-    getGeometry():ShapeGeometry{
-        const shapes: Shape[]=[];
+    getGeometry():THREE.ShapeGeometry{
+        const shapes: THREE.Shape[]=[];
 
         for(let q=0; q<this._cols; q++){
             for(let r=0; r<this._rows; r++){
@@ -640,8 +636,8 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
 
                 // console.log(q,r, xCenter, yCenter, this._width, this._height, size);
 
-                const hexShape = new Shape();
-                const points = this._flat_hex_points(new Vector2(xCenter,yCenter),this._size);
+                const hexShape = new THREE.Shape();
+                const points = this._flat_hex_points(new THREE.Vector2(xCenter,yCenter),this._size);
                 hexShape.moveTo(points[0].x, points[0].y);
                 for(let i=1; i<6; i++){
                     hexShape.lineTo(points[i].x, points[i].y);
@@ -652,12 +648,12 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
             }
         }
 
-        const geometry = new ShapeGeometry(shapes);  
+        const geometry = new THREE.ShapeGeometry(shapes);  
         return geometry;
     }
 
-    _flat_hex_points(center:Vector2, size:number):Vector2[]{
-        const points:Vector2[] = [];
+    _flat_hex_points(center:THREE.Vector2, size:number):THREE.Vector2[]{
+        const points:THREE.Vector2[] = [];
 
         for(let i=0; i<6; i++){
             points.push(this._flat_hex_corner_point(center, size, i));
@@ -671,10 +667,10 @@ export class PlaneHexFlatTopOddGeometryThreeJsHelper {
      * @param i hex cornerfrom 0 to 5
      * @returns 
      */
-    _flat_hex_corner_point(center:Vector2, size:number, i: number):Vector2{
+    _flat_hex_corner_point(center:THREE.Vector2, size:number, i: number):THREE.Vector2{
         var angle_deg = 60 * i;
         var angle_rad = Math.PI / 180 * angle_deg;
-        return new Vector2(center.x + size * Math.cos(angle_rad), center.y + size * Math.sin(angle_rad));
+        return new THREE.Vector2(center.x + size * Math.cos(angle_rad), center.y + size * Math.sin(angle_rad));
     }
     
 }
@@ -906,15 +902,15 @@ export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
                 const helper = new PlaneHexFlatTopOddGeometryThreeJsHelper(this.width,this.height,1);
                 var geometry = helper.getGeometry();
                 geometry.computeBoundingBox();
-                let size = new Vector3();
+                let size = new THREE.Vector3();
                 geometry.boundingBox?.getSize(size);
                 // console.log(JSON.stringify(size));
     
-                const backgroundGeometry = new PlaneGeometry(size.x, size.y);
+                const backgroundGeometry = new THREE.PlaneGeometry(size.x, size.y);
                 const material = new THREE.MeshBasicMaterial({
                     map: texture,
                 });
-                const background = new Mesh(backgroundGeometry, material);
+                const background = new THREE.Mesh(backgroundGeometry, material);
                 background.name = "MAP_IMAGE_BACKGROUND"
                 background.position.z = -0.02
                 background.position.x = background.position.x+size.x/2-helper.getTileSize().width/2; // minus tile.width/2
