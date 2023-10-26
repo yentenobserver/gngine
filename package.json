@@ -19,7 +19,7 @@
     }
   },
   "scripts": {
-    "docs": "typedoc && touch docs/.nojekyll",
+    "docs": "rimraf docs/* && typedoc --entryPointStrategy expand ./src && touch docs/.nojekyll",
     "build:types": "tsc -t esnext --moduleResolution node -d --emitDeclarationOnly --outFile dist/hexmap3d.d.ts src/hexmap3d.ts",
     "build:js": "rollup -c rollup.config.js",
     "build:minjs:umd": "terser dist/hexmap3d.umd.js --compress --mangle > dist/hexmap3d.umd.min.js",
