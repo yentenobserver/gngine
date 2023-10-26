@@ -877,6 +877,9 @@ export class MapQuadRendererThreeJs extends MapRendererThreeJs{
     
 }
 
+/**
+ * ThreeJs implementation of the hexagonal map renderer. It renders hexagonal flat top odd map.
+ */
 export class MapHexFlatTopOddRendererThreeJs extends MapQuadRendererThreeJs{
     async initialize(): Promise<void> {
         
