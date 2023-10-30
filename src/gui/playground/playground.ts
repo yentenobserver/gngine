@@ -176,6 +176,8 @@ export class PlaygroundThreeJs extends Playground{
 
     /* istanbul ignore next */
     _setupRenderer(canvasElement:any):void{
+        if(!canvasElement)
+            throw new Error(`Canvas html element must be provided`);
         if(canvasElement.nodeName!="CANVAS")
             throw new Error(`Invalid canvas html element`);
 
