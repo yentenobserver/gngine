@@ -128,9 +128,14 @@ export abstract class MapComponent3JS extends MapComponent {
         const hudRenderer = new HudRendererThreeJs(emitter);
         hudRenderer.setView(hudView);
 
-        const navComp = new HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
-        await navComp.build();
-        hudRenderer.addComponent(navComp); 
+        try{
+            const navComp = new HudComponentMapNavigationThreeJs("./assets/map-navigations.png");
+            await navComp.build();
+            hudRenderer.addComponent(navComp); 
+        }catch(error:any){
+            console.warn(`Error instantiating map navigations controller, check that navigation texture asset is properly installed as "assets/map-navigations.png"`);
+        }
+        
 
 
         return {
