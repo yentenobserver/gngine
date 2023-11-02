@@ -157,6 +157,8 @@ export abstract class MapComponent3JS extends MapComponent {
             renderer = new MapHexFlatTopOddRendererThreeJs(widthHeight[0],widthHeight[1], emitter, map.specs.options)            
         }else if(map.specs.kind == "QuadTile"){
             renderer = new MapQuadRendererThreeJs(widthHeight[0],widthHeight[1], emitter, map.specs.options)
+        }else{
+            throw new Error(`Incompatibile map kind, one of HexTile or QuadTile is supported`)
         }
         
         renderer!.setRenderablesFactory(assetFactory);
@@ -214,7 +216,7 @@ export abstract class MapComponent3JS extends MapComponent {
             await this.registerAsset(asset);
         this._renderer!.put(tile, tile.d);
     }
-    
+
     async tileHighlight(tiles: TileBase[], indicatorName: string, color: string){
         this._renderer!.highlightTiles(tiles, indicatorName, color);
     }

@@ -48,7 +48,7 @@ describe("High Level Map Components",()=>{
                 specs = {
                     address: "",
                     id: "1",
-                    kind: "Hex",
+                    kind: "HexTile",
                     latlon: ["2","2"],
                     name:"name",
                     size:"2x2",
