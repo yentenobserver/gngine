@@ -115,6 +115,15 @@ describe("High Level Map Components",()=>{
                 expect(s1.callCount).eq(1);
                 expect(s1.getCall(0).args[0]).eq("H3D_Highlighter");
             });
+            it("autopopulates necessary number of tile elements",()=>{
+                const tiles = mapComponent._tiles(specs);
+                expect(tiles.length).eq(4);
+            })
+            it("autopopulates tiles with TRANSPARENT tile with UNDEFINED kind",()=>{
+                const tiles = mapComponent._tiles(specs);
+                expect(tiles[1].r).eq("MAS_TRANSPARENT_TILE");
+                expect(tiles[1].t.kind).eq("UNDEFINED")
+            })
         })
     })
 })
