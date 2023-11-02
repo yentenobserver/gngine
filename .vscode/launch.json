@@ -6,6 +6,9 @@
         "request": "launch",
         "name": "Tests All",
         "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+        "env": {
+            "TS_NODE_PROJECT":"tsconfig-test.json"
+        },        
         "args": [
             "-r",
             "ts-node/register",

@@ -6,9 +6,10 @@ import { MapHexFlatTopOddRendererThreeJs, MapQuadRendererThreeJs, MapRenderer } 
 
 import * as THREE from 'three'
 import { HudComponentMapNavigationThreeJs, HudRendererThreeJs } from "../gui/renderer/hud-renderers";
-import { TileBase, TileBaseDirected } from "gameyngine";
+import { MapSpecs, TileBase, TileBaseDirected } from "gameyngine";
 import { Asset } from "../specification/assets";
 import { HexAreaMapIndicator3Js, QuadAreaMapIndicator3Js } from "../gui/renderer/map-indicators";
+import { RENDERABLES } from "../gui/renderer/assets/threejs3d.notest";
 
 export abstract class Component {
     emitter:EventEmitter;
@@ -19,7 +20,7 @@ export abstract class Component {
 }
 
 
-export abstract class MapViewerComponent extends Component {
+export abstract class MapComponent extends Component {
     _map?: Map;
     _views: {
         map?: PlaygroundView,
@@ -70,24 +71,18 @@ export abstract class MapViewerComponent extends Component {
     
 }
 
-export class MapViewerComponent3JS extends MapViewerComponent {
+export abstract class MapComponent3JS extends MapComponent {
     _externalLoader: any;
 
     constructor(emitter:EventEmitter){
         super(emitter);
     }
 
-    /**
-     * ThreeJs Map viewer component for given map
-     * @param mapSpecification map data
-     * @param tileSpecifications threejs renderables' specifications that can be used to render map data (it is assumed that all tile.r are in the tile specifications provided)
-     * @param canvasElement target html canvas element where map viewer will be loaded
-     * @param emitter receives map events
-     * @param externalLoader (optional) required, when tile specification uses other format than threejs json format
-     * @returns 
-     */
-    static async getInstance(map:Map, tileSpecifications:RenderableSpecification[], canvasElement:any, emitter:EventEmitter, externalLoader:any){
-        const component = new MapViewerComponent3JS(emitter);
+
+
+    async _prepare(map:Map, tileSpecifications:RenderableSpecification[], canvasElement:any, emitter:EventEmitter, externalLoader:any):Promise<MapComponent3JS>{
+        let component = this;
+        
         component._externalLoader = externalLoader;
         component._map = map;
         const playgroundAndView = await component._preparePlaygroundAndView(canvasElement, emitter);
@@ -106,6 +101,7 @@ export class MapViewerComponent3JS extends MapViewerComponent {
         return component;
     }
    
+    /* istanbul ignore next */
     async _preparePlaygroundAndView(canvasElement:any, emitter:EventEmitter):Promise<{playground: Playground, mapView: PlaygroundView, hudView: PlaygroundView}>{
         const playgroundOptions = {
             enableScreenshots: true
@@ -144,12 +140,14 @@ export class MapViewerComponent3JS extends MapViewerComponent {
         }
     }
 
+    /* istanbul ignore next */
     async _prepareFactory(tileSpecifications: RenderableSpecification[]):Promise<RenderablesFactory>{        
         let factory = new RenderablesThreeJSFactory(this._externalLoader);            
         await factory.setSpecifications(tileSpecifications);
         return factory;
     }
 
+    /* istanbul ignore next */
     async _prepareRenderer(map: Map, assetFactory: RenderablesFactory, mapView: PlaygroundView, emitter:EventEmitter):Promise<MapRenderer>{
         const widthHeight = map.specs.size.split("x").map((item)=>{return parseInt(item.trim())});
         // prepare Renderer
@@ -209,4 +207,103 @@ export class MapViewerComponent3JS extends MapViewerComponent {
         const indicator =  this._map?.specs.kind == "HexTile"?await HexAreaMapIndicator3Js.create(this._renderer!):await QuadAreaMapIndicator3Js.create(this._renderer!)
         this._renderer!.registerIndicator(name, indicator);
     }
+}
+
+export class MapViewerComponent3JS extends MapComponent3JS {
+    constructor(emitter:EventEmitter){
+        super(emitter);
+    }
+    /* istanbul ignore next */
+    /**
+     * ThreeJs Map viewer component for given map
+     * @param mapSpecification map data
+     * @param tileSpecifications threejs renderables' specifications that can be used to render map data (it is assumed that all tile.r are in the tile specifications provided)
+     * @param canvasElement target html canvas element where map viewer will be loaded
+     * @param emitter receives map events
+     * @param externalLoader (optional) required, when tile specification uses other format than threejs json format
+     * @returns 
+     */
+    static async getInstance(map:Map, tileSpecifications:RenderableSpecification[], canvasElement:any, emitter:EventEmitter, externalLoader:any):Promise<MapComponent3JS>{
+        const component = new MapViewerComponent3JS(emitter);
+        return component._prepare(map, tileSpecifications, canvasElement, emitter, externalLoader);
+    }
+}
+
+export interface MapBaseOptions{
+    dimensions: string, // widthxheight map dimensions
+    backgroundImgUrl?: string // optional, image to be shown in map background
+}
+
+export class MapHexBaseComponent3JS extends MapComponent3JS {
+    constructor(emitter:EventEmitter){
+        super(emitter);
+    }
+    /* istanbul ignore next */
+    static async getInstance(specs:MapSpecs, canvasElement:any, emitter:EventEmitter):Promise<MapHexBaseComponent3JS>{
+        const component = new MapHexBaseComponent3JS(emitter);
+        await component._internalPrepare(specs, canvasElement, emitter);
+        return component;
+    }
+
+    async _internalPrepare(specs:MapSpecs, canvasElement:any, emitter:EventEmitter){
+        const mapDefaults = this._mapDefaults(specs);
+        await this._prepare(mapDefaults, this._tileRenderables(), canvasElement, emitter, {});
+        await this.registerIndicator("H3D_Highlighter");
+        return this;
+    }
+
+    _mapDefaults(specs:MapSpecs):Map{
+        const map:Map = {
+            specs: specs,
+            assets: [], // asset references left empty 
+            tiles: this._tiles(specs)
+        }
+        return map;        
+    }
+
+    _tiles(specs:MapSpecs):TileBaseDirected[]{
+        const tiles = [];
+        const widthHeight = specs.size.split("x").map((item)=>{return item.trim()}).map(item=>Number.parseInt(item));
+
+        for(let c = 0; c<widthHeight[0];c++){
+            for(let r = 0; r<widthHeight[1]; r++){
+                const tile:TileBaseDirected = {
+                    "id": `${c},${r}`,
+                    "x": c,
+                    "y": r,
+                    "d": "S",
+                    "r": "MAS_TRANSPARENT_TILE",
+                    "t": {"kind": "UNDEFINED"}                 
+                }
+                tiles.push(tile);
+            }
+        }
+        return tiles;
+    }
+
+    _tileRenderables():RenderableSpecification[]{
+        const mapRenderablesSpecifications:RenderableSpecification[] = [            
+            {
+                name: "mapHelpers",
+                json: JSON.stringify(RENDERABLES.MAP.SQUARE.highlight),                    
+                pivotCorrection: "0,0,0.12",
+                scaleCorrection: {                    
+                    // byFactor: 1.2
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAP_HLPR_HIGHLIGHT"]
+            }, // highlight renderable
+            {
+                name: "mapTiles",
+                json: JSON.stringify(RENDERABLES.MAP.HEX.transparent),                    
+                autoPivotCorrection: true,
+                scaleCorrection: {                    
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAS_TRANSPARENT_TILE"]
+            }// transparent tile renderable
+        ]
+        return mapRenderablesSpecifications;
+    }
+
 }

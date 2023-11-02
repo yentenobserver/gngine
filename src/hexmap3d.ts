@@ -16,7 +16,7 @@ export {HexFlatTopOrientationProviderThreeJs, HexFlatTopPositionProviderThreeJs,
 export { UnitRenderablesThreeJSFactory, UnitsRenderer, UnitsRendererThreeJS } from './gui/renderer/unit-renderer';
 export type { UnitRenderablesFactory as UnitRenderableFactory } from './gui/renderer/unit-renderer';
 export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, PlaygroundViewHud, PlaygroundViewMain, SizingHudThreeJs, PlaygroundOptions, TileInteractionEvent, TileInteractionOperation} from "./gui/playground/playground"
-export {Component, MapViewerComponent, MapViewerComponent3JS} from './components/map-component'
+export {Component, MapComponent as MapViewerComponent, MapComponent3JS as MapViewerComponent3JS} from './components/map-component'
 export {RENDERABLES} from "./gui/renderer/assets/threejs3d.notest"
 
 export {Events} from './util/eventDictionary.notest'
