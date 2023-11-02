@@ -456,7 +456,7 @@ export class RenderablesThreeJSFactory extends RenderablesFactory {
             if(filterNames&&filterNames.length>0){
                 return filterNames.some(name => item.name.toUpperCase().includes(name.toUpperCase()))
             }else{
-                return item.type.toUpperCase()=='OBJECT3D'
+                return item.name?.length>0
             }
         })
     }

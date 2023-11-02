@@ -2631,6 +2631,11 @@ describe("Renderers",()=>{
             })
         })
         describe("_matchingChildren",()=>{
+
+            let m1:THREE.Mesh;
+            let g1:THREE.Group;
+            let o4:THREE.Object3D;
+
             beforeEach(()=>{
                 l = {
                     load(){}
@@ -2646,15 +2651,24 @@ describe("Renderers",()=>{
                 // o3.type = "Object3D"
                 o3.name = "My other name is"
 
+                g1 = new THREE.Group();
+                g1.name = "Important group"
+                m1 = new THREE.Mesh();
+                m1.name = "Important Mesh"
+                g1.add(m1);
+
+                o4 = new THREE.Object3D();     // no name set so should not be included in _matchingChildren result           
+
                 specification = {                    
                     name: "someName"                    
                 }
 
                 rf = new RenderablesThreeJSFactory(l);
-            })
-            it("returns items of type Object3D when no names provided",()=>{
-                const result = (<RenderablesThreeJSFactory>rf)._matchingChildren([o1,o2,o3],[]);
-                return expect(result.length).eq(2);
+            })            
+
+            it("returns all 3D objects with name set when no filter names provided",()=>{
+                const result = (<RenderablesThreeJSFactory>rf)._matchingChildren([o1,o2,o3, g1, m1, o4],[]);
+                return expect(result.length).eq(5);
             })
 
             it("returns items whose name contains any of the names provided",()=>{
