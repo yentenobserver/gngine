@@ -176,6 +176,14 @@ export abstract class MapComponent3JS extends MapComponent {
     async gotoTile(tile: TileBase){
         this._renderer!.goToTile(tile);        
     }
+
+    /**
+     * Makes asset ready for using in tiles and in rendering. 
+     * 
+     * Make sure that asset's variant renderablesJson
+     * contains object which name equals variant fullName.
+     * @param {Asset} asset asset  
+     */
     async registerAsset(asset: Asset){
         const availableSpecificationsNames = this._assetFactory!.spawnableRenderablesNames();
         if(!availableSpecificationsNames.join(",").includes(asset.variant.fullName)){
@@ -190,16 +198,23 @@ export abstract class MapComponent3JS extends MapComponent {
                     // byFactor: 1.2
                     autoFitSize: 1                
                 },
-                filterByNames: ["MAS_"]
+                filterByNames: [asset.variant.fullName] // in case the renderable json contains more 3d objects we register only the asset
             }
             await this._assetFactory!.setSpecifications([specs]);
         }
     }
+    /**
+     * Changes provided tile visual representation, either by using one of already registered assets or by simultanously registering a new asset 
+     * in the engine.
+     * @param tile tile to be changed
+     * @param asset (optional) when provided asset is registered (if not registered already) and after that the tile is changed
+     */
     async tileChange(tile: TileBaseDirected, asset?: Asset){
         if(asset)
             await this.registerAsset(asset);
         this._renderer!.put(tile, tile.d);
     }
+    
     async tileHighlight(tiles: TileBase[], indicatorName: string, color: string){
         this._renderer!.highlightTiles(tiles, indicatorName, color);
     }
