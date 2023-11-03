@@ -14,7 +14,9 @@ import sinon, { SinonSpy} from 'sinon';
 
 
 
-import {RenderablesFactory, RenderablesThreeJSFactory, ThreeJSHexAssetHelper, Asset} from "../src/hexmap3d";
+import {RenderablesFactory, RenderablesThreeJSFactory} from "../src/gui/renderer/renderables-factory";
+import {ThreeJSHexAssetHelper} from "../src/assets/asset-helper"
+import {Asset} from "../src/specification/assets"
 import { ASSETS, ASSET_RENDERABLE_JSONS } from './data/assets-test.notest';
 
 
