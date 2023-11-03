@@ -19,5 +19,7 @@ export type {MatchingThreeJs, PlaygroundInteractionEvent, PlaygroundView3D, Play
 export {MapViewerComponent3JS, MapHexBaseComponent3JS, MapComponent3JS, MapComponent, Component} from './components/map-component'
 export type {MapBaseOptions} from './components/map-component'
 export {RENDERABLES} from "./gui/renderer/assets/threejs3d.notest"
+export {ThreeJSHexAssetHelper} from "./assets/asset-helper"
+export type {Asset, AssetReference, AssetSpecs, AssetVariantSpecs, Library, LibraryReference} from "./specification/assets"
 
 export {Events} from './util/eventDictionary.notest'
