@@ -77,10 +77,10 @@
   },
   "nyc": {
     "check-coverage": true,
-    "branches": 62,
-    "lines": 68,
-    "functions": 66,
-    "statements": 68,
+    "branches": 66,
+    "lines": 72,
+    "functions": 70,
+    "statements": 72,
     "exclude-after-remap": false,
     "extension": [
       ".ts",
