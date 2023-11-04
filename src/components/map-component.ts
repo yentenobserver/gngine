@@ -217,9 +217,12 @@ export abstract class MapComponent3JS extends MapComponent {
      * @param asset (optional) when provided asset is registered (if not registered already) and after that the tile is changed
      */
     async tileChange(tile: TileBaseDirected, asset?: Asset){
-        if(asset)
+        if(asset){
             await this.registerAsset(asset);
-        this._renderer!.put(tile, tile.d);
+            this._renderer!.put(tile, tile.d);
+        }else{
+            this._renderer!.put(tile, tile.d);
+        }                    
     }
 
     async tileHighlight(tiles: TileBase[], indicatorName: string, color: string){
