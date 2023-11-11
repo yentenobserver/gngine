@@ -1,12 +1,12 @@
 import { RenderableSpecification, RenderablesFactory, RenderablesThreeJSFactory } from "../gui/renderer/renderables-factory";
 import { EventEmitter } from "eventemitter3";
-import {Map} from "../specification/map-specs"
+import {Map, MapSpecs} from "../specification/map-specs"
 import { Playground, PlaygroundThreeJs, PlaygroundView, PlaygroundViewHudThreeJsDefault, PlaygroundViewMainThreeJsDefault } from "../gui/playground/playground";
 import { MapHexFlatTopOddRendererThreeJs, MapQuadRendererThreeJs, MapRenderer } from "../gui/renderer/map-renderers";
 
 import * as THREE from 'three'
 import { HudComponentMapNavigationThreeJs, HudRendererThreeJs } from "../gui/renderer/hud-renderers";
-import { MapSpecs, TileBase, TileBaseDirected } from "gameyngine";
+import { TileBase, TileBaseDirected } from "gameyngine";
 import { Asset } from "../specification/assets";
 import { HexAreaMapIndicator3Js, QuadAreaMapIndicator3Js } from "../gui/renderer/map-indicators";
 import { RENDERABLES } from "../gui/renderer/assets/threejs3d.notest";
@@ -297,7 +297,7 @@ export class MapHexBaseComponent3JS extends MapComponent3JS {
                     "x": c,
                     "y": r,
                     "d": "S",
-                    "r": "MAS_TRANSPARENT_TILE",
+                    "r": specs.options?.defaultTileRenderable?specs.options?.defaultTileRenderable:"MAS_TRANSPARENT_TILE",
                     "t": {"kind": "UNDEFINED"}                 
                 }
                 tiles.push(tile);
@@ -326,6 +326,15 @@ export class MapHexBaseComponent3JS extends MapComponent3JS {
                     autoFitSize: 1                
                 },
                 filterByNames: ["MAS_TRANSPARENT_TILE"]
+            },// transparent tile renderable
+            {
+                name: "mapTiles",
+                json: JSON.stringify(RENDERABLES.MAP.HEX.transparent_full),                    
+                autoPivotCorrection: true,
+                scaleCorrection: {                    
+                    autoFitSize: 1                
+                },
+                filterByNames: ["MAS_TRANSPARENT_FULL_TILE"]
             }// transparent tile renderable
         ]
         return mapRenderablesSpecifications;

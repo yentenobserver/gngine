@@ -4,6 +4,7 @@ import { AssetReference } from "./assets";
 export interface MapSpecsOptions {
     backgroundImgUrl?: string
     showGrid?:boolean
+    defaultTileRenderable?:string // by default MAS_TRANSPARENT_TILE is used but one can change it
 }
 
 export interface MapSpecs {

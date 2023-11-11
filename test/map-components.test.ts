@@ -17,7 +17,8 @@ import sinon, { SinonStub} from 'sinon';
 import {MapHexBaseComponent3JS} from "../src/components/map-component"
 import { EventEmitter} from 'eventemitter3';
 import { RENDERABLES } from '../src/gui/renderer/assets/threejs3d.notest';
-import { MapSpecs } from 'gameyngine';
+import { MapSpecs } from '../src/specification/map-specs';
+
 
 // import {AppEventsMocks, MapEventMocks, UnitsMocks} from './data.mock'
 
@@ -100,13 +101,15 @@ describe("High Level Map Components",()=>{
                 expect(s3.getCall(0).args[3]).eq(emitter);
                 expect(s1.getCall(0).args[0]).eq("H3D_Highlighter");
             })
-            it("renders transparent tiles",async ()=>{
+            it("provides transparent tiles by default",async ()=>{
                 
                 const renderablesSpecification = mapComponent._tileRenderables();
 
-                expect(renderablesSpecification.length).eq(2);
+                expect(renderablesSpecification.length).eq(3);
                 expect(renderablesSpecification[1].json).eq(JSON.stringify(RENDERABLES.MAP.HEX.transparent));
+                expect(renderablesSpecification[2].json).eq(JSON.stringify(RENDERABLES.MAP.HEX.transparent_full));
                 expect(JSON.stringify(renderablesSpecification[1].filterByNames)).eq(JSON.stringify(["MAS_TRANSPARENT_TILE"]));
+                expect(JSON.stringify(renderablesSpecification[2].filterByNames)).eq(JSON.stringify(["MAS_TRANSPARENT_FULL_TILE"]));
 
             });
             it("has default H3D_Highlighter set up",async ()=>{                    
@@ -122,6 +125,14 @@ describe("High Level Map Components",()=>{
             it("autopopulates tiles with TRANSPARENT tile with UNDEFINED kind",()=>{
                 const tiles = mapComponent._tiles(specs);
                 expect(tiles[1].r).eq("MAS_TRANSPARENT_TILE");
+                expect(tiles[1].t.kind).eq("UNDEFINED")
+            })
+            it("autopopulates tiles with provided renderable tile (in options) with UNDEFINED kind",()=>{
+                specs.options = {
+                    defaultTileRenderable: "MAS_TRANSPARENT_FULL_TILE"
+                }
+                const tiles = mapComponent._tiles(specs);
+                expect(tiles[1].r).eq("MAS_TRANSPARENT_FULL_TILE");
                 expect(tiles[1].t.kind).eq("UNDEFINED")
             })
         })
