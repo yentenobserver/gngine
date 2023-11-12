@@ -10,6 +10,7 @@ import { TileBase, TileBaseDirected } from "gameyngine";
 import { Asset } from "../specification/assets";
 import { HexAreaMapIndicator3Js, QuadAreaMapIndicator3Js } from "../gui/renderer/map-indicators";
 import { RENDERABLES } from "../gui/renderer/assets/threejs3d.notest";
+import { AssetHelper, HexAssetHelper3JS, QuadAssetHelper3JS } from "../assets/asset-helper";
 
 export abstract class Component {
     emitter:EventEmitter;
@@ -29,6 +30,7 @@ export abstract class MapComponent extends Component {
     _playground?: Playground;
     _assetFactory?: RenderablesFactory;
     _renderer?: MapRenderer;
+    _assetHelper?: AssetHelper;
 
     constructor(emitter:EventEmitter){
         super(emitter);
@@ -38,21 +40,22 @@ export abstract class MapComponent extends Component {
     abstract _preparePlaygroundAndView(canvasElement:any, emitter:EventEmitter):Promise<{playground: Playground, mapView: PlaygroundView, hudView: PlaygroundView}>;
     abstract _prepareFactory(tileSpecifications: RenderableSpecification[]):Promise<RenderablesFactory>;
     abstract _prepareRenderer(map: Map, assetFactory: RenderablesFactory, mapView: PlaygroundView, emitter:EventEmitter):Promise<MapRenderer>;    
-
-    abstract gotoCenter():Promise<void>;
-    abstract gotoTile(tile: TileBase):Promise<void>;
-
+    abstract _prepareAssetHelper(map: Map, assetFactory: RenderablesFactory):Promise<AssetHelper>;
     /**
-     * Registers asset for rendering as a tile element on map. After successful registration
-     * one can chenge tiles using this asset as renderable
-     * @param asset target asset
+     * Centers map in view
      */
-    abstract registerAsset(asset: Asset):Promise<void>;
+    abstract gotoCenter():Promise<void>;
+    /**
+     * Centers on target tile
+     * @param tile target tile to center on
+     */
+    abstract gotoTile(tile: TileBase):Promise<void>;
     
     /**
      * Changes tile to the provided one.
      * @param tile target tile
      * @param asset (optional) when provided then the asset is registered for rendering, this is used when the tile renderable is new, not rendered ever before
+     * @returns {Promise} resolves on success, throws error
      */
     abstract tileChange(tile: TileBaseDirected, asset?: Asset):Promise<void>;
 
@@ -73,9 +76,10 @@ export abstract class MapComponent extends Component {
 
 export abstract class MapComponent3JS extends MapComponent {
     _externalLoader: any;
+    
 
     constructor(emitter:EventEmitter){
-        super(emitter);
+        super(emitter);        
     }
 
 
@@ -83,6 +87,7 @@ export abstract class MapComponent3JS extends MapComponent {
     async _prepare(map:Map, tileSpecifications:RenderableSpecification[], canvasElement:any, emitter:EventEmitter, externalLoader:any):Promise<MapComponent3JS>{
         let component = this;
         
+        component._assetHelper = await component._prepareAssetHelper(map);
         component._externalLoader = externalLoader;
         component._map = map;
         const playgroundAndView = await component._preparePlaygroundAndView(canvasElement, emitter);
@@ -173,6 +178,10 @@ export abstract class MapComponent3JS extends MapComponent {
         return renderer!;        
     }
 
+    async _prepareAssetHelper(map: Map):Promise<AssetHelper>{
+        return map.specs.kind == "HexTile"?new HexAssetHelper3JS():new QuadAssetHelper3JS();        
+    }
+
     async gotoCenter(){
         const centerTile: TileBase = <TileBase>{
             x: Math.round(this._renderer!.width/2),
@@ -185,32 +194,6 @@ export abstract class MapComponent3JS extends MapComponent {
     }
 
     /**
-     * Makes asset ready for using in tiles and in rendering. 
-     * 
-     * Make sure that asset's variant renderablesJson
-     * contains object which name equals variant fullName.
-     * @param {Asset} asset asset  
-     */
-    async registerAsset(asset: Asset){
-        const availableSpecificationsNames = this._assetFactory!.spawnableRenderablesNames();
-        if(!availableSpecificationsNames.join(",").includes(asset.variant.fullName)){
-            // load specification as it's missing from the factory
-            const specs = {
-                name: `${asset.specs.name}_${asset.specs.id}`,
-                json: JSON.stringify(asset.variant.renderableJSON),                    
-                // pivotCorrection: "0.15,-0.3,0.1",
-                autoPivotCorrection: true,
-                // scaleCorrection: 0.01
-                scaleCorrection: {
-                    // byFactor: 1.2
-                    autoFitSize: 1                
-                },
-                filterByNames: [asset.variant.fullName] // in case the renderable json contains more 3d objects we register only the asset
-            }
-            await this._assetFactory!.setSpecifications([specs]);
-        }
-    }
-    /**
      * Changes provided tile visual representation, either by using one of already registered assets or by simultanously registering a new asset 
      * in the engine.
      * @param tile tile to be changed
@@ -218,7 +201,7 @@ export abstract class MapComponent3JS extends MapComponent {
      */
     async tileChange(tile: TileBaseDirected, asset?: Asset){
         if(asset){
-            await this.registerAsset(asset);
+            await this._assetHelper!.registerAsset(asset, this._assetFactory!);
             this._renderer!.put(tile, tile.d);
         }else{
             this._renderer!.put(tile, tile.d);
@@ -328,7 +311,7 @@ export class MapHexBaseComponent3JS extends MapComponent3JS {
                 filterByNames: ["MAS_TRANSPARENT_TILE"]
             },// transparent tile renderable
             {
-                name: "mapTiles",
+                name: "mapTiles2",
                 json: JSON.stringify(RENDERABLES.MAP.HEX.transparent_full),                    
                 autoPivotCorrection: true,
                 scaleCorrection: {                    
