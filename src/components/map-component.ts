@@ -177,7 +177,7 @@ export abstract class MapComponent3JS extends MapComponent {
 
         return renderer!;        
     }
-
+    /* istanbul ignore next */
     async _prepareAssetHelper(map: Map):Promise<AssetHelper>{
         return map.specs.kind == "HexTile"?new HexAssetHelper3JS():new QuadAssetHelper3JS();        
     }
@@ -212,7 +212,7 @@ export abstract class MapComponent3JS extends MapComponent {
         this._renderer!.highlightTiles(tiles, indicatorName, color);
     }
     async registerIndicator(name: string){
-        const indicator =  this._map?.specs.kind == "HexTile"?await HexAreaMapIndicator3Js.create(this._renderer!):await QuadAreaMapIndicator3Js.create(this._renderer!)
+        const indicator =  this._map!.specs.kind == "HexTile"?await HexAreaMapIndicator3Js.create(this._renderer!):await QuadAreaMapIndicator3Js.create(this._renderer!)
         this._renderer!.registerIndicator(name, indicator);
     }
 }
@@ -280,7 +280,7 @@ export class MapHexBaseComponent3JS extends MapComponent3JS {
                     "x": c,
                     "y": r,
                     "d": "S",
-                    "r": specs.options?.defaultTileRenderable?specs.options?.defaultTileRenderable:"MAS_TRANSPARENT_TILE",
+                    "r": specs.options?.defaultTileRenderable?specs.options!.defaultTileRenderable:"MAS_TRANSPARENT_TILE",
                     "t": {"kind": "UNDEFINED"}                 
                 }
                 tiles.push(tile);
