@@ -43,7 +43,7 @@
   "author": "Maciej Grula",
   "license": "MIT",
   "dependencies": {
-    "gameyngine": "~0.1.12",
+    "gameyngine": "~0.2.0",
     "eventemitter3": "~5.0.1",
     "three": "^0.157.0"
   },
@@ -77,10 +77,10 @@
   },
   "nyc": {
     "check-coverage": true,
-    "branches": 66,
-    "lines": 72,
-    "functions": 70,
-    "statements": 72,
+    "branches": 70,
+    "lines": 75,
+    "functions": 75,
+    "statements": 75,
     "exclude-after-remap": false,
     "extension": [
       ".ts",
