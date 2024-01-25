@@ -43,7 +43,7 @@
   "author": "Maciej Grula",
   "license": "MIT",
   "dependencies": {
-    "gameyngine": "~0.1.7",
+    "gameyngine": "~0.1.12",
     "eventemitter3": "~5.0.1",
     "three": "^0.157.0"
   },
