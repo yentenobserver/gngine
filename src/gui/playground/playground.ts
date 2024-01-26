@@ -728,8 +728,8 @@ export class PlaygroundViewMainThreeJsDefault extends PlaygroundViewMainThreeJs{
             }
             this.emitter.emit(Events.INTERACTIONS.NON_CLASSIFIED, interactionEvent)
         }
-            
-        
+
+        pointerEvent.preventDefault&&pointerEvent.preventDefault();                    
         return result;
     }
     _onEvent(name:string, _data:any) {

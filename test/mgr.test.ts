@@ -614,13 +614,14 @@ describe('Playground', () => {
             let playgroundView2: PlaygroundViewMainThreeJsDefault;
             let s1: SinonStub;
             let s2: SinonStub;
-            let s3: SinonStub;        
+            let s3: SinonStub;     
+            let s4: SinonStub;        
             let playground: PlaygroundThreeJs;
             const container = {                
                 nodeName: "CANVAS"
             }
             let pointerEvent = {
-
+                preventDefault: ()=>{}
             }
             
             beforeEach(()=>{
@@ -648,12 +649,14 @@ describe('Playground', () => {
                 s2.onCall(0).returns(undefined);
 
                 s3 = sinon.stub(messageBusMocked,"emit");
+                s4 = sinon.stub(pointerEvent,"preventDefault");
 
             })
             afterEach(()=>{
                 s1.restore();
                 s2.restore();
                 s3.restore();
+                s4.restore();
             })
             it("triggers unit event when unit was picked",()=>{
                 playgroundView2._onInteraction(pointerEvent);
@@ -662,6 +665,10 @@ describe('Playground', () => {
             it("triggers tile event when tile was picked",()=>{
                 playgroundView1._onInteraction(pointerEvent);
                 return expect(s3.getCall(0).args[0]).eq(Events.INTERACTIONS.TILE);
+            })
+            it("prevents event propagation",()=>{
+                playgroundView1._onInteraction(pointerEvent);
+                expect(s4.callCount).eq(1)
             })
         })
         describe("_setupScene",()=>{
